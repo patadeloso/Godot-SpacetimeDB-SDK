@@ -137,6 +137,9 @@ func _on_delete(row: _ModuleTable):
 func _on_transactions_completed():
 	transactions_completed.emit()
 
+func _exit_tree() -> void:
+	_unsubscribe_from_table(selected_table_name)
+	
 func get_table_data() -> Array[_ModuleTable]:
 	var local_db = SpacetimeDB.get_local_database()
 	if local_db:
