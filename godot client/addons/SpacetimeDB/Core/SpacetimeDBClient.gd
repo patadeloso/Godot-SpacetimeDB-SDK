@@ -59,9 +59,8 @@ func _ready():
 		
 func _exit_tree():
 	if deserializer_worker:
-		_packet_mutex.unlock()
-		_result_mutex.unlock()
 		_thread_should_exit = true
+		_packet_semaphore.post()
 		deserializer_worker.wait_to_finish()
 		deserializer_worker = null
 		
