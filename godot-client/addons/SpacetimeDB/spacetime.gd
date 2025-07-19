@@ -7,7 +7,7 @@ const AUTOLOAD_NAME := "SpacetimeDB"
 const AUTOLOAD_PATH := BINDINGS_PATH + "generated_client.gd"
 const SAVE_PATH := BINDINGS_PATH + "codegen_data.json"
 
-var http_request = HTTPRequest.new()
+var http_request := HTTPRequest.new()
 var codegen_data: Dictionary
 var ui: SpacetimePluginUI
 
@@ -21,6 +21,9 @@ func _enter_tree():
     ui.module_removed.connect(_on_module_removed)
     ui.check_uri.connect(_on_check_uri)
     ui.generate_schema.connect(_on_generate_schema)
+    
+    http_request.timeout = 4;
+    add_child(http_request)
     
     print_log("SpacetimeDB SDK v%s" % [VERSION])
     load_codegen_data()
