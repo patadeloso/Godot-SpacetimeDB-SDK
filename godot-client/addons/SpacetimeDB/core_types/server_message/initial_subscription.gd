@@ -1,5 +1,5 @@
 extends Resource
-class_name InitialSubscriptionData
+class_name InitialSubscriptionMessage
 
 @export var database_update: DatabaseUpdateData
 @export var request_id: int # u32

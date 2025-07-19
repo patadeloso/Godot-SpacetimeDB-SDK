@@ -1,5 +1,5 @@
 extends Resource
-class_name UnsubscribeAppliedData
+class_name SubscribeAppliedMessage
 
 @export var request_id: int # u32
 @export var total_host_execution_duration_micros: int # u64
@@ -7,6 +7,6 @@ class_name UnsubscribeAppliedData
 @export var rows: SubscribeRowsData # Nested Resource
 
 func _init():
-	set_meta("bsatn_type_request_id", "u32")
-	set_meta("bsatn_type_total_host_execution_duration_micros", "u64")
-	pass
+    set_meta("bsatn_type_request_id", "u32")
+    set_meta("bsatn_type_total_host_execution_duration_micros", "u64")
+    pass

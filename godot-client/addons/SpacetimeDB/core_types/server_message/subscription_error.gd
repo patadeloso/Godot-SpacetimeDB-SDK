@@ -1,5 +1,5 @@
 extends Resource
-class_name SubscriptionErrorData
+class_name SubscriptionErrorMessage
 
 @export var total_host_execution_duration_micros: int # u64
 @export var request_id: int # u32 or -1 for None
@@ -8,12 +8,12 @@ class_name SubscriptionErrorData
 @export var error_message: String
 
 func _init():
-	request_id = -1 # Default to None
-	query_id = -1
-	table_id_resource = null # Default to None
-	set_meta("bsatn_type_total_host_execution_duration_micros", "u64")
-	pass
-	
+    request_id = -1 # Default to None
+    query_id = -1
+    table_id_resource = null # Default to None
+    set_meta("bsatn_type_total_host_execution_duration_micros", "u64")
+    pass
+    
 func has_request_id() -> bool: return request_id != -1
 func has_query_id() -> bool: return query_id != -1
 func has_table_id() -> bool: return table_id_resource != null

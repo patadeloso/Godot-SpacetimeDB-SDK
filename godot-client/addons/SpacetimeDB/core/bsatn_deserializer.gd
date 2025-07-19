@@ -11,18 +11,6 @@ const COMPRESSION_NONE := 0x00
 const COMPRESSION_BROTLI := 0x01
 const COMPRESSION_GZIP := 0x02
 
-# Server Message Tags (ensure these match protocol)
-const SERVER_MSG_INITIAL_SUB := 0x00
-const SERVER_MSG_TRANSACTION_UPDATE := 0x01
-const SERVER_MSG_TRANSACTION_UPDATE_LIGHT := 0x02 # Not currently handled in parse_packet
-const SERVER_MSG_IDENTITY_TOKEN := 0x03
-const SERVER_MSG_ONE_OFF_QUERY_RESPONSE := 0x04
-const SERVER_MSG_SUBSCRIBE_APPLIED := 0x05
-const SERVER_MSG_UNSUBSCRIBE_APPLIED := 0x06
-const SERVER_MSG_SUBSCRIPTION_ERROR := 0x07
-const SERVER_MSG_SUBSCRIBE_MULTI_APPLIED := 0x08
-const SERVER_MSG_UNSUBSCRIBE_MULTI_APPLIED := 0x09
-
 # Row List Format Tags
 const ROW_LIST_FIXED_SIZE := 0
 const ROW_LIST_ROW_OFFSETS := 1
@@ -209,7 +197,7 @@ func _get_reader_callable_for_property(resource: Resource, prop: Dictionary) -> 
 
     # --- Special Cases First ---
     # Handle specific properties requiring custom logic before generic checks
-    if resource is TransactionUpdateData and prop_name == "status":
+    if resource is TransactionUpdateMessage and prop_name == "status":
         reader_callable = Callable(self, "_read_update_status")
     # Add other special cases here if needed (e.g., Option<T> fields if handled generically later)
     if prop.class_name == &'Option':
@@ -785,11 +773,10 @@ func _get_query_update_stream(spb: StreamPeerBuffer, table_name_for_error: Strin
             _set_error("Unknown QueryUpdate compression tag %d for table '%s'" % [compression_tag_raw, table_name_for_error], spb.get_position() - 1)
             return null
 
-# Manual reader specifically for SubscriptionErrorData due to Option<T> fields
+# Manual reader specifically for SubscriptionErrorMessage due to Option<T> fields
 # Keep this manual until Option<T> is handled generically (if ever needed)
-func _read_subscription_error_data_manual(spb: StreamPeerBuffer) -> SubscriptionErrorData:
-    # Assumes SubscriptionErrorData.gd exists
-    var resource := SubscriptionErrorData.new()
+func _read_subscription_error_manual(spb: StreamPeerBuffer) -> SubscriptionErrorMessage:
+    var resource := SubscriptionErrorMessage.new()
 
     resource.total_host_execution_duration_micros = read_u64_le(spb); if has_error(): return null
 
@@ -876,35 +863,23 @@ func _parse_message_from_stream(spb: StreamPeerBuffer) -> Resource:
     if has_error(): return null
 
     var result_resource: Resource = null
-    var resource_script_path: String = "" # Path to the GDScript file for the message type
+    # Path to the GDScript file for the message type
+    var resource_script_path := SpacetimeDBServerMessage.get_resource_path(msg_type)
 
-    # Map message type tag to the corresponding Resource script path
-    # Ensure these paths are correct for your project structure
-    match msg_type:
-        SERVER_MSG_INITIAL_SUB:           resource_script_path = "res://addons/SpacetimeDB/core_types/initial_subscription_data.gd"
-        SERVER_MSG_TRANSACTION_UPDATE:    resource_script_path = "res://addons/SpacetimeDB/core_types/transaction_update_data.gd"
-        SERVER_MSG_IDENTITY_TOKEN:        resource_script_path = "res://addons/SpacetimeDB/core_types/identity_token_data.gd"
-        SERVER_MSG_ONE_OFF_QUERY_RESPONSE: resource_script_path = "res://addons/SpacetimeDB/core_types/one_off_query_response_data.gd" # IMPLEMENT READER
-        SERVER_MSG_SUBSCRIBE_APPLIED:     resource_script_path = "res://addons/SpacetimeDB/core_types/subscribe_applied_data.gd"
-        SERVER_MSG_UNSUBSCRIBE_APPLIED:   resource_script_path = "res://addons/SpacetimeDB/core_types/unsubscribe_applied_data.gd"
-        SERVER_MSG_SUBSCRIPTION_ERROR:    resource_script_path = "res://addons/SpacetimeDB/core_types/subscription_error_data.gd" # Uses manual reader
-        SERVER_MSG_SUBSCRIBE_MULTI_APPLIED: resource_script_path = "res://addons/SpacetimeDB/core_types/subscribe_multi_applied_data.gd"
-        SERVER_MSG_UNSUBSCRIBE_MULTI_APPLIED: resource_script_path = "res://addons/SpacetimeDB/core_types/unsubscribe_multi_applied_data.gd"
-        # SERVER_MSG_TRANSACTION_UPDATE_LIGHT (0x02) is not handled yet
-        _:
-            _set_error("Unknown server message type: 0x%02X" % msg_type, 1)
-            return null
-
+    if resource_script_path == "":
+        _set_error("Unknown server message type: 0x%02X" % msg_type, 1)
+        return null
+    
     # --- Special handling for types requiring manual parsing ---
-    if msg_type == SERVER_MSG_SUBSCRIPTION_ERROR:
+    if msg_type == SpacetimeDBServerMessage.SUBSCRIPTION_ERROR:
         # Use the manual reader due to Option<T> complexity
-        result_resource = _read_subscription_error_data_manual(spb)
+        result_resource = _read_subscription_error_manual(spb)
         if has_error(): return null
         # Error message is printed by _set_error, but we can add context
         if result_resource.error_message: printerr("Subscription Error Received: ", result_resource.error_message)
 
     # --- TODO: Implement reader for OneOffQueryResponseData ---
-    elif msg_type == SERVER_MSG_ONE_OFF_QUERY_RESPONSE:
+    elif msg_type == SpacetimeDBServerMessage.ONE_OFF_QUERY_RESPONSE:
         _set_error("Reader for OneOffQueryResponse (0x04) not implemented.", spb.get_position() -1)
         return null # Or return an empty resource shell if preferred
 

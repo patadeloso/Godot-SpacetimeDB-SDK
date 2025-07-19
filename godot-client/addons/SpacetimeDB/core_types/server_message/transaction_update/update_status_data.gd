@@ -1,7 +1,11 @@
 extends Resource
 class_name UpdateStatusData
 
-enum StatusType { COMMITTED, FAILED, OUT_OF_ENERGY }
+enum StatusType {
+    COMMITTED,
+    FAILED,
+    OUT_OF_ENERGY
+}
 
 @export var status_type: StatusType = StatusType.COMMITTED
 # Only valid if status_type is COMMITTED
