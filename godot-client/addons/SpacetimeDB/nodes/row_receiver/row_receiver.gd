@@ -1,5 +1,5 @@
 @tool
-@icon("res://addons/SpacetimeDB/icons/node_icon.svg")
+@icon("res://addons/SpacetimeDB/nodes/row_receiver/icon.svg")
 extends Node
 class_name RowReceiver
 

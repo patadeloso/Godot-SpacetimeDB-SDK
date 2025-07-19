@@ -3,15 +3,15 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://dovuteam3ycm7"
-path="res://.godot/imported/node_icon.svg-41328baea13ef6f16aacadf59cbc9da7.ctex"
+path="res://.godot/imported/icon.svg-9e5e811a43a099927e54cd85be5646a6.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://addons/SpacetimeDB/icons/node_icon.svg"
-dest_files=["res://.godot/imported/node_icon.svg-41328baea13ef6f16aacadf59cbc9da7.ctex"]
+source_file="res://addons/SpacetimeDB/nodes/row_receiver/icon.svg"
+dest_files=["res://.godot/imported/icon.svg-9e5e811a43a099927e54cd85be5646a6.ctex"]
 
 [params]
 
