@@ -2,9 +2,9 @@
 class_name SpacetimePlugin extends EditorPlugin
 
 const AUTOLOAD_NAME := "SpacetimeDB"
-const AUTOLOAD_PATH := "res://addons/SpacetimeDB/core/spacetimedb_client.gd"
-const DATA_PATH := "res://spacetime_data/"
-const SAVE_PATH := DATA_PATH +"/codegen_data.txt"
+const BINDINGS_PATH := "res://spacetime_bindings/"
+const AUTOLOAD_PATH := BINDINGS_PATH + "generated_client.gd"
+const SAVE_PATH := BINDINGS_PATH + "codegen_data.json"
 const UI_PATH := "res://addons/SpacetimeDB/ui/ui.tscn"
 
 var ui_panel: Control
