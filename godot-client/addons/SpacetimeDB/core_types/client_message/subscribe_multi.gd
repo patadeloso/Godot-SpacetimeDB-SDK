@@ -1,5 +1,4 @@
-extends Resource
-class_name SubscribeMultiMessage
+class_name SubscribeMultiMessage extends Resource
 
 ## List of subscription query strings for this multi-subscription.
 @export var queries: Array[String]
@@ -16,4 +15,3 @@ func _init(p_queries: Array[String], p_query_id: int, p_request_id: int = 0):
     query_id = QueryIdData.new(p_query_id)
     # Add metadata for correct BSATN integer serialization
     set_meta("bsatn_type_request_id", "u32")
-    pass

@@ -1,5 +1,4 @@
-extends Resource
-class_name TableUpdateData
+class_name TableUpdateData extends Resource
 
 @export var table_id: int # u32
 @export var table_name: String

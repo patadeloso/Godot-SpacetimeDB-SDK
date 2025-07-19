@@ -1,5 +1,4 @@
-extends Resource
-class_name ReducerCallInfoData
+class_name ReducerCallInfoData extends Resource
 
 @export var reducer_name: String
 @export var reducer_id: int # u32

@@ -1,5 +1,4 @@
-extends Resource
-class_name SubscribeAppliedMessage
+class_name SubscribeAppliedMessage extends Resource
 
 @export var request_id: int # u32
 @export var total_host_execution_duration_micros: int # u64
@@ -9,4 +8,3 @@ class_name SubscribeAppliedMessage
 func _init():
     set_meta("bsatn_type_request_id", "u32")
     set_meta("bsatn_type_total_host_execution_duration_micros", "u64")
-    pass

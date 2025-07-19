@@ -1,5 +1,4 @@
-extends Resource
-class_name SubscribeMessage
+class_name SubscribeMessage extends Resource
 
 @export var queries: Array[String]
 
@@ -8,4 +7,3 @@ func _init(p_queries: Array[String] = []):
     var typed_queries: Array[String] = []
     typed_queries.assign(p_queries) # Copy elements, ensuring type
     queries = typed_queries
-    pass

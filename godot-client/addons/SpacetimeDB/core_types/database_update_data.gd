@@ -1,4 +1,3 @@
-extends Resource
-class_name DatabaseUpdateData
+class_name DatabaseUpdateData extends Resource
 
 @export var tables: Array[TableUpdateData]

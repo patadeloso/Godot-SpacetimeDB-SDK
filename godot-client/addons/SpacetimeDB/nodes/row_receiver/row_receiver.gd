@@ -1,7 +1,6 @@
 @tool
 @icon("res://addons/SpacetimeDB/nodes/row_receiver/icon.svg")
-extends Node
-class_name RowReceiver
+class_name RowReceiver extends Node
 
 @export var table_to_receive: _ModuleTable : set = on_set;
 var selected_table_name: String : set = set_selected_table_name

@@ -1,5 +1,4 @@
-extends Resource
-class_name CallReducerMessage
+class_name CallReducerMessage extends Resource
 
 @export var reducer_name: String
 @export var args: PackedByteArray
@@ -13,4 +12,3 @@ func _init(p_reducer_name: String = "", p_args: PackedByteArray = PackedByteArra
     flags = p_flags
     set_meta("bsatn_type_request_id", "u32")
     set_meta("bsatn_type_flags", "u8")
-    pass

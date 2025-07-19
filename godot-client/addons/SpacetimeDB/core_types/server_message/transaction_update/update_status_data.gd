@@ -1,5 +1,4 @@
-extends Resource
-class_name UpdateStatusData
+class_name UpdateStatusData extends Resource
 
 enum StatusType {
     COMMITTED,

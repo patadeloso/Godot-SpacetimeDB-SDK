@@ -1,2 +1,1 @@
-extends Resource
-class_name _ModuleTable
+class_name _ModuleTable extends Resource
