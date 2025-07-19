@@ -226,7 +226,7 @@ size_flags_horizontal = 3
 size_flags_vertical = 3
 theme_override_constants/separation = -4
 
-[node name="AddModuleHint" type="Label" parent="."]
+[node name="AddModuleHint" type="VBoxContainer" parent="."]
 layout_mode = 1
 anchors_preset = 11
 anchor_left = 1.0
@@ -237,10 +237,29 @@ offset_top = 24.0
 offset_bottom = -105.0
 grow_horizontal = 0
 grow_vertical = 2
-text = "Add a module by entering the name below and clicking +"
+theme_override_constants/separation = -6
+alignment = 1
+
+[node name="Label" type="Label" parent="AddModuleHint"]
+layout_mode = 2
+text = "Add a module by entering the"
 horizontal_alignment = 1
 vertical_alignment = 1
-autowrap_mode = 3
+
+[node name="HBoxContainer" type="HBoxContainer" parent="AddModuleHint"]
+layout_mode = 2
+alignment = 1
+
+[node name="Label" type="Label" parent="AddModuleHint/HBoxContainer"]
+layout_mode = 2
+text = "name below and clicking"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="TextureRect" type="TextureRect" parent="AddModuleHint/HBoxContainer"]
+layout_mode = 2
+texture = ExtResource("2_3cpcg")
+stretch_mode = 3
 
 [node name="URILabel" type="Label" parent="."]
 layout_mode = 1
