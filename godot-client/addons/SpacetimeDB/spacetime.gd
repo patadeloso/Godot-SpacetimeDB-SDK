@@ -1,5 +1,5 @@
 @tool
-class_name Spacetime extends EditorPlugin
+class_name SpacetimePlugin extends EditorPlugin
 
 const AUTOLOAD_NAME := "SpacetimeDB"
 const AUTOLOAD_PATH := "res://addons/SpacetimeDB/core/spacetimedb_client.gd"
@@ -11,7 +11,7 @@ var ui_panel: Control
 var http_request = HTTPRequest.new()
 var module_prefab:Control
 var codegen_data: Dictionary
-static var spacetime: Spacetime
+static var spacetime: SpacetimePlugin
 
 func _enter_tree():
     if not ProjectSettings.has_setting("autoload/" + AUTOLOAD_NAME):
