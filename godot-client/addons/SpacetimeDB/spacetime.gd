@@ -11,13 +11,13 @@ var ui_panel: Control
 var http_request = HTTPRequest.new()
 var module_prefab:Control
 var codegen_data: Dictionary
-static var spacetime: SpacetimePlugin
 
 func _enter_tree():
     if not ProjectSettings.has_setting("autoload/" + AUTOLOAD_NAME):
         # get_editor_interface().get_resource_filesystem().scan()
         add_autoload_singleton(AUTOLOAD_NAME, AUTOLOAD_PATH)
         
+static var instance: SpacetimePlugin
     if not is_instance_valid(ui_panel):
         var scene = load(UI_PATH)
         if scene:
@@ -30,8 +30,8 @@ func _enter_tree():
     else:
         printerr("UI panel is not valid after instantiation attempt.")
     
-    spacetime = self
     subscribe_controls()
+    instance = self
     load_codegen_data()
         
 func subscribe_controls():
