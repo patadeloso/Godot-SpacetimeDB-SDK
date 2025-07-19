@@ -1,8 +1,9 @@
 @tool
 class_name SpacetimePlugin extends EditorPlugin
 
-const AUTOLOAD_NAME := "SpacetimeDB"
+const VERSION := "0.1.0"
 const BINDINGS_PATH := "res://spacetime_bindings/"
+const AUTOLOAD_NAME := "SpacetimeDB"
 const AUTOLOAD_PATH := BINDINGS_PATH + "generated_client.gd"
 const SAVE_PATH := BINDINGS_PATH + "codegen_data.json"
 
@@ -21,6 +22,7 @@ func _enter_tree():
     ui.check_uri.connect(_on_check_uri)
     ui.generate_schema.connect(_on_generate_schema)
     
+    print_log("SpacetimeDB SDK v%s" % [VERSION])
     load_codegen_data()
 
 func add_module(name: String, fromLoad: bool = false):
@@ -49,13 +51,13 @@ func load_codegen_data() -> void:
         save_codegen_data()
 
 func save_codegen_data() -> void:
-    if not FileAccess.file_exists(DATA_PATH):
-        DirAccess.make_dir_absolute(DATA_PATH)
+    if not FileAccess.file_exists(BINDINGS_PATH):
+        DirAccess.make_dir_absolute(BINDINGS_PATH)
         get_editor_interface().get_resource_filesystem().scan()
 
     var save_file = FileAccess.open(SAVE_PATH, FileAccess.WRITE)
     if not save_file:
-        printerr("Failed to open codegen_data.dat for writing.")
+        printerr("Failed to open codegen_data.json for writing.")
         return
     save_file.store_string(JSON.stringify(codegen_data))
     save_file.close()
@@ -114,7 +116,7 @@ func _on_generate_schema(uri: String, modules: Array[String]):
 func _cleanup_unused_classes(dir_path: String = "res://schema", files: Array[String] = []) -> void:
     var dir = DirAccess.open(dir_path)
     if not dir: return
-    print_log("File Cleanup:Scanning folder: " + dir_path)
+    print_log("File Cleanup: Scanning folder: " + dir_path)
     for file in dir.get_files():
         if not file.ends_with(".gd"): continue
         var full_path = "%s/%s" % [dir_path, file]
@@ -125,7 +127,6 @@ func _cleanup_unused_classes(dir_path: String = "res://schema", files: Array[Str
                 DirAccess.remove_absolute("%s.uid" % [full_path])
     var subfolders = dir.get_directories()
     for folder in subfolders:
-func check_uri():
         _cleanup_unused_classes(dir_path + "/" + folder, files)
 
 static func clear_logs():
