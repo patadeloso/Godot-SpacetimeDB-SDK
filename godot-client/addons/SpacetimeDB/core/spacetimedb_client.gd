@@ -31,17 +31,18 @@ var _deserializer: BSATNDeserializer
 var _serializer: BSATNSerializer
 var _local_db: LocalDatabase
 var _rest_api: SpacetimeDBRestAPI # Optional, for token/REST calls
-var _local_identity:IdentityTokenData
+
 # --- State ---
+var _connection_id: PackedByteArray
+var _identity: PackedByteArray
 var _token: String
 var _is_initialized := false
+var _next_query_id := 0
 
 # --- Signals ---
-# Re-emit signals from components for easier use
-signal connected
+signal connected(identity: PackedByteArray, token: String)
 signal disconnected
 signal connection_error(code: int, reason: String)
-signal identity_received(identity_token: IdentityTokenData)
 signal database_initialized # Emitted after InitialSubscription is processed
 signal database_updated(table_update: TableUpdateData) # Emitted for each table update
 signal row_inserted(table_name: String, row: Resource) # From LocalDatabase
@@ -245,13 +246,6 @@ func _handle_parsed_message(message_resource: Resource):
 		return
 		
 	# Handle known message types
-		
-	elif message_resource is IdentityTokenData:
-		var identity_token: IdentityTokenData = message_resource
-		print_log("SpacetimeDBClient: Received Identity Token.")
-		_local_identity = identity_token
-		emit_signal("identity_received", identity_token)
-
 	elif message_resource is TransactionUpdateData: 
 		var tx_update: TransactionUpdateData = message_resource
 		#print_log("SpacetimeDBClient: Processing Transaction Update (Reducer: %s, Req ID: %d)" % [tx_update.reducer_call.reducer_name, tx_update.reducer_call.request_id])
@@ -296,6 +290,16 @@ func _handle_parsed_message(message_resource: Resource):
             current_subscriptions.erase(unsub.query_id.id)
             subscription.end.emit()
             subscription.queue_free()
+        
+    elif message_resource is IdentityTokenMessage:
+        var identity_token: IdentityTokenMessage = message_resource
+        print_log("SpacetimeDBClient: Received Identity Token.")
+        _identity = identity_token.identity
+        if !_token and identity_token.token:
+            _token = identity_token.token
+        _connection_id = identity_token.connection_id
+        self.connected.emit(_identity, _token)
+
 # --- Public API ---
 
 func connect_db(host_url:String, database_name:String, options: SpacetimeDBConnectionOptions = null):
@@ -335,12 +339,11 @@ func is_connected_db() -> bool:
 
 # Gets the local database instance for querying
 func get_local_database() -> LocalDatabase:
-	return _local_db
-	
-func get_local_identity() -> IdentityTokenData:
-	return _local_identity
-	
-	
+    return _local_db
+    
+func get_local_identity() -> PackedByteArray:
+    return _identity
+    
 func subscribe(queries: PackedStringArray) -> SpacetimeDBSubscription:
     if not is_connected_db():
         printerr("SpacetimeDBClient: Cannot subscribe, not connected.")
