@@ -635,7 +635,6 @@ func _read_nested_resource(spb: StreamPeerBuffer, resource: Resource, prop: Dict
 
 # Reads UpdateStatus structure (handles enum tag)
 func _read_update_status(spb: StreamPeerBuffer) -> UpdateStatusData:
-    # Assumes UpdateStatusData.gd exists with enum StatusType and fields
     var resource := UpdateStatusData.new()
     var tag := read_u8(spb) # Enum tag
     if has_error(): return null
@@ -643,7 +642,7 @@ func _read_update_status(spb: StreamPeerBuffer) -> UpdateStatusData:
     match tag:
         UpdateStatusData.StatusType.COMMITTED: # 0
             resource.status_type = UpdateStatusData.StatusType.COMMITTED
-            var db_update_res = DatabaseUpdateData.new() # Assumes DatabaseUpdateData.gd exists
+            var db_update_res = DatabaseUpdateData.new()
             if not _populate_resource_from_bytes(db_update_res, spb): return null
             resource.committed_update = db_update_res
         UpdateStatusData.StatusType.FAILED: # 1
@@ -671,7 +670,6 @@ func _read_array_of_table_updates(spb: StreamPeerBuffer, resource: Resource, pro
     for i in range(length):
         if has_error(): return []
         var element_start_pos = spb.get_position()
-        # Assumes TableUpdateData.gd exists
         var table_update_instance = TableUpdateData.new()
         # Use the specialized instance reader for TableUpdateData's complex structure
         if not _read_table_update_instance(spb, table_update_instance):
@@ -812,7 +810,7 @@ func _read_subscription_error_data_manual(spb: StreamPeerBuffer) -> Subscription
     # Read Option<TableId> table_id_resource
     var table_id_tag = read_u8(spb); if has_error(): return null
     if table_id_tag == 0: # Some(TableId)
-        var table_id_res = TableIdData.new() # Assumes TableIdData.gd exists
+        var table_id_res = TableIdData.new()
         if not _populate_resource_from_bytes(table_id_res, spb): return null
         resource.table_id_resource = table_id_res
     elif table_id_tag == 1: # None
