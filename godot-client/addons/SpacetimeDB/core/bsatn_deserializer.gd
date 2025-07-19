@@ -29,85 +29,15 @@ const ROW_LIST_ROW_OFFSETS := 1
 
 # --- Properties ---
 var _last_error: String = ""
-# Stores loaded table row schema scripts: { "table_name_lower": Script }
-var _possible_row_schemas: Dictionary = {}
 var _deserialization_plan_cache: Dictionary = {}
 var _pending_data := PackedByteArray()
-var debug_mode: bool = false # Controls verbose debug printing
+var _schema: SpacetimeDBSchema
+var debug_mode := false # Controls verbose debug printing
 
 # --- Initialization ---
-
-func _init(p_schema_path: String = "res://spacetime_data/schema", p_debug_mode: bool = false) -> void:
+func _init(p_schema: SpacetimeDBSchema, p_debug_mode: bool = false) -> void:
     debug_mode = p_debug_mode
-    # Load table row schema scripts
-    _load_row_schemas("%s/tables" % p_schema_path)
-    # Load spacetime types
-    _load_row_schemas("%s/spacetime_types" % p_schema_path)
-    # Load core types if they are defined as Resources with scripts
-    _load_row_schemas("res://addons/SpacetimeDB/core_types")
-
-# --- Schema Loading ---
-func _load_row_schemas(path: String) -> void:
-    # Avoid clearing if called multiple times with different paths
-    # _possible_row_schemas.clear() # Only clear if intended reset
-
-    var dir := DirAccess.open(path)
-    if not DirAccess.dir_exists_absolute(path):
-        printerr("BSATNDeserializer: Schema directory does not exist: ", path)
-        return
-
-    dir.list_dir_begin()
-    var file_name_raw := dir.get_next()
-    while file_name_raw != "":
-        if dir.current_is_dir():
-            file_name_raw = dir.get_next()
-            continue
-
-        var file_name := file_name_raw
-
-        # Handle potential remapping on export
-        if file_name.ends_with(".remap"):
-            file_name = file_name.replace(".remap", "")
-            if not file_name.ends_with(".gd"):
-                file_name += ".gd"
-
-        if not file_name.ends_with(".gd"):
-            file_name_raw = dir.get_next()
-            continue
-
-        var script_path := path.path_join(file_name)
-        if not ResourceLoader.exists(script_path):
-            printerr("BSATNDeserializer: Script file not found or inaccessible: ", script_path, " (Original name: ", file_name_raw, ")")
-            file_name_raw = dir.get_next()
-            continue
-
-        var script := ResourceLoader.load(script_path, "GDScript") as GDScript
-
-        if script and script.can_instantiate():
-            var instance_for_name = script.new()
-            if instance_for_name is Resource: # Ensure it's a resource to get metadata
-                var base_name :Array[String] = [file_name.get_basename().get_file()]
-                var table_names : Array = _get_schema_table_name(instance_for_name, base_name)
-
-                for table_name in table_names:
-                    var lower_table_name = table_name.to_lower().replace("_", "")
-                    if _possible_row_schemas.has(lower_table_name) and debug_mode:
-                        push_warning("BSATNDeserializer: Overwriting schema for table '%s' (from %s)" % [table_name, script_path])
-                    _possible_row_schemas[lower_table_name] = script
-
-        file_name_raw = dir.get_next()
-
-    dir.list_dir_end()
-
-
-func _get_schema_table_name(instance: Resource, fallback_base_filename: Array[String]) -> Array:
-    # Prioritize const, then filename
-    var table_names = instance.get_script().get_script_constant_map()
-    
-    if table_names.has('table_names'):
-        return table_names['table_names']
-    else:
-        return fallback_base_filename
+    _schema = p_schema
 
 # --- Error Handling ---
 func has_error() -> bool: return _last_error != ""
@@ -433,7 +363,7 @@ func _populate_enum_from_bytes(spb: StreamPeerBuffer, resource: Resource) -> boo
     var enum_type = resource.get_meta("bsatn_enum_type")
     var enum_variant: int = spb.get_u8()
     var instance: Resource = null
-    var script: Script = _possible_row_schemas.get(enum_type.to_lower())
+    var script := _schema.get_type(enum_type.to_lower())
     if script and script.can_instantiate():
         instance = script.new()
         resource.value = enum_variant
@@ -495,11 +425,11 @@ func _read_value_from_bsatn_type(spb: StreamPeerBuffer, bsatn_type_str: String, 
         return option
 
     # 4. Handle Custom Resource (non-array)
-    # _possible_row_schemas keys are table_name.to_lower().replace("_", "")
+    # schema type names are table_name.to_lower().replace("_", "")
     # bsatn_type_str from metadata should be .to_lower()'d before calling this.
     var schema_key = bsatn_type_str.replace("_", "") # e.g., "maindamage" -> "maindamage", "my_type" -> "mytype"
-    if _possible_row_schemas.has(schema_key):
-        var script: Script = _possible_row_schemas.get(schema_key)
+    if _schema.types.has(schema_key):
+        var script := _schema.get_type(schema_key)
         if script and script.can_instantiate():
             var nested_instance = script.new()
             if not _populate_resource_from_bytes(nested_instance, spb):
@@ -615,7 +545,7 @@ func _read_array(spb: StreamPeerBuffer, resource: Resource, prop: Dictionary) ->
             var bsatn_element_type_str = str(resource.get_meta(array_bsatn_meta_key)).to_lower()
             element_reader_callable = _get_primitive_reader_from_bsatn_type(bsatn_element_type_str)
             # Check if resource is a nested resource in possible row schemas
-            if not element_reader_callable.is_valid() and _possible_row_schemas.has(bsatn_element_type_str):
+            if not element_reader_callable.is_valid() and _schema.types.has(bsatn_element_type_str):
                 element_reader_callable = Callable(self, "_read_nested_resource")
             if not element_reader_callable.is_valid() and debug_mode:
                 push_warning("Array '%s' has 'bsatn_type' metadata ('%s'), but it doesn't map to a primitive reader. Falling back to element type hint." % [prop_name, bsatn_element_type_str])
@@ -669,7 +599,7 @@ func _read_nested_resource(spb: StreamPeerBuffer, resource: Resource, prop: Dict
 
     # Try to find script in preloaded schemas first (common for table rows)
     var key := nested_class_name.to_lower()
-    var script: Script = _possible_row_schemas.get(key)
+    var script := _schema.get_type(key)
     var nested_instance: Resource = null
 
     if script:
@@ -768,7 +698,7 @@ func _read_table_update_instance(spb: StreamPeerBuffer, resource: TableUpdateDat
     var all_parsed_inserts: Array[Resource] = []
 
     var table_name_lower := resource.table_name.to_lower().replace("_","")
-    var row_schema_script: Script = _possible_row_schemas.get(table_name_lower)
+    var row_schema_script := _schema.get_type(table_name_lower)
     
     var row_spb := StreamPeerBuffer.new()
     

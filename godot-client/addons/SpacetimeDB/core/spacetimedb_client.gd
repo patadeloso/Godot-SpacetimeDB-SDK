@@ -3,7 +3,7 @@ class_name SpacetimeDBClient extends Node
 # --- Configuration ---
 @export var base_url: String = "http://127.0.0.1:3000"
 @export var database_name: String = "quickstart-chat" # Example
-@export var schema_path: String = "res://spacetime_data/schema/"
+@export var schema_path: String = SpacetimePlugin.BINDINGS_PATH + "schema/"
 @export var auto_connect: bool = false
 @export var auto_request_token: bool = true
 @export var token_save_path: String = "user://spacetimedb_token.dat" # Use a more specific name
@@ -74,12 +74,8 @@ func initialize_and_connect():
 
 	print_log("SpacetimeDBClient: Initializing...")
 
-	# 1. Initialize Parser
-	_deserializer = BSATNDeserializer.new(schema_path, debug_mode)
 	_serializer = BSATNSerializer.new()
 
-	# 2. Initialize Local Database
-	_local_db = LocalDatabase.new(_deserializer._possible_row_schemas) # Pass loaded schemas
 	# Connect to LocalDatabase signals to re-emit them
 	_local_db.row_inserted.connect(func(tn, r) -> void: row_inserted.emit(tn, r))
 	_local_db.row_updated.connect(func(tn, p, r) -> void: row_updated.emit(tn, p, r))
@@ -108,6 +104,12 @@ func initialize_and_connect():
 
 	# 5. Get Token and Connect
 	_load_token_or_request()
+    # 1. Load Schema
+    var schema := SpacetimeDBSchema.new(schema_path, debug_mode)
+    # 2. Initialize Parser
+    _deserializer = BSATNDeserializer.new(schema, debug_mode)
+    # 3. Initialize Local Database
+    _local_db = LocalDatabase.new(schema)
 
 func _load_token_or_request():
 	if one_time_token == false:

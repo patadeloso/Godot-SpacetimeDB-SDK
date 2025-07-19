@@ -1,7 +1,7 @@
 class_name LocalDatabase extends Node
 var _tables: Dictionary = {}
-var _row_schemas: Dictionary = {}
 var _primary_key_cache: Dictionary = {}
+var _schema: SpacetimeDBSchema
 
 var _cached_normalized_table_names: Dictionary = {} 
 var _cached_pk_fields: Dictionary = {}
@@ -17,11 +17,11 @@ signal row_deleted(table_name: String, row: Resource)
 signal row_deleted_key(table_name: String, primary_key)
 signal row_transactions_completed(table_name: String)
 
-func _init(row_schemas: Dictionary):
-	self._row_schemas = row_schemas
-	# Initialize _tables dictionary with known table names
-	for table_name_lower in _row_schemas.keys():
-		_tables[table_name_lower] = {}
+func _init(p_schema: SpacetimeDBSchema):
+    # Initialize _tables dictionary with known table names
+    _schema = p_schema
+    for table_name_lower in _schema.tables.keys():
+        _tables[table_name_lower] = {}
 
 func subscribe_to_inserts(table_name: StringName, callable: Callable):
 	if not _insert_listeners_by_table.has(table_name):
@@ -77,11 +77,9 @@ func _get_primary_key_field(table_name_lower: String) -> StringName:
 	if _primary_key_cache.has(table_name_lower):
 		return _primary_key_cache[table_name_lower]
 
-	if not _row_schemas.has(table_name_lower):
 		printerr("LocalDatabase: No schema found for table '", table_name_lower, "' to determine PK.")
 		return &"" # Return empty StringName
 
-	var schema: Script = _row_schemas[table_name_lower]
 	var instance = schema.new() # Need instance for metadata/properties
 
 	# 1. Check metadata (preferred)
@@ -105,6 +103,8 @@ func _get_primary_key_field(table_name_lower: String) -> StringName:
 	printerr("LocalDatabase: Could not determine primary key for table '", table_name_lower, "'. Add metadata or use convention.")
 	_primary_key_cache[table_name_lower] = &"" # Cache failure
 	return &""
+    if not _schema.types.has(table_name_lower):
+    var schema := _schema.get_type(table_name_lower)
 
 
 # --- Applying Updates ---
