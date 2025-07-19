@@ -10,10 +10,6 @@ var http_request = HTTPRequest.new()
 var codegen_data: Dictionary
 var ui: SpacetimePluginUI
 
-    if not ProjectSettings.has_setting("autoload/" + AUTOLOAD_NAME):
-        # get_editor_interface().get_resource_filesystem().scan()
-        add_autoload_singleton(AUTOLOAD_NAME, AUTOLOAD_PATH)
-        
 static var instance: SpacetimePlugin
 
 func _enter_tree():    
@@ -108,6 +104,9 @@ func _on_generate_schema(uri: String, modules: Array[String]):
             modules.append(parse_module_name)
     codegen.generate_module_link(modules)
     _cleanup_unused_classes("res://%s/%s" % [Codegen.PLUGIN_DATA_FOLDER ,Codegen.CODEGEN_FOLDER], generated_files)
+    
+    if not ProjectSettings.has_setting("autoload/" + AUTOLOAD_NAME):
+        add_autoload_singleton(AUTOLOAD_NAME, AUTOLOAD_PATH)
     
     get_editor_interface().get_resource_filesystem().scan()
     print_log("Code Generation Complete!")
