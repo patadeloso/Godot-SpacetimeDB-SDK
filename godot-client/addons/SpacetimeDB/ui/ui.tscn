@@ -1,23 +1,25 @@
-[gd_scene load_steps=6 format=3 uid="uid://dcklym85vmdt3"]
+[gd_scene load_steps=7 format=3 uid="uid://dcklym85vmdt3"]
 
-[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_dfrsg"]
-bg_color = Color(0.466667, 0.152941, 0.152941, 1)
+[ext_resource type="Texture2D" uid="uid://ctwdnauam1s5v" path="res://addons/SpacetimeDB/ui/icons/Error.svg" id="1_3cpcg"]
+[ext_resource type="Texture2D" uid="uid://bbwidmvngko0a" path="res://addons/SpacetimeDB/ui/icons/Remove.svg" id="1_mgbt2"]
+[ext_resource type="Texture2D" uid="uid://yyihsx4ptqm6" path="res://addons/SpacetimeDB/ui/icons/Add.svg" id="2_3cpcg"]
 
-[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_soqxf"]
-bg_color = Color(0.375413, 0.115824, 0.115986, 1)
+[sub_resource type="SystemFont" id="SystemFont_raufm"]
+font_names = PackedStringArray("Consolas")
+font_weight = 600
+subpixel_positioning = 0
 
-[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_s7wgb"]
-bg_color = Color(0.151821, 0.467906, 0.254391, 1)
+[sub_resource type="SystemFont" id="SystemFont_mgbt2"]
+font_names = PackedStringArray("Consolas")
+subpixel_positioning = 0
 
-[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_3crsy"]
-bg_color = Color(0.127917, 0.404934, 0.217562, 1)
-
-[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_yiric"]
-bg_color = Color(0.145098, 0.168627, 0.203922, 1)
-border_width_left = 1
-border_width_top = 1
-border_width_right = 1
-border_width_bottom = 1
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_3cpcg"]
+bg_color = Color(0.129412, 0.14902, 0.180392, 1)
+corner_radius_top_left = 2
+corner_radius_top_right = 2
+corner_radius_bottom_right = 2
+corner_radius_bottom_left = 2
+anti_aliasing = false
 
 [node name="Control" type="Control"]
 custom_minimum_size = Vector2(0, 250)
@@ -28,121 +30,153 @@ anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 
-[node name="prefab" type="Panel" parent="."]
+[node name="Prefabs" type="Node" parent="."]
+
+[node name="ErrorPrefab" type="HFlowContainer" parent="Prefabs"]
 visible = false
 self_modulate = Color(1, 1, 1, 0)
-custom_minimum_size = Vector2(50, 50)
+offset_right = 898.0
+offset_bottom = 17.0
+
+[node name="Control" type="Control" parent="Prefabs/ErrorPrefab"]
 layout_mode = 2
-offset_left = 896.0
+
+[node name="VBoxContainer" type="VBoxContainer" parent="Prefabs/ErrorPrefab"]
+layout_mode = 2
+alignment = 1
+
+[node name="TextureRect" type="TextureRect" parent="Prefabs/ErrorPrefab/VBoxContainer"]
+layout_mode = 2
+size_flags_horizontal = 0
+size_flags_vertical = 0
+texture = ExtResource("1_3cpcg")
+stretch_mode = 3
+
+[node name="Label" type="Label" parent="Prefabs/ErrorPrefab"]
+custom_minimum_size = Vector2(0, 9)
+layout_mode = 2
+size_flags_vertical = 0
+theme_override_colors/font_color = Color(1, 0.470588, 0.419608, 1)
+theme_override_fonts/font = SubResource("SystemFont_raufm")
+text = "ERROR:"
+
+[node name="Message" type="Label" parent="Prefabs/ErrorPrefab"]
+custom_minimum_size = Vector2(0, 9)
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_colors/font_color = Color(1, 0.470588, 0.419608, 1)
+theme_override_fonts/font = SubResource("SystemFont_mgbt2")
+autowrap_mode = 3
+
+[node name="LogPrefab" type="Label" parent="Prefabs"]
+visible = false
+custom_minimum_size = Vector2(0, 9)
+offset_right = 1.0
+offset_bottom = 17.0
+theme_override_fonts/font = SubResource("SystemFont_mgbt2")
+autowrap_mode = 3
+
+[node name="ModulePrefab" type="Panel" parent="Prefabs"]
+visible = false
+self_modulate = Color(1, 1, 1, 0)
+custom_minimum_size = Vector2(0, 31)
+offset_left = 902.0
 offset_top = 64.0
 offset_right = 1152.0
-offset_bottom = 114.0
+offset_bottom = 95.0
 
-[node name="LineEdit" type="LineEdit" parent="prefab"]
+[node name="ModuleNameInput" type="LineEdit" parent="Prefabs/ModulePrefab"]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
-offset_right = -64.0
+offset_right = -30.0
 grow_horizontal = 2
 grow_vertical = 2
 text = "ModuleName"
-alignment = 1
+placeholder_text = "Module"
 
-[node name="Button" type="Button" parent="prefab"]
+[node name="RemoveButton" type="Button" parent="Prefabs/ModulePrefab"]
 layout_mode = 1
 anchors_preset = -1
 anchor_left = 1.0
 anchor_top = 0.5
 anchor_right = 1.0
 anchor_bottom = 0.5
-offset_left = -64.0
-offset_top = -24.0
-offset_bottom = 24.0
+offset_left = -24.0
+offset_top = -15.5
+offset_bottom = 15.5
 grow_horizontal = 0
 grow_vertical = 2
-theme_override_styles/focus = SubResource("StyleBoxFlat_dfrsg")
-theme_override_styles/disabled_mirrored = SubResource("StyleBoxFlat_dfrsg")
-theme_override_styles/disabled = SubResource("StyleBoxFlat_dfrsg")
-theme_override_styles/hover_pressed_mirrored = SubResource("StyleBoxFlat_dfrsg")
-theme_override_styles/hover_pressed = SubResource("StyleBoxFlat_dfrsg")
-theme_override_styles/hover_mirrored = SubResource("StyleBoxFlat_dfrsg")
-theme_override_styles/hover = SubResource("StyleBoxFlat_soqxf")
-theme_override_styles/pressed_mirrored = SubResource("StyleBoxFlat_dfrsg")
-theme_override_styles/pressed = SubResource("StyleBoxFlat_dfrsg")
-theme_override_styles/normal_mirrored = SubResource("StyleBoxFlat_dfrsg")
-theme_override_styles/normal = SubResource("StyleBoxFlat_dfrsg")
-text = "-"
+icon = ExtResource("1_mgbt2")
+flat = true
 
 [node name="Uri" type="LineEdit" parent="."]
 layout_mode = 1
-anchors_preset = -1
+anchors_preset = 12
+anchor_top = 1.0
 anchor_right = 1.0
-offset_right = -480.0
-offset_bottom = 48.0
+anchor_bottom = 1.0
+offset_left = 86.0
+offset_top = -31.0
+offset_right = -97.0
 grow_horizontal = 2
+grow_vertical = 0
 text = "http://127.0.0.1:3000"
-placeholder_text = "Server Uri"
+placeholder_text = "Enter the server URI"
 
-[node name="Panel" type="Panel" parent="."]
+[node name="NewModule" type="Panel" parent="."]
+self_modulate = Color(1, 1, 1, 0)
 layout_mode = 1
-anchors_preset = 1
+anchors_preset = 3
 anchor_left = 1.0
+anchor_top = 1.0
 anchor_right = 1.0
-offset_left = -256.0
-offset_bottom = 48.0
+anchor_bottom = 1.0
+offset_left = -250.0
+offset_top = -101.0
+offset_bottom = -70.0
 grow_horizontal = 0
+grow_vertical = 0
 
-[node name="Label" type="Label" parent="Panel"]
+[node name="AddButton" type="Button" parent="NewModule"]
+layout_mode = 1
+anchors_preset = -1
+anchor_left = 1.0
+anchor_top = 0.5
+anchor_right = 1.0
+anchor_bottom = 0.5
+offset_left = -24.0
+offset_top = -15.5
+offset_bottom = 15.5
+grow_horizontal = 0
+grow_vertical = 2
+icon = ExtResource("2_3cpcg")
+flat = true
+
+[node name="ModuleNameInput" type="LineEdit" parent="NewModule"]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
-offset_right = -64.0
+offset_right = -30.0
 grow_horizontal = 2
 grow_vertical = 2
-text = "Modules"
-horizontal_alignment = 1
-vertical_alignment = 1
+placeholder_text = "Enter module name"
 
-[node name="Button" type="Button" parent="Panel"]
-layout_mode = 1
-anchors_preset = -1
-anchor_left = 1.0
-anchor_top = 0.5
-anchor_right = 1.0
-anchor_bottom = 0.5
-offset_left = -64.0
-offset_top = -24.0
-offset_bottom = 24.0
-grow_horizontal = 0
-grow_vertical = 2
-theme_override_styles/focus = SubResource("StyleBoxFlat_s7wgb")
-theme_override_styles/disabled_mirrored = SubResource("StyleBoxFlat_s7wgb")
-theme_override_styles/disabled = SubResource("StyleBoxFlat_s7wgb")
-theme_override_styles/hover_pressed_mirrored = SubResource("StyleBoxFlat_s7wgb")
-theme_override_styles/hover_pressed = SubResource("StyleBoxFlat_s7wgb")
-theme_override_styles/hover_mirrored = SubResource("StyleBoxFlat_s7wgb")
-theme_override_styles/hover = SubResource("StyleBoxFlat_3crsy")
-theme_override_styles/pressed_mirrored = SubResource("StyleBoxFlat_s7wgb")
-theme_override_styles/pressed = SubResource("StyleBoxFlat_s7wgb")
-theme_override_styles/normal_mirrored = SubResource("StyleBoxFlat_s7wgb")
-theme_override_styles/normal = SubResource("StyleBoxFlat_s7wgb")
-text = "+"
-
-[node name="ScrollContainer" type="ScrollContainer" parent="."]
+[node name="ModulesContainer" type="ScrollContainer" parent="."]
 layout_mode = 1
 anchors_preset = -1
 anchor_left = 1.0
 anchor_right = 1.0
 anchor_bottom = 1.0
-offset_left = -256.0
-offset_top = 64.0
-offset_bottom = -80.0
+offset_left = -250.0
+offset_top = 24.0
+offset_bottom = -105.0
 grow_horizontal = 0
 grow_vertical = 2
 
-[node name="VBoxContainer" type="VBoxContainer" parent="ScrollContainer"]
+[node name="VBox" type="VBoxContainer" parent="ModulesContainer"]
 layout_mode = 2
 size_flags_horizontal = 3
 size_flags_vertical = 3
@@ -154,33 +188,79 @@ anchor_left = 1.0
 anchor_top = 1.0
 anchor_right = 1.0
 anchor_bottom = 1.0
-offset_left = -256.0
-offset_top = -64.0
+offset_left = -250.0
+offset_top = -66.0
+offset_bottom = -35.0
 grow_horizontal = 0
 grow_vertical = 0
+disabled = true
 text = "Generate schema"
 
 [node name="CheckUri" type="Button" parent="."]
 layout_mode = 1
+anchors_preset = 3
+anchor_left = 1.0
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = -93.0
+offset_top = -31.0
+grow_horizontal = 0
+grow_vertical = 0
+text = "Check URI"
+
+[node name="Logs" type="ScrollContainer" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_right = -254.0
+offset_bottom = -35.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_3cpcg")
+
+[node name="VBox" type="VBoxContainer" parent="Logs"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+theme_override_constants/separation = -4
+
+[node name="AddModuleHint" type="Label" parent="."]
+layout_mode = 1
+anchors_preset = 11
+anchor_left = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = -250.0
+offset_top = 24.0
+offset_bottom = -105.0
+grow_horizontal = 0
+grow_vertical = 2
+text = "Add a module by entering the name below and clicking +"
+horizontal_alignment = 1
+vertical_alignment = 1
+autowrap_mode = 3
+
+[node name="URILabel" type="Label" parent="."]
+layout_mode = 1
+anchors_preset = 2
+anchor_top = 1.0
+anchor_bottom = 1.0
+offset_top = -31.0
+offset_right = 88.0
+grow_vertical = 0
+text = "Server URI:"
+vertical_alignment = 1
+
+[node name="ModulesLabel" type="Label" parent="."]
+layout_mode = 1
 anchors_preset = 1
 anchor_left = 1.0
 anchor_right = 1.0
-offset_left = -464.0
-offset_right = -272.0
-offset_bottom = 48.0
+offset_left = -250.0
+offset_top = -2.0
+offset_bottom = 21.0
 grow_horizontal = 0
-text = "Check URI"
-
-[node name="Log" type="TextEdit" parent="."]
-layout_mode = 1
-anchors_preset = -1
-anchor_right = 1.0
-anchor_bottom = 1.0
-offset_top = 64.0
-offset_right = -272.0
-focus_mode = 0
-theme_override_colors/font_readonly_color = Color(1, 1, 1, 1)
-theme_override_colors/font_color = Color(1, 1, 1, 1)
-theme_override_styles/read_only = SubResource("StyleBoxFlat_yiric")
-editable = false
-wrap_mode = 1
+text = "Modules"
+horizontal_alignment = 1
