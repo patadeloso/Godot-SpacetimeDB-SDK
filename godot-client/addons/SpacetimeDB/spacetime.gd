@@ -5,99 +5,46 @@ const AUTOLOAD_NAME := "SpacetimeDB"
 const BINDINGS_PATH := "res://spacetime_bindings/"
 const AUTOLOAD_PATH := BINDINGS_PATH + "generated_client.gd"
 const SAVE_PATH := BINDINGS_PATH + "codegen_data.json"
-const UI_PATH := "res://addons/SpacetimeDB/ui/ui.tscn"
 
-var ui_panel: Control
 var http_request = HTTPRequest.new()
-var module_prefab:Control
 var codegen_data: Dictionary
+var ui: SpacetimePluginUI
 
-func _enter_tree():
     if not ProjectSettings.has_setting("autoload/" + AUTOLOAD_NAME):
         # get_editor_interface().get_resource_filesystem().scan()
         add_autoload_singleton(AUTOLOAD_NAME, AUTOLOAD_PATH)
         
 static var instance: SpacetimePlugin
-    if not is_instance_valid(ui_panel):
-        var scene = load(UI_PATH)
-        if scene:
-            ui_panel = scene.instantiate()
-        else:
-            printerr("Failed to load UI scene: ", UI_PATH)
-            return
-    if is_instance_valid(ui_panel):
-        add_control_to_bottom_panel(ui_panel, AUTOLOAD_NAME)
-    else:
-        printerr("UI panel is not valid after instantiation attempt.")
-    
-    subscribe_controls()
+
+func _enter_tree():    
     instance = self
-    load_codegen_data()
-        
-func subscribe_controls():
-    http_request.timeout = 4;
-    add_child(http_request)
-    module_prefab = ui_panel.get_node("prefab").duplicate()
-
-    ui_panel.get_node("CheckUri").button_down.connect(check_uri);
-    ui_panel.get_node("Panel/Button").button_down.connect(add_module)
-    ui_panel.get_node("Generate").button_down.connect(generate_code);
     
-func add_module(name: String = "EnterModuleName", fromLoad: bool = false):
-    var new_module = module_prefab.duplicate()
-    var line_edit = new_module.get_node("LineEdit")
-    ui_panel.get_node("ScrollContainer/VBoxContainer").add_child(new_module)
-    line_edit.text = name
+    ui = SpacetimePluginUI.new()
+    ui.module_updated.connect(_on_module_updated)
+    ui.module_removed.connect(_on_module_removed)
+    ui.check_uri.connect(_on_check_uri)
+    ui.generate_schema.connect(_on_generate_schema)
+    
+    load_codegen_data()
+
+func add_module(name: String, fromLoad: bool = false):
+    ui.add_module(name)
+    
     if not fromLoad:
-        codegen_data.modules.append(line_edit.text)
+        codegen_data.modules.append(name)
         save_codegen_data()
-
-    line_edit.focus_exited.connect(func():
-        var index = new_module.get_index()
-        codegen_data.modules[index] = line_edit.text
-        save_codegen_data()
-    )
-
-    new_module.get_node("Button").button_down.connect(func():
-        var index = new_module.get_index()
-        codegen_data.modules.remove_at(index)
-        save_codegen_data()
-        new_module.queue_free()
-    )
-    new_module.show()
-
-func generate_code():
-    clear_log()
-    print_log("Start Code Generation...")
-    var codegen: Codegen = Codegen.new()
-    var modules: Array[String] = []
-    var generated_files: Array[String] = ["res://%s/%s/spacetime_modules.gd" % [Codegen.PLUGIN_DATA_FOLDER ,Codegen.CODEGEN_FOLDER]]
-    for i in ui_panel.get_node("ScrollContainer/VBoxContainer").get_children():
-        var module_name = i.get_node("LineEdit").text
-        var uri = ui_panel.get_node("Uri").text
-        if uri.ends_with("/"):
-            uri = uri.left(-1)
-        uri += "/v1/database/" + module_name + "/schema?version=9"
-        http_request.request(uri)
-        var result = await http_request.request_completed
-        if result[1] == 200:
-            var json = PackedByteArray(result[3]).get_string_from_utf8()
-            var parse_module_name = module_name.replace("-", "_")
-            generated_files.append_array(codegen._on_request_completed(json, parse_module_name))
-            modules.append(parse_module_name)
-    codegen.generate_module_link(modules)
-    cleanup_unused_classes("res://%s/%s" % [Codegen.PLUGIN_DATA_FOLDER ,Codegen.CODEGEN_FOLDER], generated_files)
-    get_editor_interface().get_resource_filesystem().scan()
-    print_log("Code Generation Complete!")
 
 func load_codegen_data() -> void:
     var load_data = FileAccess.open(SAVE_PATH, FileAccess.READ)
     if load_data:
+        print_log("Loading codegen data from %s" % [SAVE_PATH])
         codegen_data = JSON.parse_string(load_data.get_as_text())
         load_data.close()
-        ui_panel.get_node("Uri").text = codegen_data.uri
+        ui.set_uri(codegen_data.uri)
+        
         for module in codegen_data.modules.duplicate():
             add_module(module, true)
+            print_log("Loaded module: %s" % [module])
     else:
         codegen_data = {
             "uri": "http://127.0.0.1:3000",
@@ -117,7 +64,55 @@ func save_codegen_data() -> void:
     save_file.store_string(JSON.stringify(codegen_data))
     save_file.close()
 
-func cleanup_unused_classes(dir_path: String = "res://schema", files: Array[String] = []) -> void:
+func _on_module_updated(index: int, name: String) -> void:
+    codegen_data.modules[index] = name
+    save_codegen_data()
+
+func _on_module_removed(index: int) -> void:
+    codegen_data.modules.remove_at(index)
+    save_codegen_data()
+
+func _on_check_uri(uri: String):
+    if codegen_data.uri != uri:
+        codegen_data.uri = uri
+        save_codegen_data()
+    
+    if uri.ends_with("/"):
+        uri = uri.left(-1)
+    uri += "/v1/ping"
+    
+    print_log("Pinging... " + uri)
+    http_request.request(uri)
+    
+    var result = await http_request.request_completed
+    if result[1] == 0:
+        print_err("Request timeout - " + uri)
+    else:
+        print_log("Response code: " + str(result[1]))
+
+func _on_generate_schema(uri: String, modules: Array[String]):
+    if uri.ends_with("/"):
+        uri = uri.left(-1)
+            
+    print_log("Starting code generation...")
+    var codegen := Codegen.new()
+    var generated_files: Array[String] = ["res://%s/%s/spacetime_modules.gd" % [Codegen.PLUGIN_DATA_FOLDER ,Codegen.CODEGEN_FOLDER]]
+    for module in modules:
+        var schema_uri := "%s/v1/database/%s/schema?version=9" % [uri, module]
+        http_request.request(uri)
+        var result = await http_request.request_completed
+        if result[1] == 200:
+            var json = PackedByteArray(result[3]).get_string_from_utf8()
+            var parse_module_name = module.replace("-", "_")
+            generated_files.append_array(codegen._on_request_completed(json, parse_module_name))
+            modules.append(parse_module_name)
+    codegen.generate_module_link(modules)
+    _cleanup_unused_classes("res://%s/%s" % [Codegen.PLUGIN_DATA_FOLDER ,Codegen.CODEGEN_FOLDER], generated_files)
+    
+    get_editor_interface().get_resource_filesystem().scan()
+    print_log("Code Generation Complete!")
+
+func _cleanup_unused_classes(dir_path: String = "res://schema", files: Array[String] = []) -> void:
     var dir = DirAccess.open(dir_path)
     if not dir: return
     print_log("File Cleanup:Scanning folder: " + dir_path)
@@ -131,45 +126,23 @@ func cleanup_unused_classes(dir_path: String = "res://schema", files: Array[Stri
                 DirAccess.remove_absolute("%s.uid" % [full_path])
     var subfolders = dir.get_directories()
     for folder in subfolders:
-        cleanup_unused_classes(dir_path + "/" + folder, files)
-
 func check_uri():
-    codegen_data.uri = ui_panel.get_node("Uri").text
-    save_codegen_data()
-    var uri = ui_panel.get_node("Uri").text
-    if uri.ends_with("/"):
-        uri = uri.left(-1)
-    uri += "/v1/ping"
-    http_request.request(uri)
-    var result = await http_request.request_completed
-    clear_log()
-    if result[1] == 0:
-        print_log("Timeout Error: " +  uri)
-    else:
-        print_log("Response code: " + str(result[1]))
+        _cleanup_unused_classes(dir_path + "/" + folder, files)
 
-static func clear_log():
-    spacetime.ui_panel.get_node("Log").text = ""
+static func clear_logs():
+    instance.ui.clear_logs()
 
 static func print_log(text: Variant) -> void:
-    var log = spacetime.ui_panel.get_node("Log")
-    match typeof(text):
-        TYPE_STRING:
-            log.text += text + "\n"
-        TYPE_ARRAY:
-            for i in text:
-                log.text += str(i) + " "
-            log.text += "\n"
-        _:
-            log.text += str(text) + "\n"
+    instance.ui.add_log(text)
+
+static func print_err(text: Variant) -> void:
+    instance.ui.add_err(text)
 
 func _exit_tree():
-    if is_instance_valid(ui_panel):
-        remove_control_from_bottom_panel(ui_panel)
-        ui_panel.queue_free()
-        ui_panel = null
-        http_request.queue_free()
-        http_request = null
+    ui.destroy()
+    ui = null
+    http_request.queue_free()
+    http_request = null
         
     if ProjectSettings.has_setting("autoload/" + AUTOLOAD_NAME):
         remove_autoload_singleton(AUTOLOAD_NAME)
