@@ -4,15 +4,6 @@ class_name BSATNSerializer extends RefCounted
 const IDENTITY_SIZE := 32
 const CONNECTION_ID_SIZE := 16
 
-# Client Message Variant Tags (ensure these match server/protocol)
-const CLIENT_MSG_VARIANT_TAG_CALL_REDUCER    := 0x00
-const CLIENT_MSG_VARIANT_TAG_SUBSCRIBE       := 0x01 # Legacy? Verify usage.
-const CLIENT_MSG_VARIANT_TAG_ONEOFF_QUERY    := 0x02
-const CLIENT_MSG_VARIANT_TAG_SUBSCRIBE_SINGLE := 0x03
-const CLIENT_MSG_VARIANT_TAG_SUBSCRIBE_MULTI  := 0x04
-const CLIENT_MSG_VARIANT_TAG_UNSUBSCRIBE     := 0x05 # Single? Verify usage.
-const CLIENT_MSG_VARIANT_TAG_UNSUBSCRIBE_MULTI := 0x06
-
 # --- Properties ---
 var _last_error: String = ""
 var _spb: StreamPeerBuffer # Internal buffer used by writing functions

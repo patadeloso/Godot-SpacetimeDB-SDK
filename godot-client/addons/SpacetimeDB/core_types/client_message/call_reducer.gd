@@ -1,5 +1,5 @@
 extends Resource
-class_name CallReducerData
+class_name CallReducerMessage
 
 @export var reducer_name: String
 @export var args: PackedByteArray
@@ -7,10 +7,10 @@ class_name CallReducerData
 @export var flags: int # u8
 
 func _init(p_reducer_name: String = "", p_args: PackedByteArray = PackedByteArray(), p_request_id: int = 0, p_flags: int = 0):
-	reducer_name = p_reducer_name
-	args = p_args
-	request_id = p_request_id
-	flags = p_flags
-	set_meta("bsatn_type_request_id", "u32")
-	set_meta("bsatn_type_flags", "u8")
-	pass
+    reducer_name = p_reducer_name
+    args = p_args
+    request_id = p_request_id
+    flags = p_flags
+    set_meta("bsatn_type_request_id", "u32")
+    set_meta("bsatn_type_flags", "u8")
+    pass

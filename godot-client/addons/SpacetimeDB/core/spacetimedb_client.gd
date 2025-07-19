@@ -345,13 +345,11 @@ func subscribe(queries: PackedStringArray) -> int:
 	# 1. Generate a request ID
 	var request_id := randi() & 0xFFFFFFFF # Ensure positive u32 range
 	# 2. Create the correct payload Resource
-	var payload_data := SubscribeMultiData.new(queries, request_id)
 	
 	#print("! ",payload_data.query_id.id)
 
 	# 3. Serialize the complete ClientMessage using the universal function
 	var message_bytes := _serializer.serialize_client_message(
-		BSATNSerializer.CLIENT_MSG_VARIANT_TAG_SUBSCRIBE_MULTI,
 		payload_data 
 	)
 
@@ -380,10 +378,8 @@ func unsubscribe(id:int) -> bool:
 		return false # Indicate error
 		
 	
-	var payload_data := UnsubscribeMultiData.new(id)
 	
 	var message_bytes := _serializer.serialize_client_message(
-		BSATNSerializer.CLIENT_MSG_VARIANT_TAG_UNSUBSCRIBE_MULTI,
 		payload_data 
 	)
 
@@ -406,6 +402,10 @@ func unsubscribe(id:int) -> bool:
 		return false
 	pass
 	
+    var payload_data := SubscribeMultiMessage.new(queries, query_id)
+        SpacetimeDBClientMessage.SUBSCRIBE_MULTI,
+    var payload_data := UnsubscribeMultiMessage.new(query_id)
+        SpacetimeDBClientMessage.UNSUBSCRIBE_MULTI,
 func call_reducer(reducer_name: String, args: Array = [], types: Array = []) -> int:
 	if not is_connected_db():
 		#print_logerr("SpacetimeDBClient: Cannot call reducer, not connected.")
@@ -420,9 +420,7 @@ func call_reducer(reducer_name: String, args: Array = [], types: Array = []) -> 
 		printerr("Failed to serialize args for %s: %s" % [reducer_name, _serializer.get_last_error()])
 		return -1
 	
-	var call_data := CallReducerData.new(reducer_name, args_bytes, request_id, 0)
 	var message_bytes = _serializer.serialize_client_message(
-		BSATNSerializer.CLIENT_MSG_VARIANT_TAG_CALL_REDUCER,
 		call_data
 		)
 	
@@ -464,3 +462,5 @@ func wait_for_reducer_response(request_id_to_match: int, timeout_seconds: float 
 
 func _check_reducer_response(update: TransactionUpdateData, request_id_to_match: int) -> bool:
 	return update != null and update.reducer_call != null and update.reducer_call.request_id == request_id_to_match
+    var call_data := CallReducerMessage.new(reducer_name, args_bytes, request_id, 0)
+        SpacetimeDBClientMessage.CALL_REDUCER,
