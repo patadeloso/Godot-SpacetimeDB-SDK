@@ -116,7 +116,6 @@ func apply_database_update(db_update: DatabaseUpdateData):
 
 func apply_table_update(table_update: TableUpdateData):
     var table_name_original := StringName(table_update.table_name)
-    #print(table_name_original)
     var table_name_lower: String
 
     if _cached_normalized_table_names.has(table_name_original):
