@@ -3,72 +3,19 @@ class_name SpacetimeCodegen extends Resource
 
 const REQUIRED_FOLDERS_IN_CODEGEN_FOLDER: Array[String] = ["tables", "spacetime_types"]
 const OPTION_CLASS_NAME := "Option" 
-const GDNATIVE_TYPES := {
-    "I8": "int",
-    "I16": "int",
-    "I32": "int",
-    "I64": "int",
-    "U8": "int",
-    "U16": "int",
-    "U32": "int",
-    "U64": "int",
-    "F32": "float",
-    "F64": "float",
-    "String": "String",
-    "Vector4": "Vector4",
-    "Vector4I": "Vector4i",
-    "Vector3": "Vector3",
-    "Vector3I": "Vector3i",
-    "Vector2": "Vector2",
-    "Vector2I": "Vector2i",
-    "Plane": "Plane",
-    "Color": "Color",
-    "Quaternion": "Quaternion",
-    "Bool": "bool",
-    "Nil": "null", # For Option<()>
-}
-
-var TYPE_MAP := {
-    "__identity__": "PackedByteArray",
-    "__connection_id__": "PackedByteArray",
-    "__timestamp_micros_since_unix_epoch__": "int",
-    "__time_duration_micros__": "int",
-}
-
-var META_TYPE_MAP := {
-    "I8": "i8",
-    "I16": "i16",
-    "I32": "i32",
-    "I64": "i64",
-    "U8": "u8",
-    "U16": "u16",
-    "U32": "u32",
-    "U64": "u64",
-    "F32": "f32",
-    "F64": "f64",
-    "String": "string", # For BSATN, e.g. option_string or vec_String (if Option<Array<String>>)
-    "Bool": "bool",   # For BSATN, e.g. option_bool
-    "Nil": "nil",     # For BSATN Option<()>
-    "__identity__": "identity",
-    "__connection_id__": "connection_id",
-    "__timestamp_micros_since_unix_epoch__": "i64",
-    "__time_duration_micros__": "i64",
-}
 
 var _config: SpacetimeCodegenConfig
 var _schema_path: String
 
-func _init(p_schema_path: String) -> void:
-    TYPE_MAP.merge(GDNATIVE_TYPES)
-    
+func _init(p_schema_path: String) -> void:    
     _schema_path = p_schema_path
     _config = SpacetimeCodegenConfig.new()
     
 func _on_request_completed(json_string: String, module_name: String) -> Array[String]:
     var json = JSON.parse_string(json_string)
-    var schema: Dictionary = parse_schema(json, module_name)
+    var schema := SpacetimeSchemaParser.parse_schema(json, module_name)
     if schema.is_empty():
-        printerr("Schema parsing failed for module: %s. Aborting codegen for this module." % module_name)
+        SpacetimePlugin.print_err("Schema parsing failed for module: %s. Aborting codegen for this module." % module_name)
         return []
     
     for folder in REQUIRED_FOLDERS_IN_CODEGEN_FOLDER:
@@ -88,11 +35,10 @@ func _on_request_completed(json_string: String, module_name: String) -> Array[St
     var generated_files := build_gdscript_from_schema(schema)
     return generated_files
 
-func build_gdscript_from_schema(schema: Dictionary) -> Array[String]:
-    var module_name: String = schema.get("module", null)
+func build_gdscript_from_schema(schema: SpacetimeParsedSchema) -> Array[String]:
     var generated_files: Array[String] = []
     
-    for type_def in schema.get("types", []):
+    for type_def in schema.types:
         if type_def.has("gd_native"): continue
         
         var content: String
@@ -101,7 +47,7 @@ func build_gdscript_from_schema(schema: Dictionary) -> Array[String]:
         
         if type_def.has("struct"):
             folder_name = "spacetime_types"
-            var generated_table_names: Array[String] 
+            var generated_table_names: Array[String]
             if type_def.has("table_names"):
                 if not type_def.has("primary_key_name"): continue
                 if _config.hide_private_tables and not type_def.get("is_public", []).has(true): 
@@ -116,15 +62,15 @@ func build_gdscript_from_schema(schema: Dictionary) -> Array[String]:
                         continue
                     generated_table_names.append(tbl_name)
                     
-            content = generate_struct_gdscript(type_def, module_name, generated_table_names)
+            content = generate_struct_gdscript(schema, type_def, generated_table_names)
             output_file_name = "%s_%s.gd" % \
-                [module_name.to_snake_case(), type_def.get("name", "").to_snake_case()]
+                [schema.module.to_snake_case(), type_def.get("name", "").to_snake_case()]
         elif type_def.has("enum"):
             if not type_def.get("is_sum_type"): continue
             folder_name = "spacetime_types"
-            content = generate_enum_gdscript(type_def, module_name)
+            content = generate_enum_gdscript(schema, type_def)
             output_file_name = "%s_%s.gd" % \
-                [module_name.to_snake_case(), type_def.get("name", "").to_snake_case()]
+                [schema.module.to_snake_case(), type_def.get("name", "").to_snake_case()]
         
         var folder_path := "%s/%s" % [_schema_path, folder_name]
         var output_file_path := "%s/%s" % [folder_path, output_file_name]
@@ -138,7 +84,7 @@ func build_gdscript_from_schema(schema: Dictionary) -> Array[String]:
             generated_files.append(output_file_path)
 
     var module_content := generate_module_gdscript(schema)
-    var output_file_name_module := "module_%s.gd" % module_name.to_snake_case() 
+    var output_file_name_module := "module_%s.gd" % schema.module.to_snake_case() 
     var output_file_path_module := "%s/%s" % [_schema_path, output_file_name_module]
     var file_module := FileAccess.open(output_file_path_module, FileAccess.WRITE)
     if file_module:
@@ -147,7 +93,7 @@ func build_gdscript_from_schema(schema: Dictionary) -> Array[String]:
         generated_files.append(output_file_path_module)
 
     var reducers_content := generate_reducer_gdscript(schema)
-    var output_file_name_reducers := "module_%s_reducers.gd" % module_name.to_snake_case()
+    var output_file_name_reducers := "module_%s_reducers.gd" % schema.module.to_snake_case()
     var output_file_path_reducers := "%s/%s" % [_schema_path, output_file_name_reducers]
     var file_reducers := FileAccess.open(output_file_path_reducers, FileAccess.WRITE)
     if file_reducers:
@@ -156,7 +102,7 @@ func build_gdscript_from_schema(schema: Dictionary) -> Array[String]:
         generated_files.append(output_file_path_reducers)
 
     var types_content := generate_types_gdscript(schema)
-    var output_file_name_types := "module_%s_types.gd" % module_name.to_snake_case()
+    var output_file_name_types := "module_%s_types.gd" % schema.module.to_snake_case()
     var output_file_path_types := "%s/%s" % [_schema_path, output_file_name_types]
     var file_types := FileAccess.open(output_file_path_types, FileAccess.WRITE)
     if file_types:
@@ -167,12 +113,12 @@ func build_gdscript_from_schema(schema: Dictionary) -> Array[String]:
     SpacetimePlugin.print_log(["Generated files:\n", "\n".join(generated_files)])
     return generated_files
 
-func generate_struct_gdscript(type_def, module_name, table_names) -> String:
+func generate_struct_gdscript(schema: SpacetimeParsedSchema, type_def: Dictionary, table_names: Array[String]) -> String:
     var struct_name: String = type_def.get("name", "")
     var fields: Array = type_def.get("struct", [])
     var meta_data: Array = []
     var table_name: String = type_def.get("table_name", "")
-    var _class_name: String = module_name.to_pascal_case() + struct_name.to_pascal_case()
+    var _class_name: String = schema.module.to_pascal_case() + struct_name.to_pascal_case()
     var _extends_class = "Resource"
     if table_name:
         _extends_class = "_ModuleTable"
@@ -201,36 +147,36 @@ func generate_struct_gdscript(type_def, module_name, table_names) -> String:
         var bsatn_meta_type_string: String
         var documentation_comment: String
         var nested_type: Array = field.get("nested_type", []).duplicate()
-        nested_type.append(TYPE_MAP.get(original_inner_type_name, "Variant"))
+        nested_type.append(schema.type_map.get(original_inner_type_name, "Variant"))
         
         if field.has("is_option"):
             gd_field_type = OPTION_CLASS_NAME
             documentation_comment = "## %s" % [" of ".join(nested_type)]
             create_func_documentation_comment += format_cfdc.call(i, field_name, nested_type)
             if field.has("is_array_inside_option"):
-                bsatn_meta_type_string = "vec_%s" % META_TYPE_MAP.get(original_inner_type_name, "Variant")
+                bsatn_meta_type_string = "vec_%s" % schema.meta_type_map.get(original_inner_type_name, "Variant")
             else:
-                bsatn_meta_type_string = META_TYPE_MAP.get(original_inner_type_name, original_inner_type_name)
+                bsatn_meta_type_string = schema.meta_type_map.get(original_inner_type_name, original_inner_type_name)
         elif field.has("is_array"):
-            var element_gd_type = TYPE_MAP.get(original_inner_type_name, "Variant")
+            var element_gd_type = schema.type_map.get(original_inner_type_name, "Variant")
             if field.has("is_option_inside_array"):
                 element_gd_type = OPTION_CLASS_NAME				
                 documentation_comment = "## %s" % [" of ".join(nested_type)]
             create_func_documentation_comment += format_cfdc.call(i, field_name, nested_type)
             gd_field_type = "Array[%s]" % element_gd_type
-            var inner_meta = META_TYPE_MAP.get(original_inner_type_name, original_inner_type_name)
+            var inner_meta = schema.meta_type_map.get(original_inner_type_name, original_inner_type_name)
             bsatn_meta_type_string = "%s" % inner_meta
         else:
-            gd_field_type = TYPE_MAP.get(original_inner_type_name, "Variant")
-            bsatn_meta_type_string = META_TYPE_MAP.get(original_inner_type_name, original_inner_type_name)
+            gd_field_type = schema.type_map.get(original_inner_type_name, "Variant")
+            bsatn_meta_type_string = schema.meta_type_map.get(original_inner_type_name, original_inner_type_name)
             create_func_documentation_comment += format_cfdc.call(i, field_name, nested_type)
 
         var add_meta_for_field = false
         if field.has("is_option") or field.has("is_array"):
             add_meta_for_field = true
-        elif not GDNATIVE_TYPES.has(original_inner_type_name):
+        elif not SpacetimeSchemaParser.GDNATIVE_TYPES.has(original_inner_type_name):
             add_meta_for_field = true
-        elif META_TYPE_MAP.has(original_inner_type_name):
+        elif schema.meta_type_map.has(original_inner_type_name):
             add_meta_for_field = true
         
         if add_meta_for_field and not bsatn_meta_type_string.is_empty():
@@ -255,13 +201,13 @@ func generate_struct_gdscript(type_def, module_name, table_names) -> String:
     content += "\treturn result\n"
     return content
 
-func generate_enum_gdscript(type_def, module_name) -> String:
+func generate_enum_gdscript(schema: SpacetimeParsedSchema, type_def: Dictionary) -> String:
     var enum_name: String = type_def.get("name", "")
     var variants: Array = type_def.get("enum", [""])
     var variant_names: String = "\n".join(variants.map(func(x): 
         return "\t%s," % [x.get("name", "")]))
     
-    var _class_name: String = module_name.to_pascal_case() + enum_name.to_pascal_case()
+    var _class_name: String = schema.module.to_pascal_case() + enum_name.to_pascal_case()
     var content: String = "#Do not edit this file, it is generated automatically.\n" + \
     "class_name %s extends RustEnum\n\n" % _class_name + \
     "enum {\n%s\n}\n\n" % variant_names + \
@@ -269,7 +215,7 @@ func generate_enum_gdscript(type_def, module_name) -> String:
     "\tset_meta('enum_options', [%s])\n" % \
     [", ".join(variants.map(func(x): 
         var type = x.get("type", "")
-        var rust_type = META_TYPE_MAP.get(type, type) 
+        var rust_type = schema.meta_type_map.get(type, type) 
         if x.has("is_array_inside_option"):
             rust_type = "opt_vec_%s" % rust_type
         elif x.has("is_option_inside_array"):
@@ -293,7 +239,7 @@ func generate_enum_gdscript(type_def, module_name) -> String:
     var create_funcs: Array[String]
     for v_schema in variants:
         var variant_name: String = v_schema.get("name", "")
-        var variant_gd_type: String = TYPE_MAP.get(v_schema.get("type", ""), "Variant")
+        var variant_gd_type: String = schema.type_map.get(v_schema.get("type", ""), "Variant")
         var nested_type: Array = v_schema.get("nested_type", []).duplicate()
         nested_type.append(variant_gd_type)
         if v_schema.has("is_option"):
@@ -331,12 +277,11 @@ func generate_enum_gdscript(type_def, module_name) -> String:
         
     return content
 
-func generate_module_gdscript(schema: Dictionary) -> String:
-    var module_name: String = schema.get("module", null)
+func generate_module_gdscript(schema: SpacetimeParsedSchema) -> String:
     var content: String = "#Do not edit this file, it is generated automatically.\n" + \
-    "class_name %sModule extends Resource\n\n" % module_name.to_pascal_case()
-    content += "const Reducers = preload('%s/module_%s_reducers.gd')\n" % [_schema_path, module_name.to_snake_case()]
-    content += "const Types = preload('%s/module_%s_types.gd')\n\n" % [_schema_path, module_name.to_snake_case()]
+    "class_name %sModule extends Resource\n\n" % schema.module.to_pascal_case()
+    content += "const Reducers = preload('%s/module_%s_reducers.gd')\n" % [_schema_path, schema.module.to_snake_case()]
+    content += "const Types = preload('%s/module_%s_types.gd')\n\n" % [_schema_path, schema.module.to_snake_case()]
     
     var types_part = generate_types_gdscript(schema, true)
     if not types_part.is_empty():
@@ -345,10 +290,9 @@ func generate_module_gdscript(schema: Dictionary) -> String:
     content += generate_reducer_gdscript(schema) 
     return content
 
-func generate_types_gdscript(schema: Dictionary, const_pointer: bool = false) -> String:
+func generate_types_gdscript(schema: SpacetimeParsedSchema, const_pointer: bool = false) -> String:
     var content: String = "" 
-    var module_name: String = schema.get("module", null)
-    for _type_def in schema.get("types", []):
+    for _type_def in schema.types:
         if _type_def.has("gd_native"): continue
         var type_name: String = _type_def.get("name", "")
         var subfolder = "spacetime_types"
@@ -375,12 +319,12 @@ func generate_types_gdscript(schema: Dictionary, const_pointer: bool = false) ->
             else: 
                 content += "const %s = preload('%s/%s/%s_%s.gd')\n" % \
                 [type_name.to_pascal_case(), _schema_path, subfolder, 
-                module_name.to_snake_case(), type_name.to_snake_case()]
+                schema.module.to_snake_case(), type_name.to_snake_case()]
     return content
 
-func generate_reducer_gdscript(schema: Dictionary) -> String:
+func generate_reducer_gdscript(schema: SpacetimeParsedSchema) -> String:
     var content: String = "" 
-    for reducer in schema.get("reducers", []):
+    for reducer in schema.reducers:
         if reducer.get("is_scheduled", false) and _config.hide_scheduled_reducers: continue
         var params_str_parts: Array[String] = []
         var description_comment: Array = []
@@ -391,17 +335,17 @@ func generate_reducer_gdscript(schema: Dictionary) -> String:
             var gd_param_type: String
             var original_inner_type_name: String = param.get("type", "Variant")
             var nested_type: Array = param.get("nested_type", []).duplicate()
-            nested_type.append(TYPE_MAP.get(original_inner_type_name, "Variant"))
+            nested_type.append(schema.type_map.get(original_inner_type_name, "Variant"))
             description_comment.append("## %d. %s: %s [br]" % [i, param_name, " of ".join(nested_type)])
             if param.has("is_option"):
                 gd_param_type = OPTION_CLASS_NAME
             elif param.has("is_array"):
-                var element_gd_type = TYPE_MAP.get(original_inner_type_name, "Variant")
+                var element_gd_type = schema.type_map.get(original_inner_type_name, "Variant")
                 if param.has("is_option_inside_array"):
                     element_gd_type = OPTION_CLASS_NAME
                 gd_param_type = "Array[%s]" % element_gd_type
             else:
-                gd_param_type = TYPE_MAP.get(original_inner_type_name, "Variant")
+                gd_param_type = schema.type_map.get(original_inner_type_name, "Variant")
             params_str_parts.append("%s: %s" % [param_name, gd_param_type])
         
         var params_str : String
@@ -422,12 +366,12 @@ func generate_reducer_gdscript(schema: Dictionary) -> String:
             if x.has("is_option"):
                 var inner_meta_for_option: String
                 if x.has("is_array_inside_option"):
-                    inner_meta_for_option = "vec_%s" % META_TYPE_MAP.get(original_inner_type_name_bsatn, original_inner_type_name_bsatn)
+                    inner_meta_for_option = "vec_%s" % schema.meta_type_map.get(original_inner_type_name_bsatn, original_inner_type_name_bsatn)
                 else:
-                    inner_meta_for_option = META_TYPE_MAP.get(original_inner_type_name_bsatn, original_inner_type_name_bsatn)
+                    inner_meta_for_option = schema.meta_type_map.get(original_inner_type_name_bsatn, original_inner_type_name_bsatn)
                 bsatn_param_type = "%s" % inner_meta_for_option
             else:
-                bsatn_param_type = META_TYPE_MAP.get(original_inner_type_name_bsatn, original_inner_type_name_bsatn)
+                bsatn_param_type = schema.meta_type_map.get(original_inner_type_name_bsatn, original_inner_type_name_bsatn)
             
             if bsatn_param_type.is_empty(): return "''" 
             return "&'%s'" % bsatn_param_type
@@ -460,251 +404,3 @@ func generate_module_link(modules: Array[String]) -> void:
     if file:
         file.store_string(content)
         file.close()
-
-func parse_schema(schema: Dictionary, module_name: String) -> Dictionary:
-    var schema_tables: Array = schema.get("tables", [])
-    var schema_types_raw: Array = schema.get("types", []) 
-    var schema_reducers: Array = schema.get("reducers", [])
-    var typespace: Array = schema.get("typespace", {}).get("types", [])
-    schema_types_raw.sort_custom(func(a, b): return a.get("ty", -1) < b.get("ty", -1))
-    var parsed_types_list := [] 
-    var scheduled_reducers: Array[String] = []
-    
-    for type_info in schema_types_raw:
-        var type_name: String = type_info.get("name", {}).get("name", null)
-        if not type_name:
-            printerr("Invalid schema: Type name not found for type: %s" % type_info)
-            return {}
-        var type_data := {"name": type_name}
-        if GDNATIVE_TYPES.has(type_name):
-            type_data["gd_native"] = true
-        
-        var ty_idx := int(type_info.get("ty", -1)) 
-        if ty_idx == -1:
-            printerr("Invalid schema: Type 'ty' not found for type: %s" % type_info)
-            return {}
-        if ty_idx >= typespace.size():
-            printerr("Invalid schema: Type index %d out of bounds for typespace (size %d) for type %s" % [ty_idx, typespace.size(), type_name])
-            return {}
-
-        var current_type_definition = typespace[ty_idx]
-        var struct_def: Dictionary = current_type_definition.get("Product", {}) 
-        var sum_type_def: Dictionary = current_type_definition.get("Sum", {}) 
-
-        if struct_def:
-            var struct_elements = []
-            for el in struct_def.get("elements", []):
-                var data = {
-                    "name": el.get("name", {}).get("some", null),
-                }
-                var type = parse_field_type(el.get("algebraic_type", {}), data, schema_types_raw)
-                if not type.is_empty():
-                    data["type"] = type
-                struct_elements.append(data)
-            
-            if not type_data.has("gd_native"):
-                TYPE_MAP[type_name] = module_name.to_pascal_case() + type_name.to_pascal_case()
-                META_TYPE_MAP[type_name] = module_name.to_pascal_case() + type_name.to_pascal_case()
-            type_data["struct"] = struct_elements
-            parsed_types_list.append(type_data)
-        elif sum_type_def: 
-            var parsed_variants := []
-            type_data["is_sum_type"] = is_sum_type(sum_type_def)
-            for v in sum_type_def.get("variants", []):
-                var variant_data := { "name": v.get("name",{}).get("some", null) }
-                var type = parse_sum_type(v.get("algebraic_type", {}), variant_data, schema_types_raw)
-                if not type.is_empty():
-                    variant_data["type"] = type
-                parsed_variants.append(variant_data)			
-            type_data["enum"] = parsed_variants
-            parsed_types_list.append(type_data)
-
-            if not type_data.get("is_sum_type"): 
-                META_TYPE_MAP[type_name] = "u8" 
-                TYPE_MAP[type_name] = "{0}Module.{1}".format([module_name.to_pascal_case(), type_name.to_pascal_case()])
-            else: 
-                TYPE_MAP[type_name] = module_name.to_pascal_case() + type_name.to_pascal_case()
-                META_TYPE_MAP[type_name] = module_name.to_pascal_case() + type_name.to_pascal_case()
-        else:
-            if not type_data.has("gd_native"):
-                if TYPE_MAP.has(type_name) and not GDNATIVE_TYPES.has(type_name):
-                    type_data["struct"] = [] 
-                    parsed_types_list.append(type_data)
-                else:
-                    SpacetimePlugin.print_log("Type '%s' has no Product/Sum definition in typespace and is not GDNative. Skipping." % type_name)
-
-    for table_info in schema_tables:
-        var table_name_str: String = table_info.get("name", null) 
-        var ref_idx_raw = table_info.get("product_type_ref", null) 
-        if ref_idx_raw == null or table_name_str == null: continue
-        var ref_idx = int(ref_idx_raw)
-        
-        var target_type_def = null
-        var original_type_name_for_table = "UNKNOWN_TYPE_FOR_TABLE"
-        if ref_idx < schema_types_raw.size():
-            original_type_name_for_table = schema_types_raw[ref_idx].get("name", {}).get("name")
-            for pt in parsed_types_list:
-                if pt.name == original_type_name_for_table:
-                    target_type_def = pt
-                    break
-        
-        if target_type_def == null or not target_type_def.has("struct"):
-            printerr("Table '%s' refers to an invalid or non-struct type (index %s in original schema, name %s)." % [table_name_str, str(ref_idx), original_type_name_for_table if original_type_name_for_table else "N/A"])
-            continue
-
-        if not target_type_def.has("table_names"):
-            target_type_def.table_names = []
-        target_type_def.table_names.append(table_name_str)
-        target_type_def.table_name = table_name_str 
-        var primary_key_indices: Array = table_info.get("primary_key", [])
-        if primary_key_indices.size() == 1:
-            var pk_field_idx = int(primary_key_indices[0])
-            if pk_field_idx < target_type_def.struct.size():
-                target_type_def.primary_key = pk_field_idx
-                target_type_def.primary_key_name = target_type_def.struct[pk_field_idx].name
-            else:
-                printerr("Primary key index %d out of bounds for table %s (struct size %d)" % [pk_field_idx, table_name_str, target_type_def.struct.size()])
-        if not target_type_def.has("is_public"): target_type_def.is_public = []
-        if table_info.get("table_access", {}).has("Private"):
-            target_type_def.is_public.append(false)
-        else: target_type_def.is_public.append(true)
-        if table_info.get("schedule", {}).has("some"):
-            var schedule = table_info.get("schedule", {}).some
-            target_type_def.schedule = schedule
-            scheduled_reducers.append(schedule.reducer_name)
-    
-    var parsed_reducers_list := [] 
-    for reducer_info in schema_reducers:
-        var lifecycle = reducer_info.get("lifecycle", {}).get("some", null)
-        if lifecycle: continue 
-        var r_name = reducer_info.get("name", null) 
-        if r_name == null:
-            printerr("Reducer found with no name: ", reducer_info)
-            continue
-        var reducer_data: Dictionary = {"name": r_name}
-        
-        var reducer_raw_params = reducer_info.get("params", {}).get("elements", [])
-        var reducer_params = []
-        for raw_param in reducer_raw_params:
-            var data = {"name": raw_param.get("name", {}).get("some", null)}
-            var type = parse_field_type(raw_param.get("algebraic_type", {}), data, schema_types_raw)
-            data["type"] = type
-            reducer_params.append(data)	
-        reducer_data["params"] = reducer_params
-        
-        if r_name in scheduled_reducers:
-            reducer_data["is_scheduled"] = true
-        parsed_reducers_list.append(reducer_data)
-
-    var parsed_schema_output = { 
-        "module": module_name.to_pascal_case(),
-        "types": parsed_types_list,
-        "reducers": parsed_reducers_list,
-        "type_map": TYPE_MAP, 
-        "meta_type_map": META_TYPE_MAP,
-        "tables": schema_tables, 
-        "typespace": typespace
-    }
-    return parsed_schema_output
-
-func is_sum_option(sum_def) -> bool: 
-    var variants = sum_def.get("variants", [])
-    if variants.size() != 2:
-        return false
-    
-    var name1 = variants[0].get("name", {}).get("some", "")
-    var name2 = variants[1].get("name", {}).get("some", "")
-
-    var found_some = false
-    var found_none = false
-    var none_is_unit = false
-
-    for v_idx in range(variants.size()):
-        var v_name = variants[v_idx].get("name", {}).get("some", "")
-        if v_name == "some":
-            found_some = true
-        elif v_name == "none":
-            found_none = true
-            var none_variant_type = variants[v_idx].get("algebraic_type", {})
-            if none_variant_type.has("Product") and none_variant_type.Product.get("elements", []).is_empty():
-                none_is_unit = true
-            elif none_variant_type.is_empty():
-                none_is_unit = true
-
-
-    return found_some and found_none and none_is_unit
-
-func is_sum_type(sum_def) -> bool:
-    var variants = sum_def.get("variants", [])
-    for variant in variants:
-        var type = variant.get("algebraic_type", {})
-        if not type.has("Product"):
-            return true
-        var elements = type.Product.get("elements", [])
-        if elements.size() > 0:
-            return true
-    return false
-
-# Recursively parse a field type
-func parse_field_type(field_type: Dictionary, data: Dictionary, schema_types: Array) -> String:
-    if field_type.has("Array"):
-        var nested_type = data.get("nested_type", [])
-        nested_type.append(&"Array")
-        data["nested_type"] = nested_type
-        if data.has("is_option"):
-            data["is_array_inside_option"] = true
-        else:
-            data["is_array"] = true		
-        field_type = field_type.Array
-        return parse_field_type(field_type, data, schema_types)
-    elif field_type.has("Product"):
-        return field_type.Product.get("elements", [])[0].get('name', {}).get('some', null)
-    elif field_type.has("Sum"):
-        if is_sum_option(field_type.Sum):
-            var nested_type = data.get("nested_type", [])
-            nested_type.append(&"Option")
-            data["nested_type"] = nested_type
-            if data.has("is_array"):
-                data["is_option_inside_array"] = true
-            else:
-                data["is_option"] = true			
-        field_type = field_type.Sum.variants[0].get('algebraic_type', {})
-        return parse_field_type(field_type, data, schema_types)
-    elif field_type.has("Ref"):
-        return schema_types[field_type.Ref].get("name", {}).get("name", null)
-    else:
-        return field_type.keys()[0]
-
-# Recursively parse a sum type
-func parse_sum_type(variant_type: Dictionary, data: Dictionary, schema_types: Array) -> String:
-    if variant_type.has("Array"):
-        var nested_type = data.get("nested_type", [])
-        nested_type.append(&"Array")
-        data["nested_type"] = nested_type
-        if data.has("is_option"):
-            data["is_array_inside_option"] = true
-        else:
-            data["is_array"] = true
-        variant_type = variant_type.Array
-        return parse_sum_type(variant_type, data, schema_types)
-    elif variant_type.has("Product"):
-        var variant_type_array = variant_type.Product.get("elements", [])
-        if variant_type_array.size() >= 1:
-            return variant_type_array[0].get('name', {}).get('some', null)
-        else:
-            return ""
-    elif variant_type.has("Sum"):
-        if is_sum_option(variant_type.Sum):
-            var nested_type = data.get("nested_type", [])
-            nested_type.append(&"Option")
-            data["nested_type"] = nested_type
-            if data.has("is_array"):
-                data["is_option_inside_array"] = true
-            else:
-                data["is_option"] = true
-        variant_type = variant_type.Sum.variants[0].get('algebraic_type', {})
-        return parse_sum_type(variant_type, data, schema_types)
-    elif variant_type.has("Ref"):
-        return schema_types[variant_type.Ref].get("name", {}).get("name", null)
-    else:
-        return variant_type.keys()[0]
