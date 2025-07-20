@@ -130,14 +130,16 @@ static func parse_schema(schema: Dictionary, module_name: String) -> SpacetimePa
                 else:
                     SpacetimePlugin.print_log("Type '%s' has no Product/Sum definition in typespace and is not GDNative. Skipping." % type_name)
     
+    var parsed_tables_list: Array[Dictionary] = []
     var scheduled_reducers: Array[String] = []
     for table_info in schema_tables:
-        var table_name_str: String = table_info.get("name", null) 
-        var ref_idx_raw = table_info.get("product_type_ref", null) 
+        var table_name_str: String = table_info.get("name", null)
+        var ref_idx_raw = table_info.get("product_type_ref", null)
         if ref_idx_raw == null or table_name_str == null: continue
         var ref_idx = int(ref_idx_raw)
         
         var target_type_def = null
+        var target_type_idx = 0
         var original_type_name_for_table = "UNKNOWN_TYPE_FOR_TABLE"
         if ref_idx < schema_types_raw.size():
             original_type_name_for_table = schema_types_raw[ref_idx].get("name", {}).get("name")
@@ -145,31 +147,66 @@ static func parse_schema(schema: Dictionary, module_name: String) -> SpacetimePa
                 if pt.name == original_type_name_for_table:
                     target_type_def = pt
                     break
+                target_type_idx += 1
         
         if target_type_def == null or not target_type_def.has("struct"):
             SpacetimePlugin.print_err("Table '%s' refers to an invalid or non-struct type (index %s in original schema, name %s)." % [table_name_str, str(ref_idx), original_type_name_for_table if original_type_name_for_table else "N/A"])
             continue
+            
+        var table_data := {
+            "name": table_name_str,
+            "type_idx": target_type_idx
+        }
 
         if not target_type_def.has("table_names"):
             target_type_def.table_names = []
         target_type_def.table_names.append(table_name_str)
-        target_type_def.table_name = table_name_str 
+        target_type_def.table_name = table_name_str
+        
         var primary_key_indices: Array = table_info.get("primary_key", [])
         if primary_key_indices.size() == 1:
             var pk_field_idx = int(primary_key_indices[0])
             if pk_field_idx < target_type_def.struct.size():
+                var pk_field_name: String = target_type_def.struct[pk_field_idx].name
+                table_data.primary_key = pk_field_idx
+                table_data.primary_key_name = pk_field_name
                 target_type_def.primary_key = pk_field_idx
-                target_type_def.primary_key_name = target_type_def.struct[pk_field_idx].name
+                target_type_def.primary_key_name = pk_field_name
             else:
                 SpacetimePlugin.print_err("Primary key index %d out of bounds for table %s (struct size %d)" % [pk_field_idx, table_name_str, target_type_def.struct.size()])
-        if not target_type_def.has("is_public"): target_type_def.is_public = []
+        
+        var parsed_unique_indexes: Array[Dictionary] = []
+        var constraints_def = table_info.get("constraints", [])
+        for constraint_def in constraints_def:
+            var constraint_name_str: String = constraint_def.get("name", {}).get("some", null)
+            var column_indices: Array = constraint_def.get("data", {}).get("Unique", {}).get("columns", [])
+            if column_indices.size() != 1 or constraint_name_str == null: continue
+            
+            var unique_field_idx = int(column_indices[0])
+            if unique_field_idx < target_type_def.struct.size():
+                var unique_index: Dictionary = target_type_def.struct[unique_field_idx].duplicate()
+                unique_index.constraint_name = constraint_name_str
+                parsed_unique_indexes.append(unique_index)
+            else:
+                SpacetimePlugin.print_err("Unique field index %d out of bounds for table %s (struct size %d)" % [unique_field_idx, table_name_str, target_type_def.struct.size()])
+    
+        table_data.unique_indexes = parsed_unique_indexes
+        
+        var is_public = true
+        if not target_type_def.has("is_public"):
+            target_type_def.is_public = []
         if table_info.get("table_access", {}).has("Private"):
-            target_type_def.is_public.append(false)
-        else: target_type_def.is_public.append(true)
+            is_public = false
+        
+        table_data.is_public = is_public
+        target_type_def.is_public.append(is_public)
+        
         if table_info.get("schedule", {}).has("some"):
             var schedule = table_info.get("schedule", {}).some
+            table_data.schedule = schedule
             target_type_def.schedule = schedule
             scheduled_reducers.append(schedule.reducer_name)
+        parsed_tables_list.append(table_data)
     
     var parsed_reducers_list: Array[Dictionary] = [] 
     for reducer_info in schema_reducers:
@@ -196,9 +233,9 @@ static func parse_schema(schema: Dictionary, module_name: String) -> SpacetimePa
 
     parsed_schema.types = parsed_types_list
     parsed_schema.reducers = parsed_reducers_list
+    parsed_schema.tables = parsed_tables_list
     parsed_schema.type_map = type_map
     parsed_schema.meta_type_map = meta_type_map
-    parsed_schema.tables = schema_tables
     parsed_schema.typespace = typespace
     return parsed_schema
 
