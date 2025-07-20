@@ -2,14 +2,14 @@
 @icon("res://addons/SpacetimeDB/nodes/row_receiver/icon.svg")
 class_name RowReceiver extends Node
 
-@export var table_to_receive: _ModuleTable : set = on_set;
+@export var table_to_receive: _ModuleTableType : set = on_set;
 var selected_table_name: String : set = set_selected_table_name
 
 var _derived_table_names: Array[String] = []
 
-signal insert(row: _ModuleTable)
-signal update(prev: _ModuleTable, row: _ModuleTable)
-signal delete(row: _ModuleTable)
+signal insert(row: _ModuleTableType)
+signal update(prev: _ModuleTableType, row: _ModuleTableType)
+signal delete(row: _ModuleTableType)
 signal transactions_completed
 
 var _current_db_instance = null 
@@ -19,7 +19,7 @@ func _get_db():
         _current_db_instance = SpacetimeDB.get_local_database()
     return _current_db_instance
     
-func on_set(schema: _ModuleTable):
+func on_set(schema: _ModuleTableType):
     _derived_table_names.clear()
 
     if schema == null:
@@ -32,8 +32,8 @@ func on_set(schema: _ModuleTable):
         
         if script_resource is Script:
             var global_name: String = script_resource.get_global_name().replace("_gd", "")
-            if global_name == "_ModuleTable": 
-                push_error("_ModuleTable is the base class for tables, not a reciever table. Selection is not changed.")
+            if global_name == "_ModuleTableType": 
+                push_error("_ModuleTableType is the base class for table types, not a reciever table. Selection is not changed.")
                 return
             table_to_receive = schema
             name = "Receiver [%s]" % global_name
@@ -123,13 +123,13 @@ func _unsubscribe_from_table(table_name_sn: StringName):
     db.unsubscribe_from_deletes(table_name_sn, Callable(self, "_on_delete"))
     db.unsubscribe_from_transactions_completed(table_name_sn, Callable(self, "_on_transactions_completed"))
     
-func _on_insert(row: _ModuleTable):
+func _on_insert(row: _ModuleTableType):
     insert.emit(row)
 
-func _on_update(previous: _ModuleTable, row: _ModuleTable):
+func _on_update(previous: _ModuleTableType, row: _ModuleTableType):
     update.emit(previous, row)
 
-func _on_delete(row: _ModuleTable):
+func _on_delete(row: _ModuleTableType):
     delete.emit(row)
 
 func _on_transactions_completed():
@@ -138,7 +138,7 @@ func _on_transactions_completed():
 func _exit_tree() -> void:
     _unsubscribe_from_table(selected_table_name)
     
-func get_table_data() -> Array[_ModuleTable]:
+func get_table_data() -> Array[_ModuleTableType]:
     var local_db = SpacetimeDB.get_local_database()
     if local_db:
         return local_db.get_all_rows(selected_table_name)

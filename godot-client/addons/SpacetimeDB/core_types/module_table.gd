@@ -1,1 +1,0 @@
-class_name _ModuleTable extends Resource

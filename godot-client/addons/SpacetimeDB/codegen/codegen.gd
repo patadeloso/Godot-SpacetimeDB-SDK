@@ -134,7 +134,7 @@ func _generate_struct_gdscript(schema: SpacetimeParsedSchema, type_def: Dictiona
     var _class_name: String = schema.module.to_pascal_case() + struct_name.to_pascal_case()
     var _extends_class = "Resource"
     if table_name:
-        _extends_class = "_ModuleTable"
+        _extends_class = "_ModuleTableType"
         var primary_key_name: String = type_def.get("primary_key_name", "")
         if primary_key_name:
             meta_data.append("set_meta('primary_key', '%s')" % primary_key_name)
@@ -198,7 +198,7 @@ func _generate_struct_gdscript(schema: SpacetimeParsedSchema, type_def: Dictiona
         content += "@export var %s: %s %s\n" % [field_name, gd_field_type, documentation_comment]
         class_fields.append([field_name, gd_field_type])
 
-    content += "\nfunc _init():\n"
+    content += "\nfunc _init() -> void:\n"
     for m in meta_data:
         content += "\t%s\n" % m	
     if meta_data.size() == 0: 

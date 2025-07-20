@@ -183,18 +183,18 @@ func apply_table_update(table_update: TableUpdateData):
         row_transactions_completed.emit(table_name_original)
             
 # --- Access Methods ---
-func get_row(table_name: String, primary_key_value) -> _ModuleTable:
+func get_row(table_name: String, primary_key_value) -> _ModuleTableType:
     var table_name_lower := table_name.to_lower().replace("_","")
     if _tables.has(table_name_lower):
         return _tables[table_name_lower].get(primary_key_value) 
     return null
     
-func get_all_rows(table_name: String) -> Array[_ModuleTable]:
+func get_all_rows(table_name: String) -> Array[_ModuleTableType]:
     var table_name_lower := table_name.to_lower().replace("_","")
     if _tables.has(table_name_lower):
         var table_dict: Dictionary = _tables[table_name_lower]
         var values_array: Array = table_dict.values()
-        var typed_result_array: Array[_ModuleTable] = []
+        var typed_result_array: Array[_ModuleTableType] = []
         typed_result_array.assign(values_array)
 
         return typed_result_array
