@@ -5,7 +5,7 @@ var tables: Dictionary[String, GDScript] = {}
 
 var debug_mode: bool = false # Controls verbose debug printing
 
-func _init(p_schema_path: String = "res://spacetime_data/schema", p_debug_mode: bool = false) -> void:
+func _init(p_schema_path: String = "res://spacetime_bindings/schema", p_debug_mode: bool = false) -> void:
     debug_mode = p_debug_mode
     
     # Load table row schema scripts
