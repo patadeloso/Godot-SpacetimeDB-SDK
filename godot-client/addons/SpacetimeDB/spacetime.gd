@@ -62,7 +62,7 @@ func save_codegen_data() -> void:
 
     var save_file = FileAccess.open(SAVE_PATH, FileAccess.WRITE)
     if not save_file:
-        printerr("Failed to open codegen_data.json for writing.")
+        print_err("Failed to open codegen_data.json for writing")
         return
     save_file.store_string(JSON.stringify(codegen_data))
     save_file.close()
