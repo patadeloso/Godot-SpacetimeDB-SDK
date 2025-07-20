@@ -2,6 +2,7 @@ class_name SpacetimePluginUI extends RefCounted
 
 const UI_PANEL_NAME := "SpacetimeDB"
 const UI_PATH := "res://addons/SpacetimeDB/ui/ui.tscn"
+const ERROR_LOG_ICON := "res://addons/SpacetimeDB/ui/icons/Error.svg"
 
 signal module_added(name: String)
 signal module_updated(index: int, name: String)
@@ -12,12 +13,13 @@ signal generate_schema(uri: String, modules: Array[String])
 var _ui_panel: Control
 var _uri_input: LineEdit
 var _modules_container: VBoxContainer
-var _logs_container: VBoxContainer
+var _logs_label: RichTextLabel
 var _add_module_hint_container: VBoxContainer
 var _new_module_name_input: LineEdit
 var _new_module_button: Button
 var _check_uri_button: Button
 var _generate_button: Button
+var _clear_logs_button: Button
 
 func _init() -> void:
     if not is_instance_valid(_ui_panel):
@@ -35,16 +37,20 @@ func _init() -> void:
     
     _uri_input = _ui_panel.get_node("Uri") as LineEdit
     _modules_container = _ui_panel.get_node("ModulesContainer/VBox") as VBoxContainer
-    _logs_container = _ui_panel.get_node("Logs/VBox") as VBoxContainer
+    _logs_label = _ui_panel.get_node("Logs") as RichTextLabel
     _add_module_hint_container = _ui_panel.get_node("AddModuleHint") as VBoxContainer
     _new_module_name_input = _ui_panel.get_node("NewModule/ModuleNameInput") as LineEdit
     _new_module_button = _ui_panel.get_node("NewModule/AddButton") as Button
     _check_uri_button = _ui_panel.get_node("CheckUri") as Button
     _generate_button = _ui_panel.get_node("Generate") as Button
+    _clear_logs_button = _ui_panel.get_node("ClearLogsButton") as Button
+    
+    _logs_label.text = ""
     
     _check_uri_button.button_down.connect(_on_check_uri)
     _generate_button.button_down.connect(_on_generate_code)
     _new_module_button.button_down.connect(_on_new_module)
+    _clear_logs_button.button_down.connect(_on_clear_logs)
 
 func set_uri(uri: String) -> void:
     _uri_input.text = uri
@@ -77,40 +83,30 @@ func add_module(name: String) -> void:
     _generate_button.disabled = false
 
 func clear_logs():
-    var logs := _logs_container.get_children()
-    for log in logs:
-        if not log.is_queued_for_deletion():
-            log.queue_free()
+    _logs_label.text = ""
 
 func add_log(text: Variant) -> void:
-    var new_log: Label = _ui_panel.get_node("Prefabs/LogPrefab").duplicate() as Label
     match typeof(text):
         TYPE_STRING:
-            new_log.text += text as String
+            _logs_label.text += "%s\n" % [text]
         TYPE_ARRAY:
             for i in text as Array:
-                new_log.text += str(i) + " "
+                _logs_label.text += str(i) + " "
+            _logs_label.text += "\n"
         _:
-            new_log.text += str(text)
-    
-    _logs_container.add_child(new_log)
-    new_log.show()
+            _logs_label.text += "%s\n" % [str(text)]
 
 func add_err(text: Variant) -> void:
-    var new_err: Control = _ui_panel.get_node("Prefabs/ErrorPrefab").duplicate() as Control
-    var message: Label = new_err.get_node("Message") as Label
-    
     match typeof(text):
         TYPE_STRING:
-            message.text += text as String
+            _logs_label.text += "[img]%s[/img] [color=#FF5F5F][b]ERROR:[/b] %s[/color]\n" % [ERROR_LOG_ICON, text]
         TYPE_ARRAY:
+            _logs_label.text += "[img]%s[/img] [color=#FF5F5F][b]ERROR:[/b] " % [ERROR_LOG_ICON]
             for i in text as Array:
-                message.text += str(i) + " "
+                _logs_label.text += str(i) + " "
+            _logs_label.text += "[/color]\n"
         _:
-            message.text += str(text)
-    
-    _logs_container.add_child(new_err)
-    new_err.show()
+            _logs_label.text += "[img]%s[/img] [color=#FF5F5F][b]ERROR:[/b] %s[/color]\n" % [ERROR_LOG_ICON, str(text)]
 
 func destroy() -> void:
     if is_instance_valid(_ui_panel):
@@ -119,7 +115,7 @@ func destroy() -> void:
     _ui_panel = null
     _uri_input = null
     _modules_container = null
-    _logs_container = null
+    _logs_label = null
     _add_module_hint_container = null
     _new_module_name_input = null
     _new_module_button = null
@@ -142,3 +138,6 @@ func _on_new_module() -> void:
     add_module(name)
     module_added.emit(name)
     _new_module_name_input.text = ""
+
+func _on_clear_logs() -> void:
+    clear_logs()
