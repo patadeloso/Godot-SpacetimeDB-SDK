@@ -17,6 +17,7 @@ func _enter_tree():
     instance = self
     
     ui = SpacetimePluginUI.new()
+    ui.module_added.connect(_on_module_added)
     ui.module_updated.connect(_on_module_updated)
     ui.module_removed.connect(_on_module_removed)
     ui.check_uri.connect(_on_check_uri)
@@ -65,8 +66,12 @@ func save_codegen_data() -> void:
     save_file.store_string(JSON.stringify(codegen_data))
     save_file.close()
 
+func _on_module_added(name: String) -> void:
+    codegen_data.modules.append(name)
+    save_codegen_data()
+
 func _on_module_updated(index: int, name: String) -> void:
-    codegen_data.modules[index] = name
+    codegen_data.modules.set(index, name)
     save_codegen_data()
 
 func _on_module_removed(index: int) -> void:

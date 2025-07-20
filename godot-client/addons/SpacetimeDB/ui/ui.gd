@@ -3,6 +3,7 @@ class_name SpacetimePluginUI extends RefCounted
 const UI_PANEL_NAME := "SpacetimeDB"
 const UI_PATH := "res://addons/SpacetimeDB/ui/ui.tscn"
 
+signal module_added(name: String)
 signal module_updated(index: int, name: String)
 signal module_removed(index: int)
 signal check_uri(uri: String)
@@ -139,4 +140,5 @@ func _on_generate_code() -> void:
 func _on_new_module() -> void:
     var name := _new_module_name_input.text
     add_module(name)
+    module_added.emit(name)
     _new_module_name_input.text = ""
