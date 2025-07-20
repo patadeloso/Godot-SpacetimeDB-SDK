@@ -8,14 +8,12 @@ var debug_mode: bool = false # Controls verbose debug printing
 func _init(p_schema_path: String = "res://spacetime_bindings/schema", p_debug_mode: bool = false) -> void:
     debug_mode = p_debug_mode
     
-    # Load table row schema scripts
-    _load_types("%s/tables" % p_schema_path, tables)
-    # Load spacetime types
-    _load_types("%s/spacetime_types" % p_schema_path)
+    # Load table row schemas and spacetime types
+    _load_types("%s/types" % p_schema_path)
     # Load core types if they are defined as Resources with scripts
     _load_types("res://addons/SpacetimeDB/core_types")
     
-func _load_types(path: String, category: Variant = null) -> void:
+func _load_types(path: String) -> void:
     var dir := DirAccess.open(path)
     if not DirAccess.dir_exists_absolute(path):
         printerr("SpacetimeDBSchema: Schema directory does not exist: ", path)
@@ -49,18 +47,26 @@ func _load_types(path: String, category: Variant = null) -> void:
         var script := ResourceLoader.load(script_path, "GDScript") as GDScript
 
         if script and script.can_instantiate():
-            var instance_for_name = script.new()
-            if instance_for_name is Resource: # Ensure it's a resource to get metadata
-                var base_name: Array[String] = [file_name.get_basename().get_file()]
-                var table_names := _get_schema_table_name(instance_for_name, base_name)
+            var instance = script.new()
+            if instance is Resource: # Ensure it's a resource to get metadata
+                var fallback_table_names: Array[String] = [file_name.get_basename().get_file()]
+                
+                var constants := script.get_script_constant_map()
+                var table_names: Array[String]
+                var is_table := false
+                if constants.has('table_names'):
+                    is_table = true
+                    table_names = constants['table_names'] as Array[String]
+                else:
+                    table_names = fallback_table_names
 
                 for table_name in table_names:
                     var lower_table_name := table_name.to_lower().replace("_", "")
                     if types.has(lower_table_name) and debug_mode:
                         push_warning("SpacetimeDBSchema: Overwriting schema for table '%s' (from %s)" % [table_name, script_path])
                         
-                    if category:
-                        category[lower_table_name] = script
+                    if is_table:
+                        tables[lower_table_name] = script
                     types[lower_table_name] = script
                     
 
@@ -68,15 +74,5 @@ func _load_types(path: String, category: Variant = null) -> void:
 
     dir.list_dir_end()
 
-func _get_schema_table_name(instance: Resource, fallback_base_filename: Array[String]) -> Array[String]:
-    # Prioritize const, then filename
-    var constants := (instance.get_script() as GDScript).get_script_constant_map()
-    
-    if constants.has('table_names'):
-        return constants['table_names'] as Array[String]
-    else:
-        return fallback_base_filename
-
 func get_type(type_name: String) -> GDScript:
     return types.get(type_name)
-    
