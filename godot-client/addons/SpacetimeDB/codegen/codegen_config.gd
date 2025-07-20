@@ -10,7 +10,7 @@ const DEFAULT_CONFIG := {
 var hide_private_tables := DEFAULT_CONFIG.hide_private_tables
 var hide_scheduled_reducers := DEFAULT_CONFIG.hide_scheduled_reducers
 
-var _codegen_config_path := SpacetimePlugin.BINDINGS_PATH + "codegen_config.json"
+var _codegen_config_path := SpacetimePlugin.BINDINGS_PATH + "/codegen_config.json"
 
 func _init() -> void:
     load_config()

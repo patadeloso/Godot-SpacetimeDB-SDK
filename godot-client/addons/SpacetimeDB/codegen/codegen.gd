@@ -44,7 +44,7 @@ func _generate_module_bindings(module_name: String, json_string: String) -> Arra
         if not DirAccess.dir_exists_absolute(folder_path):
             DirAccess.make_dir_recursive_absolute(folder_path)
     
-    var debug_dir_path := "%s/%s" % [SpacetimePlugin.BINDINGS_PATH, "codegen_debug/"]
+    var debug_dir_path := "%s/%s" % [SpacetimePlugin.BINDINGS_PATH, "codegen_debug"]
     if not DirAccess.dir_exists_absolute(debug_dir_path):
         DirAccess.make_dir_recursive_absolute(debug_dir_path)
             
