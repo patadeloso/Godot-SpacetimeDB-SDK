@@ -1,4 +1,4 @@
-class_name SpacetimeDBClient extends Node
+class_name SpacetimeDBClientImpl extends Node
 
 # --- Configuration ---
 @export var base_url: String = "http://127.0.0.1:3000"
@@ -69,7 +69,6 @@ func _exit_tree():
 func print_log(log_message:String):
     if debug_mode:
         print(log_message)
-    pass;
     
 func initialize_and_connect():
     if _is_initialized: return
