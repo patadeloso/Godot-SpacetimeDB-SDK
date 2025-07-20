@@ -1,19 +1,11 @@
 @tool
 class_name Codegen extends Resource
-var HIDE_PRIVATE_TABLES: = true
-var HIDE_SCHEDULED_REDUCERS: = true
 
 const PLUGIN_DATA_FOLDER = "spacetime_data"
 const CODEGEN_FOLDER = "schema"
-const REQUIRED_FOLDERS_IN_CODEGEN_FOLDER = ["tables", "spacetime_types"]
-const OPTION_CLASS_NAME = "Option" 
 
-var CONFIG: Dictionary = {
-    "config_version": 2,
-    "hide_scheduled_reducers": HIDE_SCHEDULED_REDUCERS,
-    "hide_private_tables": HIDE_PRIVATE_TABLES
-}
-
+const REQUIRED_FOLDERS_IN_CODEGEN_FOLDER: Array[String] = ["tables", "spacetime_types"]
+const OPTION_CLASS_NAME := "Option" 
 const GDNATIVE_TYPES := {
     "I8": "int",
     "I16": "int",
@@ -38,12 +30,14 @@ const GDNATIVE_TYPES := {
     "Bool": "bool",
     "Nil": "null", # For Option<()>
 }
+
 var TYPE_MAP := {
     "__identity__": "PackedByteArray",
     "__connection_id__": "PackedByteArray",
     "__timestamp_micros_since_unix_epoch__": "int",
     "__time_duration_micros__": "int",
 }
+
 var META_TYPE_MAP := {
     "I8": "i8",
     "I16": "i16",
@@ -64,30 +58,15 @@ var META_TYPE_MAP := {
     "__time_duration_micros__": "i64",
 }
 
-func _init() -> void:
-    TYPE_MAP.merge(GDNATIVE_TYPES)
-    if not FileAccess.file_exists("res://%s/%s" %[PLUGIN_DATA_FOLDER, "codegen_config.json"]):
-        var file = FileAccess.open("res://%s/%s" %[PLUGIN_DATA_FOLDER , "codegen_config.json"], FileAccess.WRITE)
-        file.store_string(JSON.stringify(CONFIG, "\t", false))
-        file.close()
-    var file = FileAccess.open("res://%s/%s" %[PLUGIN_DATA_FOLDER , "codegen_config.json"], FileAccess.READ)
-    var config = JSON.parse_string(file.get_as_text())
-    file.close()
-    HIDE_SCHEDULED_REDUCERS = config.get("hide_scheduled_reducers", HIDE_SCHEDULED_REDUCERS)
-    HIDE_PRIVATE_TABLES = config.get("hide_private_tables", HIDE_PRIVATE_TABLES)
-    update_config(config)
-    
-func update_config(config: Dictionary) -> void:
-    var version = config.get("config_version")
-    if version < CONFIG.get("config_version"):
-        var file = FileAccess.open("res://%s/%s" %[PLUGIN_DATA_FOLDER , "codegen_config.json"], FileAccess.WRITE)
-        file.store_string(JSON.stringify({
-            "config_version": 2,
-            "hide_scheduled_reducers": HIDE_SCHEDULED_REDUCERS,
-            "hide_private_tables": HIDE_PRIVATE_TABLES
-        }, "\t", false))
-        file.close()
+var _config: SpacetimeCodegenConfig
+var _schema_path: String
 
+func _init(p_schema_path: String) -> void:
+    TYPE_MAP.merge(GDNATIVE_TYPES)
+    
+    _schema_path = p_schema_path
+    _config = SpacetimeCodegenConfig.new()
+    
 func _on_request_completed(json_string: String, module_name: String) -> Array[String]:
     var json = JSON.parse_string(json_string)
     var schema: Dictionary = parse_schema(json, module_name)
@@ -120,14 +99,14 @@ func build_gdscript_from_schema(schema: Dictionary) -> Array[String]:
             var generated_table_names: Array[String] 
             if type_def.has("table_names"):
                 if not type_def.has("primary_key_name"): continue
-                if HIDE_PRIVATE_TABLES and not type_def.get("is_public", []).has(true): 
+                if _config.hide_private_tables and not type_def.get("is_public", []).has(true): 
                     SpacetimePlugin.print_log("Skipping private table struct %s" % type_def.get("name", ""))
                     continue
                 var table_names_arr: Array = type_def.get("table_names", []) 
                 folder_path = "tables"
                 for i in table_names_arr.size():
                     var tbl_name: String = table_names_arr[i] 
-                    if HIDE_PRIVATE_TABLES and not type_def.get("is_public", [])[i]:  
+                    if _config.hide_private_tables and not type_def.get("is_public", [])[i]:  
                         SpacetimePlugin.print_log("Skipping private table %s" % tbl_name)
                         continue
                     generated_table_names.append(tbl_name)
@@ -378,7 +357,7 @@ func generate_types_gdscript(schema: Dictionary, const_pointer: bool = false) ->
         if _type_def.has("table_name"): 
             if not _type_def.has("primary_key_name"):
                 continue
-            if HIDE_PRIVATE_TABLES and not _type_def.get("is_public", []).has(true): continue
+            if _config.hide_private_tables and not _type_def.get("is_public", []).has(true): continue
             subfolder = "tables"
         
         if const_pointer:
@@ -404,7 +383,7 @@ func generate_types_gdscript(schema: Dictionary, const_pointer: bool = false) ->
 func generate_reducer_gdscript(schema: Dictionary) -> String:
     var content: String = "" 
     for reducer in schema.get("reducers", []):
-        if reducer.get("is_scheduled", false) and HIDE_SCHEDULED_REDUCERS: continue
+        if reducer.get("is_scheduled", false) and _config.hide_scheduled_reducers: continue
         var params_str_parts: Array[String] = []
         var description_comment: Array = []
         var reducer_params = reducer.get("params", [])
