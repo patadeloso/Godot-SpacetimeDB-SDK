@@ -177,7 +177,7 @@ static func parse_schema(schema: Dictionary, module_name: String) -> SpacetimePa
         if lifecycle: continue 
         var r_name = reducer_info.get("name", null) 
         if r_name == null:
-            SpacetimePlugin.print_err("Reducer found with no name: ", reducer_info)
+            SpacetimePlugin.print_err("Reducer found with no name: %s" % [reducer_info])
             continue
         var reducer_data: Dictionary = {"name": r_name}
         
