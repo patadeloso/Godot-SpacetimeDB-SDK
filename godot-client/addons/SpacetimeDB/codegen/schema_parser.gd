@@ -70,7 +70,7 @@ static func parse_schema(schema: Dictionary, module_name: String) -> SpacetimePa
     for type_info in schema_types_raw:
         var type_name: String = type_info.get("name", {}).get("name", null)
         if not type_name:
-            printerr("Invalid schema: Type name not found for type: %s" % type_info)
+            SpacetimePlugin.print_err("Invalid schema: Type name not found for type: %s" % type_info)
             return parsed_schema
         var type_data := {"name": type_name}
         if GDNATIVE_TYPES.has(type_name):
@@ -78,10 +78,10 @@ static func parse_schema(schema: Dictionary, module_name: String) -> SpacetimePa
         
         var ty_idx := int(type_info.get("ty", -1)) 
         if ty_idx == -1:
-            printerr("Invalid schema: Type 'ty' not found for type: %s" % type_info)
+            SpacetimePlugin.print_err("Invalid schema: Type 'ty' not found for type: %s" % type_info)
             return parsed_schema
         if ty_idx >= typespace.size():
-            printerr("Invalid schema: Type index %d out of bounds for typespace (size %d) for type %s" % [ty_idx, typespace.size(), type_name])
+            SpacetimePlugin.print_err("Invalid schema: Type index %d out of bounds for typespace (size %d) for type %s" % [ty_idx, typespace.size(), type_name])
             return parsed_schema
 
         var current_type_definition = typespace[ty_idx]
@@ -147,7 +147,7 @@ static func parse_schema(schema: Dictionary, module_name: String) -> SpacetimePa
                     break
         
         if target_type_def == null or not target_type_def.has("struct"):
-            printerr("Table '%s' refers to an invalid or non-struct type (index %s in original schema, name %s)." % [table_name_str, str(ref_idx), original_type_name_for_table if original_type_name_for_table else "N/A"])
+            SpacetimePlugin.print_err("Table '%s' refers to an invalid or non-struct type (index %s in original schema, name %s)." % [table_name_str, str(ref_idx), original_type_name_for_table if original_type_name_for_table else "N/A"])
             continue
 
         if not target_type_def.has("table_names"):
@@ -161,7 +161,7 @@ static func parse_schema(schema: Dictionary, module_name: String) -> SpacetimePa
                 target_type_def.primary_key = pk_field_idx
                 target_type_def.primary_key_name = target_type_def.struct[pk_field_idx].name
             else:
-                printerr("Primary key index %d out of bounds for table %s (struct size %d)" % [pk_field_idx, table_name_str, target_type_def.struct.size()])
+                SpacetimePlugin.print_err("Primary key index %d out of bounds for table %s (struct size %d)" % [pk_field_idx, table_name_str, target_type_def.struct.size()])
         if not target_type_def.has("is_public"): target_type_def.is_public = []
         if table_info.get("table_access", {}).has("Private"):
             target_type_def.is_public.append(false)
@@ -177,7 +177,7 @@ static func parse_schema(schema: Dictionary, module_name: String) -> SpacetimePa
         if lifecycle: continue 
         var r_name = reducer_info.get("name", null) 
         if r_name == null:
-            printerr("Reducer found with no name: ", reducer_info)
+            SpacetimePlugin.print_err("Reducer found with no name: ", reducer_info)
             continue
         var reducer_data: Dictionary = {"name": r_name}
         
