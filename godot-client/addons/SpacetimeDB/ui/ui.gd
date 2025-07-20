@@ -32,11 +32,11 @@ func _enter_tree() -> void:
     _clear_logs_button = $"ClearLogsButton"
     _copy_logs_button = $"CopyLogsButton"
     
-    _check_uri_button.button_down.connect(_on_check_uri)
-    _generate_button.button_down.connect(_on_generate_code)
-    _new_module_button.button_down.connect(_on_new_module)
-    _clear_logs_button.button_down.connect(_on_clear_logs)
-    _copy_logs_button.button_down.connect(_on_copy_selected_logs)
+    _check_uri_button.pressed.connect(_on_check_uri)
+    _generate_button.pressed.connect(_on_generate_code)
+    _new_module_button.pressed.connect(_on_new_module)
+    _clear_logs_button.pressed.connect(_on_clear_logs)
+    _copy_logs_button.pressed.connect(_on_copy_selected_logs)
 
 func _input(event: InputEvent) -> void:
     if not visible:
