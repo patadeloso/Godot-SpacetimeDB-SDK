@@ -1,8 +1,12 @@
-[gd_scene load_steps=10 format=3 uid="uid://dcklym85vmdt3"]
+[gd_scene load_steps=13 format=3 uid="uid://dcklym85vmdt3"]
 
 [ext_resource type="Texture2D" uid="uid://bbwidmvngko0a" path="res://addons/SpacetimeDB/ui/icons/Remove.svg" id="1_mgbt2"]
 [ext_resource type="Texture2D" uid="uid://yyihsx4ptqm6" path="res://addons/SpacetimeDB/ui/icons/Add.svg" id="2_3cpcg"]
 [ext_resource type="Texture2D" uid="uid://bj322os6s3pwb" path="res://addons/SpacetimeDB/ui/icons/Clear.svg" id="4_raufm"]
+
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_ej8d4"]
+
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_raufm"]
 
 [sub_resource type="SystemFont" id="SystemFont_3cpcg"]
 font_names = PackedStringArray("Consolas", "Monospace")
@@ -38,6 +42,8 @@ anti_aliasing = false
 
 [sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_3cpcg"]
 
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_d0lf3"]
+
 [node name="Control" type="Control"]
 custom_minimum_size = Vector2(0, 250)
 layout_mode = 3
@@ -63,7 +69,7 @@ layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
-offset_right = -30.0
+offset_right = -32.0
 grow_horizontal = 2
 grow_vertical = 2
 text = "ModuleName"
@@ -76,14 +82,15 @@ anchor_left = 1.0
 anchor_top = 0.5
 anchor_right = 1.0
 anchor_bottom = 0.5
-offset_left = -24.0
-offset_top = -15.5
-offset_bottom = 15.5
+offset_left = -26.0
+offset_top = -13.5
+offset_bottom = 13.5
 grow_horizontal = 0
 grow_vertical = 2
 tooltip_text = "Remove Module"
+theme_override_styles/normal = SubResource("StyleBoxEmpty_ej8d4")
 icon = ExtResource("1_mgbt2")
-flat = true
+icon_alignment = 1
 
 [node name="Uri" type="LineEdit" parent="."]
 layout_mode = 1
@@ -91,7 +98,7 @@ anchors_preset = 12
 anchor_top = 1.0
 anchor_right = 1.0
 anchor_bottom = 1.0
-offset_left = 123.0
+offset_left = 125.0
 offset_top = -31.0
 offset_right = -97.0
 grow_horizontal = 2
@@ -113,6 +120,16 @@ offset_bottom = -70.0
 grow_horizontal = 0
 grow_vertical = 0
 
+[node name="ModuleNameInput" type="LineEdit" parent="NewModule"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_right = -32.0
+grow_horizontal = 2
+grow_vertical = 2
+placeholder_text = "Enter module name"
+
 [node name="AddButton" type="Button" parent="NewModule"]
 layout_mode = 1
 anchors_preset = -1
@@ -120,24 +137,15 @@ anchor_left = 1.0
 anchor_top = 0.5
 anchor_right = 1.0
 anchor_bottom = 0.5
-offset_left = -24.0
-offset_top = -15.5
-offset_bottom = 15.5
+offset_left = -26.0
+offset_top = -13.5
+offset_bottom = 13.5
 grow_horizontal = 0
 grow_vertical = 2
 tooltip_text = "Add Module"
+theme_override_styles/normal = SubResource("StyleBoxEmpty_raufm")
 icon = ExtResource("2_3cpcg")
-flat = true
-
-[node name="ModuleNameInput" type="LineEdit" parent="NewModule"]
-layout_mode = 1
-anchors_preset = 15
-anchor_right = 1.0
-anchor_bottom = 1.0
-offset_right = -30.0
-grow_horizontal = 2
-grow_vertical = 2
-placeholder_text = "Enter module name"
+icon_alignment = 1
 
 [node name="ModulesContainer" type="ScrollContainer" parent="."]
 layout_mode = 1
@@ -213,16 +221,16 @@ layout_mode = 1
 anchors_preset = 2
 anchor_top = 1.0
 anchor_bottom = 1.0
-offset_top = -28.0
-offset_right = 24.0
-offset_bottom = -4.0
+offset_top = -30.0
+offset_right = 26.0
+offset_bottom = -3.0
 grow_vertical = 0
 tooltip_text = "Clear Output"
 theme_override_styles/normal = SubResource("StyleBoxEmpty_3cpcg")
 icon = ExtResource("4_raufm")
 icon_alignment = 1
 
-[node name="AddModuleHint" type="VBoxContainer" parent="."]
+[node name="AddModuleHint" type="RichTextLabel" parent="."]
 layout_mode = 1
 anchors_preset = 11
 anchor_left = 1.0
@@ -233,38 +241,21 @@ offset_top = 24.0
 offset_bottom = -105.0
 grow_horizontal = 0
 grow_vertical = 2
-theme_override_constants/separation = -6
-alignment = 1
-
-[node name="Label" type="Label" parent="AddModuleHint"]
-layout_mode = 2
-text = "Add a module by entering the"
+theme_override_styles/normal = SubResource("StyleBoxEmpty_d0lf3")
+bbcode_enabled = true
+text = "Add a module by entering the name below and clicking [img]res://addons/SpacetimeDB/ui/icons/Add.svg[/img]"
+scroll_active = false
 horizontal_alignment = 1
 vertical_alignment = 1
-
-[node name="HBoxContainer" type="HBoxContainer" parent="AddModuleHint"]
-layout_mode = 2
-alignment = 1
-
-[node name="Label" type="Label" parent="AddModuleHint/HBoxContainer"]
-layout_mode = 2
-text = "name below and clicking"
-horizontal_alignment = 1
-vertical_alignment = 1
-
-[node name="TextureRect" type="TextureRect" parent="AddModuleHint/HBoxContainer"]
-layout_mode = 2
-texture = ExtResource("2_3cpcg")
-stretch_mode = 3
 
 [node name="URILabel" type="Label" parent="."]
 layout_mode = 1
 anchors_preset = 2
 anchor_top = 1.0
 anchor_bottom = 1.0
-offset_left = 37.0
+offset_left = 39.0
 offset_top = -31.0
-offset_right = 123.0
+offset_right = 125.0
 grow_vertical = 0
 text = "Server URI:"
 vertical_alignment = 1
@@ -286,7 +277,7 @@ layout_mode = 1
 anchors_preset = 2
 anchor_top = 1.0
 anchor_bottom = 1.0
-offset_left = 28.0
+offset_left = 30.0
 offset_top = -31.0
-offset_right = 33.0
+offset_right = 35.0
 grow_vertical = 0

@@ -14,7 +14,7 @@ var _ui_panel: Control
 var _uri_input: LineEdit
 var _modules_container: VBoxContainer
 var _logs_label: RichTextLabel
-var _add_module_hint_container: VBoxContainer
+var _add_module_hint_label: RichTextLabel
 var _new_module_name_input: LineEdit
 var _new_module_button: Button
 var _check_uri_button: Button
@@ -38,7 +38,7 @@ func _init() -> void:
     _uri_input = _ui_panel.get_node("Uri") as LineEdit
     _modules_container = _ui_panel.get_node("ModulesContainer/VBox") as VBoxContainer
     _logs_label = _ui_panel.get_node("Logs") as RichTextLabel
-    _add_module_hint_container = _ui_panel.get_node("AddModuleHint") as VBoxContainer
+    _add_module_hint_label = _ui_panel.get_node("AddModuleHint") as RichTextLabel
     _new_module_name_input = _ui_panel.get_node("NewModule/ModuleNameInput") as LineEdit
     _new_module_button = _ui_panel.get_node("NewModule/AddButton") as Button
     _check_uri_button = _ui_panel.get_node("CheckUri") as Button
@@ -74,12 +74,12 @@ func add_module(name: String) -> void:
         new_module.queue_free()
         
         if _modules_container.get_child_count() == 0:
-            _add_module_hint_container.show()
+            _add_module_hint_label.show()
             _generate_button.disabled = true
     )
     
     new_module.show()
-    _add_module_hint_container.hide()
+    _add_module_hint_label.hide()
     _generate_button.disabled = false
 
 func clear_logs():
@@ -99,14 +99,14 @@ func add_log(text: Variant) -> void:
 func add_err(text: Variant) -> void:
     match typeof(text):
         TYPE_STRING:
-            _logs_label.text += "[img]%s[/img] [color=#FF5F5F][b]ERROR:[/b] %s[/color]\n" % [ERROR_LOG_ICON, text]
+            _logs_label.text += "[img]%s[/img] [color=#FF786B][b]ERROR:[/b] %s[/color]\n" % [ERROR_LOG_ICON, text]
         TYPE_ARRAY:
-            _logs_label.text += "[img]%s[/img] [color=#FF5F5F][b]ERROR:[/b] " % [ERROR_LOG_ICON]
+            _logs_label.text += "[img]%s[/img] [color=#FF786B][b]ERROR:[/b] " % [ERROR_LOG_ICON]
             for i in text as Array:
                 _logs_label.text += str(i) + " "
             _logs_label.text += "[/color]\n"
         _:
-            _logs_label.text += "[img]%s[/img] [color=#FF5F5F][b]ERROR:[/b] %s[/color]\n" % [ERROR_LOG_ICON, str(text)]
+            _logs_label.text += "[img]%s[/img] [color=#FF786B][b]ERROR:[/b] %s[/color]\n" % [ERROR_LOG_ICON, str(text)]
 
 func destroy() -> void:
     if is_instance_valid(_ui_panel):
@@ -116,7 +116,7 @@ func destroy() -> void:
     _uri_input = null
     _modules_container = null
     _logs_label = null
-    _add_module_hint_container = null
+    _add_module_hint_label = null
     _new_module_name_input = null
     _new_module_button = null
     _check_uri_button = null
