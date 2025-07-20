@@ -1,7 +1,6 @@
-class_name SpacetimePluginUI extends RefCounted
+@tool
+class_name SpacetimePluginUI extends Control
 
-const UI_PANEL_NAME := "SpacetimeDB"
-const UI_PATH := "res://addons/SpacetimeDB/ui/ui.tscn"
 const ERROR_LOG_ICON := "res://addons/SpacetimeDB/ui/icons/Error.svg"
 
 signal module_added(name: String)
@@ -10,7 +9,6 @@ signal module_removed(index: int)
 signal check_uri(uri: String)
 signal generate_schema(uri: String, modules: Array[String])
 
-var _ui_panel: Control
 var _uri_input: LineEdit
 var _modules_container: VBoxContainer
 var _logs_label: RichTextLabel
@@ -21,31 +19,16 @@ var _check_uri_button: Button
 var _generate_button: Button
 var _clear_logs_button: Button
 
-func _init() -> void:
-    if not is_instance_valid(_ui_panel):
-        var scene = load(UI_PATH)
-        if scene:
-            _ui_panel = scene.instantiate()
-        else:
-            printerr("[SpacetimePlugin] Failed to load UI scene: ", UI_PATH)
-            return
-    if is_instance_valid(_ui_panel):
-        SpacetimePlugin.instance.add_control_to_bottom_panel(_ui_panel, UI_PANEL_NAME)
-    else:
-        printerr("[SpacetimePlugin] UI panel is not valid after instantiation")
-        return
-    
-    _uri_input = _ui_panel.get_node("Uri") as LineEdit
-    _modules_container = _ui_panel.get_node("ModulesContainer/VBox") as VBoxContainer
-    _logs_label = _ui_panel.get_node("Logs") as RichTextLabel
-    _add_module_hint_label = _ui_panel.get_node("AddModuleHint") as RichTextLabel
-    _new_module_name_input = _ui_panel.get_node("NewModule/ModuleNameInput") as LineEdit
-    _new_module_button = _ui_panel.get_node("NewModule/AddButton") as Button
-    _check_uri_button = _ui_panel.get_node("CheckUri") as Button
-    _generate_button = _ui_panel.get_node("Generate") as Button
-    _clear_logs_button = _ui_panel.get_node("ClearLogsButton") as Button
-    
-    _logs_label.text = ""
+func _enter_tree() -> void:
+    _uri_input = $"Uri"
+    _modules_container = $"ModulesContainer/VBox"
+    _logs_label = $"Logs"
+    _add_module_hint_label = $"AddModuleHint"
+    _new_module_name_input = $"NewModule/ModuleNameInput"
+    _new_module_button = $"NewModule/AddButton"
+    _check_uri_button = $"CheckUri"
+    _generate_button = $"Generate"
+    _clear_logs_button = $"ClearLogsButton"
     
     _check_uri_button.button_down.connect(_on_check_uri)
     _generate_button.button_down.connect(_on_generate_code)
@@ -56,7 +39,7 @@ func set_uri(uri: String) -> void:
     _uri_input.text = uri
 
 func add_module(name: String) -> void:
-    var new_module: Panel = _ui_panel.get_node("Prefabs/ModulePrefab").duplicate() as Panel
+    var new_module: Panel = $"Prefabs/ModulePrefab".duplicate() as Panel
     var name_input: LineEdit = new_module.get_node("ModuleNameInput") as LineEdit
     name_input.text = name
     _modules_container.add_child(new_module)
@@ -109,10 +92,9 @@ func add_err(text: Variant) -> void:
             _logs_label.text += "[img]%s[/img] [color=#FF786B][b]ERROR:[/b] %s[/color]\n" % [ERROR_LOG_ICON, str(text)]
 
 func destroy() -> void:
-    if is_instance_valid(_ui_panel):
-        SpacetimePlugin.instance.remove_control_from_bottom_panel(_ui_panel)
-        _ui_panel.queue_free()
-    _ui_panel = null
+    if is_instance_valid(self):
+        SpacetimePlugin.instance.remove_control_from_bottom_panel(self)
+        queue_free()
     _uri_input = null
     _modules_container = null
     _logs_label = null

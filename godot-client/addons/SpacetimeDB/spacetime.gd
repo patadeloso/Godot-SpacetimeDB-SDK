@@ -7,6 +7,8 @@ const BINDINGS_SCHEMA_PATH := BINDINGS_PATH + "schema"
 const AUTOLOAD_NAME := "SpacetimeDB"
 const AUTOLOAD_PATH := BINDINGS_PATH + "generated_client.gd"
 const SAVE_PATH := BINDINGS_PATH + "codegen_data.json"
+const UI_PANEL_NAME := "SpacetimeDB"
+const UI_PATH := "res://addons/SpacetimeDB/ui/ui.tscn"
 
 var http_request := HTTPRequest.new()
 var codegen_data: Dictionary
@@ -17,12 +19,26 @@ static var instance: SpacetimePlugin
 func _enter_tree():    
     instance = self
     
-    ui = SpacetimePluginUI.new()
+    if not is_instance_valid(ui):
+        var scene = load(UI_PATH)
+        if scene:
+            ui = scene.instantiate() as SpacetimePluginUI
+        else:
+            printerr("SpacetimePlugin: Failed to load UI scene: ", UI_PATH)
+            return
+            
+    if is_instance_valid(ui):
+        add_control_to_bottom_panel(ui, UI_PANEL_NAME)
+    else:
+        printerr("SpacetimePlugin: UI panel is not valid after instantiation")
+        return
+        
     ui.module_added.connect(_on_module_added)
     ui.module_updated.connect(_on_module_updated)
     ui.module_removed.connect(_on_module_removed)
     ui.check_uri.connect(_on_check_uri)
     ui.generate_schema.connect(_on_generate_schema)
+    ui.clear_logs()
     
     http_request.timeout = 4;
     add_child(http_request)
