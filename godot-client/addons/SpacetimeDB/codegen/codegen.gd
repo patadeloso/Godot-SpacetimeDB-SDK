@@ -287,7 +287,6 @@ func _generate_module_gdscript(schema: SpacetimeParsedSchema) -> String:
     if not types_part.is_empty():
         content += types_part + "\n"
         
-    content += generate_reducer_gdscript(schema) 
     return content
 
 func _generate_types_gdscript(schema: SpacetimeParsedSchema, const_pointer: bool = false) -> String:
