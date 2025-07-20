@@ -47,7 +47,7 @@ signal database_update(table_update: TableUpdateData) # Emitted for each table u
 
 # From LocalDatabase
 signal row_inserted(table_name: String, row: Resource)
-signal row_updated(table_name: String, previous: Resource, row: Resource)
+signal row_updated(table_name: String, old_row: Resource, new_row: Resource)
 signal row_deleted(table_name: String, row: Resource)
 signal row_transactions_completed(table_name: String)
 

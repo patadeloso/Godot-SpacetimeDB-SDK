@@ -13,7 +13,7 @@ var _delete_key_listeners_by_table: Dictionary = {}
 var _transactions_completed_listeners_by_table: Dictionary = {}
 
 signal row_inserted(table_name: String, row: Resource)
-signal row_updated(table_name: String, previous_row: Resource, row: Resource)
+signal row_updated(table_name: String, old_row: Resource, new_row: Resource)
 signal row_deleted(table_name: String, row: Resource) 
 signal row_transactions_completed(table_name: String)
 
@@ -158,7 +158,7 @@ func apply_table_update(table_update: TableUpdateData):
             if _update_listeners_by_table.has(table_name_original):
                 for listener: Callable in _update_listeners_by_table[table_name_original]:
                     listener.call(prev_row_resource, inserted_row) 
-                row_updated.emit(table_name_original,prev_row_resource, inserted_row)
+                row_updated.emit(table_name_original, prev_row_resource, inserted_row)
         else:
             if _insert_listeners_by_table.has(table_name_original):
                 for listener: Callable in _insert_listeners_by_table[table_name_original]:
