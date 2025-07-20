@@ -27,7 +27,7 @@ func _enter_tree():
     http_request.timeout = 4;
     add_child(http_request)
     
-    print_log("SpacetimeDB SDK v%s" % [VERSION])
+    print_log("SpacetimeDB SDK v%s (c) 2025 flametime and contributors" % [VERSION])
     load_codegen_data()
 
 func add_module(name: String, fromLoad: bool = false):
