@@ -42,6 +42,7 @@ pub struct Message {
 }
 
 #[table(name = user_data, public)]
+#[table(name = user_data_hidden)]
 pub struct UserData {
     #[primary_key]
     identity: Identity,
