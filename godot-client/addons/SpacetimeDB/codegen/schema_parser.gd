@@ -57,11 +57,11 @@ static func parse_schema(schema: Dictionary, module_name: String) -> SpacetimePa
     type_map.merge(GDNATIVE_TYPES)
     var meta_type_map = DEFAULT_META_TYPE_MAP.duplicate()
     
-    var schema_tables: Array[Dictionary] = schema.get("tables", [])
-    var schema_types_raw: Array[Dictionary] = schema.get("types", [])
+    var schema_tables: Array = schema.get("tables", [])
+    var schema_types_raw: Array = schema.get("types", [])
     schema_types_raw.sort_custom(func(a, b): return a.get("ty", -1) < b.get("ty", -1))
-    var schema_reducers: Array[Dictionary] = schema.get("reducers", [])
-    var typespace: Array[Dictionary] = schema.get("typespace", {}).get("types", [])
+    var schema_reducers: Array = schema.get("reducers", [])
+    var typespace: Array = schema.get("typespace", {}).get("types", [])
     
     var parsed_schema := SpacetimeParsedSchema.new()
     parsed_schema.module = module_name.to_pascal_case()
@@ -197,6 +197,7 @@ static func parse_schema(schema: Dictionary, module_name: String) -> SpacetimePa
     parsed_schema.types = parsed_types_list
     parsed_schema.reducers = parsed_reducers_list
     parsed_schema.type_map = type_map
+    parsed_schema.meta_type_map = meta_type_map
     parsed_schema.tables = schema_tables
     parsed_schema.typespace = typespace
     return parsed_schema
