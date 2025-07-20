@@ -66,7 +66,6 @@ func _generate_gdscript_from_schema(schema: SpacetimeParsedSchema) -> Array[Stri
         
         var content: String
         var folder_name: String
-        var output_file_name: String
         
         if type_def.has("struct"):
             folder_name = "spacetime_types"
@@ -86,15 +85,13 @@ func _generate_gdscript_from_schema(schema: SpacetimeParsedSchema) -> Array[Stri
                     generated_table_names.append(tbl_name)
                     
             content = _generate_struct_gdscript(schema, type_def, generated_table_names)
-            output_file_name = "%s_%s.gd" % \
-                [schema.module.to_snake_case(), type_def.get("name", "").to_snake_case()]
         elif type_def.has("enum"):
             if not type_def.get("is_sum_type"): continue
             folder_name = "spacetime_types"
             content = _generate_enum_gdscript(schema, type_def)
-            output_file_name = "%s_%s.gd" % \
-                [schema.module.to_snake_case(), type_def.get("name", "").to_snake_case()]
         
+        var output_file_name := "%s_%s_type.gd" % \
+            [schema.module.to_snake_case(), type_def.get("name", "").to_snake_case()]
         var folder_path := "%s/%s" % [_schema_path, folder_name]
         var output_file_path := "%s/%s" % [folder_path, output_file_name]
         if not DirAccess.dir_exists_absolute(folder_path):
@@ -316,7 +313,8 @@ func _generate_types_gdscript(schema: SpacetimeParsedSchema, const_pointer: bool
     for _type_def in schema.types:
         if _type_def.has("gd_native"): continue
         var type_name: String = _type_def.get("name", "")
-        var subfolder = "spacetime_types"
+        var subfolder := "spacetime_types"
+        var file_suffix := ""
         if _type_def.has("table_name"): 
             if not _type_def.has("primary_key_name"):
                 continue
@@ -338,7 +336,7 @@ func _generate_types_gdscript(schema: SpacetimeParsedSchema, const_pointer: bool
                 content += variants_str
                 content += "\n}\n"
             else: 
-                content += "const %s = preload('%s/%s/%s_%s.gd')\n" % \
+                content += "const %s = preload('%s/%s/%s_%s_type.gd')\n" % \
                 [type_name.to_pascal_case(), _schema_path, subfolder, 
                 schema.module.to_snake_case(), type_name.to_snake_case()]
     return content
