@@ -18,6 +18,7 @@ var _new_module_button: Button
 var _check_uri_button: Button
 var _generate_button: Button
 var _clear_logs_button: Button
+var _copy_logs_button: Button
 
 func _enter_tree() -> void:
     _uri_input = $"Uri"
@@ -29,11 +30,23 @@ func _enter_tree() -> void:
     _check_uri_button = $"CheckUri"
     _generate_button = $"Generate"
     _clear_logs_button = $"ClearLogsButton"
+    _copy_logs_button = $"CopyLogsButton"
     
     _check_uri_button.button_down.connect(_on_check_uri)
     _generate_button.button_down.connect(_on_generate_code)
     _new_module_button.button_down.connect(_on_new_module)
     _clear_logs_button.button_down.connect(_on_clear_logs)
+    _copy_logs_button.button_down.connect(_on_copy_selected_logs)
+
+func _input(event: InputEvent) -> void:
+    if not visible:
+        return
+    
+    if event is InputEventKey:
+        if event.pressed and event.keycode == KEY_C and event.ctrl_pressed:
+            copy_selected_logs()
+        elif event.pressed and event.keycode == KEY_K and event.ctrl_pressed and event.alt_pressed:
+            clear_logs()
 
 func set_uri(uri: String) -> void:
     _uri_input.text = uri
@@ -67,6 +80,10 @@ func add_module(name: String) -> void:
 
 func clear_logs():
     _logs_label.text = ""
+
+func copy_selected_logs():
+    var selected_text = _logs_label.get_selected_text()
+    DisplayServer.clipboard_set(selected_text)
 
 func add_log(text: Variant) -> void:
     match typeof(text):
@@ -103,7 +120,9 @@ func destroy() -> void:
     _new_module_button = null
     _check_uri_button = null
     _generate_button = null
-  
+    _clear_logs_button = null
+    _copy_logs_button = null
+
 func _on_check_uri() -> void:
     check_uri.emit(_uri_input.text)
     
@@ -123,3 +142,6 @@ func _on_new_module() -> void:
 
 func _on_clear_logs() -> void:
     clear_logs()
+
+func _on_copy_selected_logs() -> void:
+    copy_selected_logs()
