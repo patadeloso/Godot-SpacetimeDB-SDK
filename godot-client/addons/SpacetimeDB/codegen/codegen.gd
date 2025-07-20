@@ -30,7 +30,7 @@ func _on_request_completed(json_string: String, module_name: String) -> Array[St
     var file = FileAccess.open("%s/readme.txt" % [debug_dir_path], FileAccess.WRITE)
     file.store_string("You can delete this directory and files. It's only used for codegen debugging.")
     file = FileAccess.open("%s/schema_%s.json" % [debug_dir_path, module_name], FileAccess.WRITE)
-    file.store_string(JSON.stringify(schema, "\t", false))
+    file.store_string(JSON.stringify(schema.to_dictionary(), "\t", false))
     
     var generated_files := build_gdscript_from_schema(schema)
     return generated_files
