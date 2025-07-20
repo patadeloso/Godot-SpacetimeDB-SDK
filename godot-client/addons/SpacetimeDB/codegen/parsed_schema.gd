@@ -9,7 +9,7 @@ var tables: Array = []
 var typespace: Array = []
 
 func is_empty() -> bool:
-    return types.is_empty() && reducers.is_empty()
+    return types.is_empty() and reducers.is_empty()
 
 func to_dictionary() -> Dictionary:
     return {

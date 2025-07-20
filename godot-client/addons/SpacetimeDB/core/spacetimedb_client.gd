@@ -275,7 +275,7 @@ func _handle_parsed_message(message_resource: Resource):
         var identity_token: IdentityTokenMessage = message_resource
         print_log("SpacetimeDBClient: Received Identity Token.")
         _identity = identity_token.identity
-        if !_token and identity_token.token:
+        if not _token and identity_token.token:
             _token = identity_token.token
         _connection_id = identity_token.connection_id
         self.connected.emit(_identity, _token)
