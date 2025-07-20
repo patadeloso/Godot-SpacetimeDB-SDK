@@ -15,7 +15,6 @@ var _transactions_completed_listeners_by_table: Dictionary = {}
 signal row_inserted(table_name: String, row: Resource)
 signal row_updated(table_name: String, previous_row: Resource, row: Resource)
 signal row_deleted(table_name: String, row: Resource) 
-signal row_deleted_key(table_name: String, primary_key)
 signal row_transactions_completed(table_name: String)
 
 func _init(p_schema: SpacetimeDBSchema):

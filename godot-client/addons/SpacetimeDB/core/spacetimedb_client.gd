@@ -49,7 +49,6 @@ signal database_update(table_update: TableUpdateData) # Emitted for each table u
 signal row_inserted(table_name: String, row: Resource)
 signal row_updated(table_name: String, previous: Resource, row: Resource)
 signal row_deleted(table_name: String, row: Resource)
-signal row_deleted_key(table_name: String, primary_key)
 signal row_transactions_completed(table_name: String)
 
 signal reducer_call_response(response: Resource) # TODO: Define response resource
@@ -90,7 +89,6 @@ func initialize_and_connect():
     _local_db.row_inserted.connect(func(tn, r) -> void: row_inserted.emit(tn, r))
     _local_db.row_updated.connect(func(tn, p, r) -> void: row_updated.emit(tn, p, r))
     _local_db.row_deleted.connect(func(tn, r) -> void: row_deleted.emit(tn, r))
-    _local_db.row_deleted_key.connect(func(tn, pk) -> void: row_deleted_key.emit(tn, pk))
     _local_db.row_transactions_completed.connect(func(tn) -> void: row_transactions_completed.emit(tn))
     add_child(_local_db) # Add as child if it needs signals
 
