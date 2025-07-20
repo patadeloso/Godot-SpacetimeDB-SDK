@@ -114,6 +114,12 @@ func _on_generate_schema(uri: String, module_names: Array[String]):
             var parse_module_name = module_name.replace("-", "_")
             generated_files.append_array(codegen._on_request_completed(json, parse_module_name))
             generated_modules.append(parse_module_name)
+        elif result[1] == 404:
+            print_err("Module not found - %s" % [schema_uri])
+        elif result[1] == 0:
+            print_err("Request timeout - %s" % [schema_uri])
+        else:
+            print_err("Failed to fetch module schema: %s - Response code %s" % [module_name, result[1]])
     
     codegen.generate_module_link(generated_modules)
     _cleanup_unused_classes(BINDINGS_SCHEMA_PATH, generated_files)
