@@ -20,7 +20,6 @@ func _get_db():
     return _current_db_instance
     
 func on_set(schema: _ModuleTable):
-    
     _derived_table_names.clear()
 
     if schema == null:
