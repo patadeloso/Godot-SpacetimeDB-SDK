@@ -3,6 +3,7 @@ class_name SpacetimePlugin extends EditorPlugin
 
 const VERSION := "0.1.0"
 const BINDINGS_PATH := "res://spacetime_bindings/"
+const BINDINGS_SCHEMA_PATH := BINDINGS_PATH + "schema"
 const AUTOLOAD_NAME := "SpacetimeDB"
 const AUTOLOAD_PATH := BINDINGS_PATH + "generated_client.gd"
 const SAVE_PATH := BINDINGS_PATH + "codegen_data.json"
@@ -96,30 +97,32 @@ func _on_check_uri(uri: String):
     else:
         print_log("Response code: " + str(result[1]))
 
-func _on_generate_schema(uri: String, modules: Array[String]):
+func _on_generate_schema(uri: String, module_names: Array[String]):
     if uri.ends_with("/"):
         uri = uri.left(-1)
             
     print_log("Starting code generation...")
-    var codegen := Codegen.new()
-    var generated_files: Array[String] = ["res://%s/%s/spacetime_modules.gd" % [Codegen.PLUGIN_DATA_FOLDER ,Codegen.CODEGEN_FOLDER]]
-    for module in modules:
-        var schema_uri := "%s/v1/database/%s/schema?version=9" % [uri, module]
-        http_request.request(uri)
+    var codegen := SpacetimeCodegen.new(BINDINGS_SCHEMA_PATH)
+    var generated_modules: Array[String] = []
+    var generated_files: Array[String] = ["%s/spacetime_modules.gd" % [BINDINGS_SCHEMA_PATH]]
+    for module_name in module_names:
+        var schema_uri := "%s/v1/database/%s/schema?version=9" % [uri, module_name]
+        http_request.request(schema_uri)
         var result = await http_request.request_completed
         if result[1] == 200:
             var json = PackedByteArray(result[3]).get_string_from_utf8()
-            var parse_module_name = module.replace("-", "_")
+            var parse_module_name = module_name.replace("-", "_")
             generated_files.append_array(codegen._on_request_completed(json, parse_module_name))
-            modules.append(parse_module_name)
-    codegen.generate_module_link(modules)
-    _cleanup_unused_classes("res://%s/%s" % [Codegen.PLUGIN_DATA_FOLDER ,Codegen.CODEGEN_FOLDER], generated_files)
+            generated_modules.append(parse_module_name)
+    
+    codegen.generate_module_link(generated_modules)
+    _cleanup_unused_classes(BINDINGS_SCHEMA_PATH, generated_files)
     
     if not ProjectSettings.has_setting("autoload/" + AUTOLOAD_NAME):
         add_autoload_singleton(AUTOLOAD_NAME, AUTOLOAD_PATH)
     
     get_editor_interface().get_resource_filesystem().scan()
-    print_log("Code Generation Complete!")
+    print_log("Code generation complete!")
 
 func _cleanup_unused_classes(dir_path: String = "res://schema", files: Array[String] = []) -> void:
     var dir = DirAccess.open(dir_path)
