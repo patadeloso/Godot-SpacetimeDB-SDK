@@ -102,18 +102,18 @@ func _on_generate_schema(uri: String, module_names: Array[String]):
         uri = uri.left(-1)
             
     print_log("Starting code generation...")
-    var codegen := SpacetimeCodegen.new(BINDINGS_SCHEMA_PATH)
-    var generated_modules: Array[String] = []
-    var generated_files: Array[String] = ["%s/spacetime_modules.gd" % [BINDINGS_SCHEMA_PATH]]
+    
+    print_log("Fetching module schemas...")
+    var module_schemas: Dictionary[String, String] = {}
     for module_name in module_names:
         var schema_uri := "%s/v1/database/%s/schema?version=9" % [uri, module_name]
         http_request.request(schema_uri)
         var result = await http_request.request_completed
         if result[1] == 200:
             var json = PackedByteArray(result[3]).get_string_from_utf8()
-            var parse_module_name = module_name.replace("-", "_")
-            generated_files.append_array(codegen._on_request_completed(json, parse_module_name))
-            generated_modules.append(parse_module_name)
+            var snake_module_name = module_name.replace("-", "_")
+            module_schemas[snake_module_name] = json
+            print_log("Fetched schema for module: %s" % [module_name])
         elif result[1] == 404:
             print_err("Module not found - %s" % [schema_uri])
         elif result[1] == 0:
@@ -121,7 +121,9 @@ func _on_generate_schema(uri: String, module_names: Array[String]):
         else:
             print_err("Failed to fetch module schema: %s - Response code %s" % [module_name, result[1]])
     
-    codegen.generate_module_link(generated_modules)
+    var codegen := SpacetimeCodegen.new(BINDINGS_SCHEMA_PATH)
+    var generated_files := codegen.generate_bindings(module_schemas)
+    
     _cleanup_unused_classes(BINDINGS_SCHEMA_PATH, generated_files)
     
     if not ProjectSettings.has_setting("autoload/" + AUTOLOAD_NAME):
