@@ -223,6 +223,9 @@ theme_override_fonts/bold_italics_font = SubResource("SystemFont_ej8d4")
 theme_override_fonts/bold_font = SubResource("SystemFont_d0lf3")
 theme_override_styles/normal = SubResource("StyleBoxFlat_e5a4l")
 bbcode_enabled = true
+text = "SpacetimeDB SDK v0.1.0 (c) 2025-present flametime and contributors
+[img]res://addons/SpacetimeDB/ui/icons/Error.svg[/img] [color=#FF786B][b]ERROR:[/b] Plugin failed to load[/color]
+"
 scroll_following = true
 shortcut_keys_enabled = false
 selection_enabled = true
