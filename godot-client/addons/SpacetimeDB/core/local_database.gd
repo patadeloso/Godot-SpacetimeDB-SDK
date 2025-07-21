@@ -1,6 +1,6 @@
 class_name LocalDatabase extends Node
 
-var _tables: Dictionary = {}
+var _tables: Dictionary[String, Dictionary] = {}
 var _primary_key_cache: Dictionary = {}
 var _schema: SpacetimeDBSchema
 
@@ -12,9 +12,9 @@ var _delete_listeners_by_table: Dictionary = {}
 var _delete_key_listeners_by_table: Dictionary = {} 
 var _transactions_completed_listeners_by_table: Dictionary = {}
 
-signal row_inserted(table_name: String, row: Resource)
-signal row_updated(table_name: String, old_row: Resource, new_row: Resource)
-signal row_deleted(table_name: String, row: Resource) 
+signal row_inserted(table_name: String, row: _ModuleTableType)
+signal row_updated(table_name: String, old_row: _ModuleTableType, new_row: _ModuleTableType)
+signal row_deleted(table_name: String, row: _ModuleTableType) 
 signal row_transactions_completed(table_name: String)
 
 func _init(p_schema: SpacetimeDBSchema):
@@ -138,11 +138,11 @@ func apply_table_update(table_update: TableUpdateData):
             return
         _cached_pk_fields[table_name_lower] = pk_field
 
-    var table_dict: Dictionary = _tables[table_name_lower]
+    var table_dict := _tables[table_name_lower]
     
     var inserted_pks_set: Dictionary = {} # { pk_value: true }
     
-    for inserted_row: Resource in table_update.inserts:
+    for inserted_row: _ModuleTableType in table_update.inserts:
         var pk_value = inserted_row.get(pk_field)
         if pk_value == null:
             push_error("LocalDatabase: Inserted row for table '", table_name_original, "' has null PK value for field '", pk_field, "'. Skipping.")
@@ -150,7 +150,7 @@ func apply_table_update(table_update: TableUpdateData):
 
         inserted_pks_set[pk_value] = true
 
-        var prev_row_resource: Resource = table_dict.get(pk_value, null)
+        var prev_row_resource: _ModuleTableType = table_dict.get(pk_value, null)
         
         table_dict[pk_value] = inserted_row
         if prev_row_resource != null:
@@ -164,7 +164,7 @@ func apply_table_update(table_update: TableUpdateData):
                     listener.call(inserted_row)
                 row_inserted.emit(table_name_original, inserted_row)
                 
-    for deleted_row: Resource in table_update.deletes:
+    for deleted_row: _ModuleTableType in table_update.deletes:
         var pk_value = deleted_row.get(pk_field)
         if pk_value == null:
             push_warning("LocalDatabase: Deleted row for table '", table_name_original, "' has null PK value for field '", pk_field, "'. Skipping.")
@@ -183,20 +183,27 @@ func apply_table_update(table_update: TableUpdateData):
         row_transactions_completed.emit(table_name_original)
             
 # --- Access Methods ---
-func get_row(table_name: String, primary_key_value) -> _ModuleTableType:
+func get_row_by_pk(table_name: String, primary_key_value) -> _ModuleTableType:
     var table_name_lower := table_name.to_lower().replace("_","")
     if _tables.has(table_name_lower):
         return _tables[table_name_lower].get(primary_key_value) 
     return null
     
 func get_all_rows(table_name: String) -> Array[_ModuleTableType]:
+    var rows = _get_all_rows_untyped(table_name)
+    var typed_result_array: Array[_ModuleTableType] = []
+    typed_result_array.assign(rows)
+    
+    return typed_result_array
+
+func count_all_rows(table_name: String) -> int:
+    var rows = _get_all_rows_untyped(table_name)
+    return rows.size()
+        
+func _get_all_rows_untyped(table_name: String) -> Array:
     var table_name_lower := table_name.to_lower().replace("_","")
     if _tables.has(table_name_lower):
-        var table_dict: Dictionary = _tables[table_name_lower]
-        var values_array: Array = table_dict.values()
-        var typed_result_array: Array[_ModuleTableType] = []
-        typed_result_array.assign(values_array)
-
-        return typed_result_array
-    else:
-        return []
+        var table_dict := _tables[table_name_lower]
+        return table_dict.values()
+    
+    return []
