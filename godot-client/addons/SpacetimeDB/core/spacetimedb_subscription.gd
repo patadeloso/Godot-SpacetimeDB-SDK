@@ -10,7 +10,7 @@ signal end
 signal _applied_or_timeout(timeout: bool)
 signal _ended_or_timeout(timeout: bool)
 
-var _client: SpacetimeDBClientImpl
+var _client: SpacetimeDBClient
 var _active := false
 var _ended := false
 
@@ -22,7 +22,7 @@ var ended: bool:
         return _ended
 
 static func create(
-    p_client: SpacetimeDBClientImpl,
+    p_client: SpacetimeDBClient,
     p_query_id: int,
     p_queries: PackedStringArray
 ) -> SpacetimeDBSubscription:
