@@ -76,7 +76,8 @@ func initialize_and_connect():
     print_log("SpacetimeDBClient: Initializing...")
     
     # 1. Load Schema
-    var schema := SpacetimeDBSchema.new(schema_path, debug_mode)
+    var module_name: String = get_meta("module_name", "")
+    var schema := SpacetimeDBSchema.new(module_name, schema_path, debug_mode)
 
     # 2. Initialize Parser
     _deserializer = BSATNDeserializer.new(schema, debug_mode)
@@ -336,7 +337,7 @@ func disconnect_db():
 func is_connected_db() -> bool:
     return _connection and _connection.is_connected_db()
 
-# Gets the local database instance for querying
+# The untyped local database instance, use the generated .Db property for querying
 func get_local_database() -> LocalDatabase:
     return _local_db
     

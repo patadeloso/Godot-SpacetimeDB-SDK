@@ -5,25 +5,27 @@ var tables: Dictionary[String, GDScript] = {}
 
 var debug_mode: bool = false # Controls verbose debug printing
 
-func _init(p_schema_path: String = "res://spacetime_bindings/schema", p_debug_mode: bool = false) -> void:
+func _init(p_module_name: String, p_schema_path: String = "res://spacetime_bindings/schema", p_debug_mode: bool = false) -> void:
     debug_mode = p_debug_mode
     
     # Load table row schemas and spacetime types
-    _load_types("%s/types" % p_schema_path)
+    _load_types("%s/types" % p_schema_path, p_module_name.to_snake_case())
     # Load core types if they are defined as Resources with scripts
     _load_types("res://addons/SpacetimeDB/core_types")
     
-func _load_types(path: String) -> void:
+func _load_types(path: String, prefix: String = "") -> void:
     var dir := DirAccess.open(path)
     if not DirAccess.dir_exists_absolute(path):
         printerr("SpacetimeDBSchema: Schema directory does not exist: ", path)
         return
 
     dir.list_dir_begin()
-    var file_name_raw := dir.get_next()
-    while file_name_raw != "":
+    while true:
+        var file_name_raw := dir.get_next()
+        if file_name_raw == "":
+            break
+        
         if dir.current_is_dir():
-            file_name_raw = dir.get_next()
             continue
 
         var file_name := file_name_raw
@@ -35,13 +37,14 @@ func _load_types(path: String) -> void:
                 file_name += ".gd"
 
         if not file_name.ends_with(".gd"):
-            file_name_raw = dir.get_next()
+            continue
+            
+        if prefix and not file_name.begins_with(prefix):
             continue
 
         var script_path := path.path_join(file_name)
         if not ResourceLoader.exists(script_path):
             printerr("SpacetimeDBSchema: Script file not found or inaccessible: ", script_path, " (Original name: ", file_name_raw, ")")
-            file_name_raw = dir.get_next()
             continue
 
         var script := ResourceLoader.load(script_path, "GDScript") as GDScript
@@ -68,10 +71,7 @@ func _load_types(path: String) -> void:
                     if is_table:
                         tables[lower_table_name] = script
                     types[lower_table_name] = script
-                    
-
-        file_name_raw = dir.get_next()
-
+            
     dir.list_dir_end()
 
 func get_type(type_name: String) -> GDScript:
