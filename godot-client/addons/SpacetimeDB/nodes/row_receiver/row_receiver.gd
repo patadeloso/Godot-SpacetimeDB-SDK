@@ -14,11 +14,15 @@ signal transactions_completed
 
 var _current_db_instance = null 
 
-func _get_db() -> LocalDatabase:
+func _get_db(wait_for_init: bool = false) -> LocalDatabase:
     if _current_db_instance == null or not is_instance_valid(_current_db_instance):
         var constants := (table_to_receive.get_script() as GDScript).get_script_constant_map()
         var module_name: String = constants.get("module_name", "").to_pascal_case()
         _current_db_instance = SpacetimeDB[module_name].get_local_database()
+        
+        if wait_for_init:
+            await SpacetimeDB[module_name].database_initialized
+            _get_db(false)
     return _current_db_instance
     
 func on_set(schema: _ModuleTableType):
@@ -85,11 +89,7 @@ func _ready() -> void:
     if Engine.is_editor_hint():
         return;
     
-    var db := _get_db()
-    if db == null:
-        await SpacetimeDB.database_initialized
-        db = _get_db()
-        
+    var db := await _get_db(true)
     _subscribe_to_table(selected_table_name)
 
     if not table_to_receive:
@@ -107,7 +107,7 @@ func _subscribe_to_table(table_name_sn: StringName):
     if Engine.is_editor_hint() or table_name_sn == &"":
         return
     
-    var db := _get_db()
+    var db := await _get_db()
     if not is_instance_valid(db): return
 
     db.subscribe_to_inserts(table_name_sn, Callable(self, "_on_insert"))
@@ -119,7 +119,7 @@ func _unsubscribe_from_table(table_name_sn: StringName):
     if Engine.is_editor_hint() or table_name_sn == &"":
         return
     
-    var db := _get_db()
+    var db := await _get_db()
     if not is_instance_valid(db): return 
 
     db.unsubscribe_from_inserts(table_name_sn, Callable(self, "_on_insert"))
@@ -143,7 +143,7 @@ func _exit_tree() -> void:
     _unsubscribe_from_table(selected_table_name)
     
 func get_table_data() -> Array[_ModuleTableType]:
-    var db := _get_db()
+    var db := await _get_db()
     if db:
         return db.get_all_rows(selected_table_name)
     return []
