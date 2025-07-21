@@ -83,7 +83,7 @@ func _generate_gdscript_from_schema(schema: SpacetimeParsedSchema) -> Array[Stri
             if not type_def.get("is_sum_type"): continue
             content = _generate_enum_gdscript(schema, type_def)
         
-        var output_file_name := "%s_%s_type.gd" % \
+        var output_file_name := "%s_%s.gd" % \
             [schema.module.to_snake_case(), type_def.get("name", "").to_snake_case()]
         var folder_path := "%s/types" % _schema_path
         var output_file_path := "%s/%s" % [folder_path, output_file_name]
@@ -462,7 +462,7 @@ func _generate_types_gdscript(schema: SpacetimeParsedSchema, const_pointer: bool
                 content += variants_str
                 content += "\n}\n"
             else: 
-                content += "const %s = preload('%s/types/%s_%s_type.gd')\n" % \
+                content += "const %s = preload('%s/types/%s_%s.gd')\n" % \
                 [type_name.to_pascal_case(), _schema_path, 
                 schema.module.to_snake_case(), type_name.to_snake_case()]
     return content
