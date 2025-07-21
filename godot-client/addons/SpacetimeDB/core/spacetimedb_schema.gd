@@ -1,7 +1,7 @@
 class_name SpacetimeDBSchema extends Resource
 
-@export var types: Dictionary[String, GDScript] = {}
-@export var tables: Dictionary[String, GDScript] = {}
+var types: Dictionary[String, GDScript] = {}
+var tables: Dictionary[String, GDScript] = {}
 
 var debug_mode: bool = false # Controls verbose debug printing
 
