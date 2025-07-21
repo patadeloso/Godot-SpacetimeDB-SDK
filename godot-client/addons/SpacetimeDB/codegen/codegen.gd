@@ -528,9 +528,10 @@ func _generate_reducers_gdscript(schema: SpacetimeParsedSchema) -> String:
         content += "\n".join(description_comment) + "\n"
         var reducer_name: String = reducer.get("name", "")
         content += "static func %s(%s) -> void:\n" % [reducer_name, params_str] + \
-        "\tvar __id__: int = SpacetimeDB.call_reducer('%s', [%s], [%s])\n" % \
-        [reducer_name, param_names_str, param_bsatn_types_str] + \
-        "\tvar __result__ = await SpacetimeDB.wait_for_reducer_response(__id__)\n" + \
+        "\tvar __id__: int = SpacetimeDB.%s.call_reducer('%s', [%s], [%s])\n" % \
+        [schema.module.to_pascal_case(), reducer_name, param_names_str, param_bsatn_types_str] + \
+        "\tvar __result__ = await SpacetimeDB.%s.wait_for_reducer_response(__id__)\n" % \
+        schema.module.to_pascal_case() + \
         "\tcb.call(__result__)\n\n"
     
     if not content.is_empty():
