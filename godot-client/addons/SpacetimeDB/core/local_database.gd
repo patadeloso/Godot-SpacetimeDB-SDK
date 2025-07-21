@@ -1,8 +1,8 @@
 class_name LocalDatabase extends Node
 
-var _tables: Dictionary[String, Dictionary] = {}
-var _primary_key_cache: Dictionary = {}
-var _schema: SpacetimeDBSchema
+@export var _tables: Dictionary[String, Dictionary] = {}
+@export var _primary_key_cache: Dictionary = {}
+@export var _schema: SpacetimeDBSchema
 
 var _cached_normalized_table_names: Dictionary = {} 
 var _cached_pk_fields: Dictionary = {}

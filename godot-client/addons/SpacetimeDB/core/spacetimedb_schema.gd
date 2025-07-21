@@ -1,7 +1,7 @@
-class_name SpacetimeDBSchema extends RefCounted
+class_name SpacetimeDBSchema extends Resource
 
-var types: Dictionary[String, GDScript] = {}
-var tables: Dictionary[String, GDScript] = {}
+@export var types: Dictionary[String, GDScript] = {}
+@export var tables: Dictionary[String, GDScript] = {}
 
 var debug_mode: bool = false # Controls verbose debug printing
 
