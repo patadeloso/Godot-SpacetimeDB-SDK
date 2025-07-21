@@ -1,4 +1,4 @@
-class_name SpacetimeDBClientImpl extends Node
+class_name SpacetimeDBClient extends Node
 
 # --- Configuration ---
 @export var base_url: String = "http://127.0.0.1:3000"
@@ -93,13 +93,14 @@ func initialize_and_connect():
     _local_db.row_updated.connect(func(tn, p, r) -> void: row_updated.emit(tn, p, r))
     _local_db.row_deleted.connect(func(tn, r) -> void: row_deleted.emit(tn, r))
     _local_db.row_transactions_completed.connect(func(tn) -> void: row_transactions_completed.emit(tn))
+    _local_db.name = "LocalDatabase"
     add_child(_local_db) # Add as child if it needs signals
 
     # 4. Initialize REST API Handler (optional, mainly for token)
     _rest_api = SpacetimeDBRestAPI.new(base_url, debug_mode)
     _rest_api.token_received.connect(_on_token_received)
     _rest_api.token_request_failed.connect(_on_token_request_failed)
-    # Connect other REST signals if needed
+    _rest_api.name = "RestAPI"
     add_child(_rest_api)
 
     # 5. Initialize Connection Handler
@@ -107,6 +108,7 @@ func initialize_and_connect():
     _connection.disconnected.connect(func(): disconnected.emit())
     _connection.connection_error.connect(func(c, r): connection_error.emit(c, r))
     _connection.message_received.connect(_on_websocket_message_received)
+    _connection.name = "Connection"
     add_child(_connection)
 
     _is_initialized = true
@@ -387,6 +389,7 @@ func subscribe(queries: PackedStringArray) -> SpacetimeDBSubscription:
             print_log("SpacetimeDBClient: SubscribeMulti request sent successfully (BSATN), Query ID: %d" % query_id)
             pending_subscriptions.set(query_id, subscription)
             # Add as child for signals
+            subscription.name = "Subscription"
             add_child(subscription)
             
         return subscription
