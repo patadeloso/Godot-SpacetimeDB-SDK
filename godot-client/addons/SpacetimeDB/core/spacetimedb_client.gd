@@ -240,7 +240,9 @@ func _decompress_and_parse(raw_bytes: PackedByteArray) -> PackedByteArray:
 func _parse_packet_and_get_resource(bsatn_bytes: PackedByteArray) -> Resource:
     if not _deserializer: return null
     
-    var message_resource: Resource = _deserializer.process_bytes_and_extract_messages(bsatn_bytes)[0]
+    var result := _deserializer.process_bytes_and_extract_messages(bsatn_bytes)
+    if result.is_empty(): return null
+    var message_resource: Resource = result[0]
     
     if _deserializer.has_error():
         printerr("SpacetimeDBClient: Failed to parse BSATN packet: ", _deserializer.get_last_error())
