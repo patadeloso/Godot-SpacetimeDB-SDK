@@ -71,7 +71,8 @@ func print_log(log_message:String):
         print(log_message)
     
 func initialize_and_connect():
-    if _is_initialized: return
+    if _is_initialized:
+        return
 
     print_log("SpacetimeDBClient: Initializing...")
     
@@ -85,6 +86,8 @@ func initialize_and_connect():
 
     # 3. Initialize Local Database
     _local_db = LocalDatabase.new(schema)
+    _init_db(_local_db)
+    
     # Connect to LocalDatabase signals to re-emit them
     _local_db.row_inserted.connect(func(tn, r) -> void: row_inserted.emit(tn, r))
     _local_db.row_updated.connect(func(tn, p, r) -> void: row_updated.emit(tn, p, r))
@@ -111,6 +114,9 @@ func initialize_and_connect():
 
     # 6. Get Token and Connect
     _load_token_or_request()
+
+func _init_db(local_db: LocalDatabase) -> void:
+    pass
 
 func _load_token_or_request():
     if one_time_token == false:
