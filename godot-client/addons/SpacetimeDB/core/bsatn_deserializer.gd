@@ -597,7 +597,7 @@ func _read_nested_resource(spb: StreamPeerBuffer, resource: Resource, prop: Dict
         if ClassDB.can_instantiate(nested_class_name):
             nested_instance = ClassDB.instantiate(nested_class_name)
             if not nested_instance is Resource:
-                _set_error("ClassDB instantiated '%s' for property '%s', but it's not a Resource." % [nested_class_name, prop_name], spb.get_position())
+                _set_error("ClassDB instantiated '%s' for property '%s', but it's not a Resource. (instance: %s)" % [nested_class_name, prop_name, nested_instance], spb.get_position())
                 return null
             # If it's a Resource without an explicit script (e.g., built-in), population might still work
             if debug_mode and nested_instance.get_script() == null:
