@@ -5,7 +5,8 @@ const VERSION := "0.1.0"
 const BINDINGS_PATH := "res://spacetime_bindings"
 const BINDINGS_SCHEMA_PATH := BINDINGS_PATH + "/schema"
 const AUTOLOAD_NAME := "SpacetimeDB"
-const AUTOLOAD_PATH := BINDINGS_SCHEMA_PATH + "/generated_client.gd"
+const AUTOLOAD_FILE_NAME := "spacetime_autoload.gd"
+const AUTOLOAD_PATH := BINDINGS_SCHEMA_PATH + "/" + AUTOLOAD_FILE_NAME
 const SAVE_PATH := BINDINGS_PATH + "/codegen_data.json"
 const UI_PANEL_NAME := "SpacetimeDB"
 const UI_PATH := "res://addons/SpacetimeDB/ui/ui.tscn"
@@ -43,7 +44,7 @@ func _enter_tree():
     http_request.timeout = 4;
     add_child(http_request)
     
-    print_log("SpacetimeDB SDK v%s (c) 2025 flametime and contributors" % [VERSION])
+    print_log("SpacetimeDB SDK v%s (c) 2025-present flametime and contributors" % [VERSION])
     load_codegen_data()
 
 func add_module(name: String, fromLoad: bool = false):
