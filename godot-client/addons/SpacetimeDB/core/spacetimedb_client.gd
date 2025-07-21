@@ -43,6 +43,7 @@ var _next_query_id := 0
 signal connected(identity: PackedByteArray, token: String)
 signal disconnected
 signal connection_error(code: int, reason: String)
+signal database_initialized # Emitted after InitialSubscription is processed
 signal database_update(table_update: TableUpdateData) # Emitted for each table update
 
 # From LocalDatabase
@@ -260,6 +261,7 @@ func _handle_parsed_message(message_resource: Resource):
         var initial_sub: InitialSubscriptionMessage = message_resource
         print_log("SpacetimeDBClient: Processing Initial Subscription (Req ID: %d)" % initial_sub.request_id)
         _local_db.apply_database_update(initial_sub.database_update)
+        self.database_initialized.emit()
         
     elif message_resource is SubscribeMultiAppliedMessage:
         var initial_sub: SubscribeMultiAppliedMessage = message_resource
