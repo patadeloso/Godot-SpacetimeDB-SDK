@@ -13,42 +13,50 @@ func _ready():
     # Disable threading (e.g., for web builds)
     # options.threading = false
     
-    SpacetimeDB.connect_db(
+    SpacetimeDB.Main.connect_db( #WARNING <--- replace 'Main' with your module name
         "https://flametime.cfd/spacetime", #WARNING <--- replace it with your url
-        "main", #WARNING <--- replace it with your database
+        "main", #WARNING <--- replace it with your database name
         options
-        )
+    )
 
-    SpacetimeDB.connected.connect(_on_spacetimedb_connected)
-    SpacetimeDB.disconnected.connect(_on_spacetimedb_disconnected)
-    SpacetimeDB.connection_error.connect(_on_spacetimedb_connection_error)
-    SpacetimeDB.identity_received.connect(_on_spacetimedb_identity_received)
+    SpacetimeDB.Main.connected.connect(_on_spacetimedb_connected)
+    SpacetimeDB.Main.disconnected.connect(_on_spacetimedb_disconnected)
+    SpacetimeDB.Main.connection_error.connect(_on_spacetimedb_connection_error)
 
-func _on_spacetimedb_connected():
+func _on_spacetimedb_connected(identity: PackedByteArray, token: String):
     print("Game: Connected to SpacetimeDB!")
+    print("Game: My Identity: 0x%s" % [identity.hex_encode()])
+    subscribe_self_updates()
     
-func subsribe_self_updates():
-    var id = SpacetimeDB.get_local_identity().identity.duplicate()
+func subscribe_self_updates():
+    var id = SpacetimeDB.Main.get_local_identity().duplicate()
     id.reverse()
     var query_string = [
         "SELECT * FROM user WHERE identity == '0x%s'" % id.hex_encode()
-        ]
-    var sub_req_id = SpacetimeDB.subscribe(query_string)
-    if sub_req_id < 0:
+    ]
+    var sub := SpacetimeDB.Main.subscribe(query_string)
+    if sub.error:
         printerr("Game: Failed to send subscription request.")
-    else:
-        print("Game: Subscription request sent (Req ID: %d)." % sub_req_id)
-    pass;
+        return
     
+    sub.applied.connect(_on_self_loaded)
+    print("Game: Subscription request sent (Query ID: %d)." % sub.query_id)
+    
+func _on_self_loaded():
+    var id = SpacetimeDB.Main.get_local_identity()
+    var user := SpacetimeDB.Main.db.user.identity.find(id)
+    var user_obj := {
+        identity = user.identity.hex_encode(),
+        online = user.online, 
+        lobby_id = user.lobby_id, 
+        damage = user.damage,
+        test_option_string = user.test_option_string,
+        test_option_message = user.test_option_message
+    }
+    print("Game: Received user from subscription: %s" % user_obj)
+
 func _on_spacetimedb_disconnected():
     print("Game: Disconnected from SpacetimeDB.")
 
-func _on_spacetimedb_connection_error(code, reason):
+func _on_spacetimedb_connection_error(code: int, reason: String):
     printerr("Game: SpacetimeDB Connection Error: ", reason, " Code: ", code)
-
-func _on_spacetimedb_identity_received(identity_token: IdentityTokenData):
-    print("Game: My Identity: 0x", identity_token.identity.hex_encode())
-    subsribe_self_updates()
-
-func _on_spacetimedb_database_initialized():
-    print("Game: Local database initialized.")

@@ -18,7 +18,7 @@ config/icon="res://icon.svg"
 
 [autoload]
 
-SpacetimeDB="*res://addons/SpacetimeDB/Core/SpacetimeDBClient.gd"
+SpacetimeDB="*res://spacetime_bindings/schema/spacetime_autoload.gd"
 
 [display]
 
