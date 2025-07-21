@@ -83,7 +83,8 @@ func clear_logs():
 
 func copy_selected_logs():
     var selected_text = _logs_label.get_selected_text()
-    DisplayServer.clipboard_set(selected_text)
+    if selected_text:
+        DisplayServer.clipboard_set(selected_text)
 
 func add_log(text: Variant) -> void:
     match typeof(text):
