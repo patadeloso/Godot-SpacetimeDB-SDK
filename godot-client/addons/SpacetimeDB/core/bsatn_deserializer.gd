@@ -332,7 +332,7 @@ func _populate_resource_from_bytes(resource: Resource, spb: StreamPeerBuffer) ->
         if has_error():
             if not _last_error.contains(str(instruction.name)):
                 var existing_error = get_last_error()
-                _set_error("Failed reading value for property '%s' in '%s'. Cause: %s" % [instruction.name, resource.resource_path if resource else "Unknown", existing_error], value_start_pos)
+                _set_error("Failed reading value for property '%s' in '%s'. Cause: %s" % [instruction.name, resource.get_script().get_global_name() if resource else "Unknown", existing_error], value_start_pos)
             return false
 
         if value != null:
