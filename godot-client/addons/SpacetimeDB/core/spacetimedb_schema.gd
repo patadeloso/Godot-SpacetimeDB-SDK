@@ -11,9 +11,13 @@ func _init(p_module_name: String, p_schema_path: String = "res://spacetime_bindi
     # Load table row schemas and spacetime types
     _load_types("%s/types" % p_schema_path, p_module_name.to_snake_case())
     # Load core types if they are defined as Resources with scripts
-    _load_types("res://addons/SpacetimeDB/core_types")
+    _load_types("res://addons/SpacetimeDB/core_types/**")
+
+func _load_types(raw_path: String, prefix: String = "") -> void:
+    var path := raw_path
+    if path.ends_with("/**"):
+        path = path.left(-3)
     
-func _load_types(path: String, prefix: String = "") -> void:
     var dir := DirAccess.open(path)
     if not DirAccess.dir_exists_absolute(path):
         printerr("SpacetimeDBSchema: Schema directory does not exist: ", path)
@@ -37,6 +41,9 @@ func _load_types(path: String, prefix: String = "") -> void:
                 file_name += ".gd"
 
         if not file_name.ends_with(".gd"):
+            var potential_dir_path := path.path_join(file_name_raw)
+            if raw_path.ends_with("/**") and DirAccess.dir_exists_absolute(potential_dir_path):
+                _load_types(potential_dir_path.path_join("/**"), prefix)
             continue
             
         if prefix and not file_name.begins_with(prefix):
