@@ -2,7 +2,6 @@
 # FILE WILL NOT BE SAVED. MODIFY TABLES IN YOUR MODULE SOURCE CODE INSTEAD.
 class_name MainMessage extends Resource
 
-const module_name := "Main"
 @export var int_value: int 
 @export var string_value: String 
 @export var int_vec: Array[int] 

@@ -2,7 +2,6 @@
 # FILE WILL NOT BE SAVED. MODIFY TABLES IN YOUR MODULE SOURCE CODE INSTEAD.
 class_name MainDamage extends Resource
 
-const module_name := "Main"
 @export var amount: int 
 @export var source: PackedByteArray 
 @export var int_vec: Array[int] 
