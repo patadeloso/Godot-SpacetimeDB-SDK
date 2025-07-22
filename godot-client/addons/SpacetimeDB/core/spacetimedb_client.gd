@@ -260,7 +260,7 @@ func _handle_parsed_message(message_resource: Resource):
     # Handle known message types
     if message_resource is InitialSubscriptionMessage:
         var initial_sub: InitialSubscriptionMessage = message_resource
-        print_log("SpacetimeDBClient: Processing Initial Subscription (Req ID: %d)" % initial_sub.request_id)
+        print_log("SpacetimeDBClient: Processing Initial Subscription (Query ID: %d)" % initial_sub.query_id.id)
         _local_db.apply_database_update(initial_sub.database_update)
         if not _received_initial_subscription:
             _received_initial_subscription = true
@@ -268,7 +268,7 @@ func _handle_parsed_message(message_resource: Resource):
         
     elif message_resource is SubscribeMultiAppliedMessage:
         var sub: SubscribeMultiAppliedMessage = message_resource
-        print_log("SpacetimeDBClient: Processing Subscription (Req ID: %d)" % sub.request_id)
+        print_log("SpacetimeDBClient: Processing Multi Subscription (Query ID: %d)" % sub.query_id.id)
         _local_db.apply_database_update(sub.database_update)
         if pending_subscriptions.has(sub.query_id.id):
             var subscription := pending_subscriptions[sub.query_id.id]
