@@ -2,19 +2,19 @@ extends Node3D
 
 func _ready():
     var options = SpacetimeDBConnectionOptions.new()
-    
+
     options.one_time_token = true # <--- anonymous-like. set to false to persist
-    options.debug_mode = false # <--- enables lots of additional debug prints and warnings
+    options.debug_mode = true # <--- enables lots of additional debug prints and warnings
     options.compression = SpacetimeDBConnection.CompressionPreference.GZIP
     options.threading = true
     # Increase buffer size. In general, you don't need this.
     # options.set_all_buffer_size(1024 * 1024 * 2)
-    
+
     # Disable threading (e.g., for web builds)
     # options.threading = false
-    
+
     SpacetimeDB.Main.connect_db( #WARNING <--- replace 'Main' with your module name
-        "https://flametime.cfd/spacetime", #WARNING <--- replace it with your url
+        "http://127.0.0.1:3000", #WARNING <--- replace it with your url
         "main", #WARNING <--- replace it with your database name
         options
     )
@@ -31,8 +31,8 @@ func _on_spacetimedb_connected(identity: PackedByteArray, token: String):
 func subscribe_self_updates():
     var id = SpacetimeDB.Main.get_local_identity().duplicate()
     id.reverse()
-    var query_string = [
-        "SELECT * FROM user WHERE identity == '0x%s'" % id.hex_encode()
+    var query_string := [
+        "SELECT * FROM user WHERE identity = '0x%s'" % id.hex_encode()
     ]
     var sub := SpacetimeDB.Main.subscribe(query_string)
     if sub.error:
