@@ -47,7 +47,6 @@ pub struct UserData {
     #[primary_key]
     identity: Identity,
     online: bool,
-    #[unique]
     name: String,
     lobby_id: u64,
     color: Color,
