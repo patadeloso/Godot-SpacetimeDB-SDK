@@ -45,15 +45,18 @@ func subscribe_self_updates():
 func _on_self_loaded():
     var id = SpacetimeDB.Main.get_local_identity()
     var user := SpacetimeDB.Main.db.user.identity.find(id)
-    var user_obj := {
-        identity = user.identity.hex_encode(),
-        online = user.online, 
-        lobby_id = user.lobby_id, 
-        damage = user.damage,
-        test_option_string = user.test_option_string,
-        test_option_message = user.test_option_message
-    }
-    print("Game: Received user from subscription: %s" % user_obj)
+    if user:
+        var user_obj := {
+            identity = user.identity.hex_encode(),
+            online = user.online, 
+            lobby_id = user.lobby_id, 
+            damage = user.damage,
+            test_option_string = user.test_option_string,
+            test_option_message = user.test_option_message
+        }
+        print("Game: Received user from subscription: %s" % user_obj)
+    else:
+        print("Game: User subscription applied but no user with identity: 0x%s" % id.hex_encode())
 
 func _on_spacetimedb_disconnected():
     print("Game: Disconnected from SpacetimeDB.")
