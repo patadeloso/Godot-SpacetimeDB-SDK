@@ -380,11 +380,6 @@
 					"name": "identity",
 					"type": "__identity__",
 					"constraint_name": "user_data_identity_key"
-				},
-				{
-					"name": "name",
-					"type": "String",
-					"constraint_name": "user_data_name_key"
 				}
 			],
 			"is_public": true
@@ -399,11 +394,6 @@
 					"name": "identity",
 					"type": "__identity__",
 					"constraint_name": "user_data_hidden_identity_key"
-				},
-				{
-					"name": "name",
-					"type": "String",
-					"constraint_name": "user_data_hidden_name_key"
 				}
 			],
 			"is_public": false

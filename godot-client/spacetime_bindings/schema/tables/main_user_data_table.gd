@@ -3,13 +3,11 @@
 class_name MainUserDataTable extends _ModuleTable
 
 var identity: MainUserDataIdentityUniqueIndex
-var name: MainUserDataNameUniqueIndex
 
 func _init(db: LocalDatabase) -> void:
 	super(db)
 	set_meta("table_name", "user_data")
 	identity = MainUserDataIdentityUniqueIndex.new(db)
-	name = MainUserDataNameUniqueIndex.new(db)
 
 func iter() -> Array[MainUserData]:
 	var rows: Array = super()
