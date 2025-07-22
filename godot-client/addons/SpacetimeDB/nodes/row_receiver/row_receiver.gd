@@ -2,6 +2,7 @@
 @icon("res://addons/SpacetimeDB/nodes/row_receiver/icon.svg")
 class_name RowReceiver extends Node
 
+@export var debug_mode: bool = false
 @export var table_to_receive: _ModuleTableType : set = on_set;
 var selected_table_name: String : set = set_selected_table_name
 
@@ -14,15 +15,21 @@ signal transactions_completed
 
 var _current_db_instance = null 
 
+func _print_log(log_message: String):
+    if debug_mode:
+        print("%s: %s" % [get_path(), log_message])
+
 func _get_db(wait_for_init: bool = false) -> LocalDatabase:
     if _current_db_instance == null or not is_instance_valid(_current_db_instance):
         var constants := (table_to_receive.get_script() as GDScript).get_script_constant_map()
         var module_name: String = constants.get("module_name", "").to_pascal_case()
         _current_db_instance = SpacetimeDB[module_name].get_local_database()
         
-        if wait_for_init:
+        if _current_db_instance == null and wait_for_init:
+            _print_log("Waiting for db to be initialized...")
             await SpacetimeDB[module_name].database_initialized
-            _get_db(false)
+            _current_db_instance = SpacetimeDB[module_name].get_local_database()
+            _print_log("Db initialized")
     return _current_db_instance
     
 func on_set(schema: _ModuleTableType):
@@ -90,7 +97,7 @@ func _ready() -> void:
         return;
     
     var db := await _get_db(true)
-    _subscribe_to_table(selected_table_name)
+    _subscribe_to_table(db, selected_table_name)
 
     if not table_to_receive:
         push_error("No data schema. Node path: ", get_path())
@@ -103,12 +110,18 @@ func _ready() -> void:
     for row_data in data:
         _on_insert(row_data)
         
-func _subscribe_to_table(table_name_sn: StringName):
+func _subscribe_to_table(db: LocalDatabase, table_name_sn: StringName):
     if Engine.is_editor_hint() or table_name_sn == &"":
         return
     
-    var db := await _get_db()
-    if not is_instance_valid(db): return
+    _print_log("Subscribing to table: %s" % table_name_sn)
+    
+    # Emit data that was inserted before we subscribed
+    var existing_data := await get_table_data()
+    if existing_data.size() > 0:
+        for row in existing_data:
+            _on_insert(row)
+        _on_transactions_completed()
 
     db.subscribe_to_inserts(table_name_sn, Callable(self, "_on_insert"))
     db.subscribe_to_updates(table_name_sn, Callable(self, "_on_update"))
