@@ -94,7 +94,11 @@ func _get_property_list() -> Array:
 
 func _ready() -> void:
     if Engine.is_editor_hint():
-        return;
+        return
+    
+    if not table_to_receive:
+        printerr("The table_to_receive is not set on %s" % get_path())
+        return
     
     var db := await _get_db(true)
     _subscribe_to_table(db, selected_table_name)
