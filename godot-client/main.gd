@@ -22,6 +22,7 @@ func _ready():
     SpacetimeDB.Main.connected.connect(_on_spacetimedb_connected)
     SpacetimeDB.Main.disconnected.connect(_on_spacetimedb_disconnected)
     SpacetimeDB.Main.connection_error.connect(_on_spacetimedb_connection_error)
+    SpacetimeDB.Main.database_initialized.connect(_on_spacetimedb_database_init)
 
 func _on_spacetimedb_connected(identity: PackedByteArray, token: String):
     print("Game: Connected to SpacetimeDB!")
@@ -63,3 +64,6 @@ func _on_spacetimedb_disconnected():
 
 func _on_spacetimedb_connection_error(code: int, reason: String):
     printerr("Game: SpacetimeDB Connection Error: ", reason, " Code: ", code)
+
+func _on_spacetimedb_database_init():
+    print("Game: Database initialised")
