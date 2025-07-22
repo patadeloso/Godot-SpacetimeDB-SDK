@@ -37,6 +37,7 @@ var _connection_id: PackedByteArray
 var _identity: PackedByteArray
 var _token: String
 var _is_initialized := false
+var _received_inital_subscription := false
 var _next_query_id := 0
 
 # --- Signals ---
@@ -261,17 +262,23 @@ func _handle_parsed_message(message_resource: Resource):
         var initial_sub: InitialSubscriptionMessage = message_resource
         print_log("SpacetimeDBClient: Processing Initial Subscription (Req ID: %d)" % initial_sub.request_id)
         _local_db.apply_database_update(initial_sub.database_update)
-        self.database_initialized.emit()
+        if not _received_inital_subscription:
+            _received_inital_subscription = true
+            self.database_initialized.emit()
         
     elif message_resource is SubscribeMultiAppliedMessage:
-        var initial_sub: SubscribeMultiAppliedMessage = message_resource
-        print_log("SpacetimeDBClient: Processing Initial Subscription (Req ID: %d)" % initial_sub.request_id)
-        _local_db.apply_database_update(initial_sub.database_update)
-        if pending_subscriptions.has(initial_sub.query_id.id):
-            var subscription := pending_subscriptions[initial_sub.query_id.id]
-            current_subscriptions[initial_sub.query_id.id] = subscription
-            pending_subscriptions.erase(initial_sub.query_id.id)
+        var sub: SubscribeMultiAppliedMessage = message_resource
+        print_log("SpacetimeDBClient: Processing Subscription (Req ID: %d)" % sub.request_id)
+        _local_db.apply_database_update(sub.database_update)
+        if pending_subscriptions.has(sub.query_id.id):
+            var subscription := pending_subscriptions[sub.query_id.id]
+            current_subscriptions[sub.query_id.id] = subscription
+            pending_subscriptions.erase(sub.query_id.id)
             subscription.applied.emit()
+        
+        if not _received_inital_subscription:
+            _received_inital_subscription = true
+            self.database_initialized.emit()
         
     elif message_resource is UnsubscribeMultiAppliedMessage:
         var unsub: UnsubscribeMultiAppliedMessage = message_resource
