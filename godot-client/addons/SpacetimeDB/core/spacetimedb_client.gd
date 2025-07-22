@@ -366,8 +366,6 @@ func subscribe(queries: PackedStringArray) -> SpacetimeDBSubscription:
     _next_query_id += 1
     # 2. Create the correct payload Resource
     var payload_data := SubscribeMultiMessage.new(queries, query_id)
-    
-    #print("! ",payload_data.query_id.id)
 
     # 3. Serialize the complete ClientMessage using the universal function
     var message_bytes := _serializer.serialize_client_message(
@@ -436,7 +434,7 @@ func unsubscribe(query_id: int) -> Error:
     
 func call_reducer(reducer_name: String, args: Array = [], types: Array = []) -> int:
     if not is_connected_db():
-        #print_logerr("SpacetimeDBClient: Cannot call reducer, not connected.")
+        printerr("SpacetimeDBClient: Cannot call reducer, not connected.")
         return -1 # Indicate error
         
     # Generate a request ID (ensure it's u32 range if needed, but randi is fine for now)
