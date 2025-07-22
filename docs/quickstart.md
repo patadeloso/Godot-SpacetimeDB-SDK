@@ -188,3 +188,9 @@ func get_all_cached_players() -> Array[PlayerData]:
         return SpacetimeDB.MyModule.db.PlayerData.iter()
     return []
 ```
+
+---
+
+### Continue reading
+
+-   [API Reference](api.md)
