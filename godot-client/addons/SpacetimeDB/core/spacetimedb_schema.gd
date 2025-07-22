@@ -30,6 +30,10 @@ func _load_types(raw_path: String, prefix: String = "") -> void:
             break
         
         if dir.current_is_dir():
+            var dir_name := file_name_raw
+            if dir_name != "." and dir_name != ".." and raw_path.ends_with("/**"):
+                var dir_path := path.path_join(dir_name)
+                _load_types(dir_path.path_join("/**"), prefix)
             continue
 
         var file_name := file_name_raw
@@ -41,12 +45,9 @@ func _load_types(raw_path: String, prefix: String = "") -> void:
                 file_name += ".gd"
 
         if not file_name.ends_with(".gd"):
-            var potential_dir_path := path.path_join(file_name_raw)
-            if raw_path.ends_with("/**") and DirAccess.dir_exists_absolute(potential_dir_path):
-                _load_types(potential_dir_path.path_join("/**"), prefix)
             continue
             
-        if prefix and not file_name.begins_with(prefix):
+        if prefix != "" and not file_name.begins_with(prefix):
             continue
 
         var script_path := path.path_join(file_name)

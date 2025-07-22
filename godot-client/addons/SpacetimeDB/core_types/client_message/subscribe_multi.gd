@@ -7,7 +7,7 @@ class_name SubscribeMultiMessage extends Resource
 @export var request_id: int # u32
 @export var query_id: QueryIdData
 
-func _init(p_queries: Array[String], p_query_id: int, p_request_id: int = 0):
+func _init(p_queries: Array[String] = [], p_query_id: int = 0, p_request_id: int = 0):
     var typed_queries: Array[String] = []
     typed_queries.assign(p_queries)
     queries = typed_queries
