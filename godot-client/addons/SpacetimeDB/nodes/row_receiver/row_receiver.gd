@@ -72,12 +72,10 @@ func on_set(schema: _ModuleTableType):
     if Engine.is_editor_hint():
         property_list_changed.emit()
 
-
 func set_selected_table_name(value: String):
     if selected_table_name == value:
         return
     selected_table_name = value
-
 
 func _get_property_list() -> Array:
     var properties: Array = []
@@ -91,34 +89,26 @@ func _get_property_list() -> Array:
         })
     return properties
 
-
 func _ready() -> void:
     if Engine.is_editor_hint():
         return
     
     if not table_to_receive:
-        printerr("The table_to_receive is not set on %s" % get_path())
+        push_error("The table_to_receive is not set on %s" % get_path())
         return
     
     var db := await _get_db(true)
     _subscribe_to_table(db, selected_table_name)
-
-    if not table_to_receive:
-        push_error("No data schema. Node path: ", get_path())
-        return
-    
-    if get_parent() and not get_parent().is_node_ready():
-        await get_parent().ready
-    
-    var data := db.get_all_rows(selected_table_name)
-    for row_data in data:
-        _on_insert(row_data)
         
 func _subscribe_to_table(db: LocalDatabase, table_name_sn: StringName):
     if Engine.is_editor_hint() or table_name_sn == &"":
         return
     
     _print_log("Subscribing to table: %s" % table_name_sn)
+    
+    if get_parent() and not get_parent().is_node_ready():
+        _print_log("Waiting for parent before subscribing")
+        await get_parent().ready
     
     # Emit data that was inserted before we subscribed
     var existing_data := await get_table_data()
@@ -131,10 +121,14 @@ func _subscribe_to_table(db: LocalDatabase, table_name_sn: StringName):
     db.subscribe_to_updates(table_name_sn, Callable(self, "_on_update"))
     db.subscribe_to_deletes(table_name_sn, Callable(self, "_on_delete"))
     db.subscribe_to_transactions_completed(table_name_sn, Callable(self, "_on_transactions_completed"))
+    
+    _print_log("Successfully subscribed to table: %s" % table_name_sn)
 
 func _unsubscribe_from_table(table_name_sn: StringName):
     if Engine.is_editor_hint() or table_name_sn == &"":
         return
+        
+    _print_log("Unsubscribing from table: %s" % table_name_sn)
     
     var db := await _get_db()
     if not is_instance_valid(db): return 
