@@ -73,6 +73,7 @@ player_scene = ExtResource("2_0xm2m")
 
 [node name="Receiver [MainUserData]" type="Node" parent="PlayerSpawner"]
 script = ExtResource("5_7mycd")
+debug_mode = null
 table_to_receive = SubResource("Resource_4c57u")
 selected_table_name = "user_data"
 metadata/_custom_type_script = "uid://jvk6ou7i2d4s"
@@ -83,6 +84,7 @@ receiver = NodePath("Receiver [MainUser]")
 
 [node name="Receiver [MainUser]" type="Node" parent="Lobby"]
 script = ExtResource("5_7mycd")
+debug_mode = null
 table_to_receive = SubResource("Resource_efxa6")
 selected_table_name = "user"
 metadata/_custom_type_script = "uid://jvk6ou7i2d4s"
