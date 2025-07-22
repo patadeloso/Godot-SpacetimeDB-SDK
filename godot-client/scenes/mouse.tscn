@@ -39,6 +39,7 @@ vertical_alignment = 1
 
 [node name="Receiver [MainUserData]" type="Node" parent="."]
 script = ExtResource("3_j7mu1")
+debug_mode = null
 table_to_receive = SubResource("Resource_dexx5")
 selected_table_name = "user_data"
 metadata/_custom_type_script = "uid://jvk6ou7i2d4s"
