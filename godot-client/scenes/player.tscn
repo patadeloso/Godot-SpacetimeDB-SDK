@@ -46,7 +46,6 @@ text = "Hello world"
 
 [node name="Receiver [MainUserData]" type="Node" parent="."]
 script = ExtResource("2_qhqgy")
-debug_mode = null
 table_to_receive = SubResource("Resource_dqkch")
 selected_table_name = "user_data"
 metadata/_custom_type_script = "uid://jvk6ou7i2d4s"
