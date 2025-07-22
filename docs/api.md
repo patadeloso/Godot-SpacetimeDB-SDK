@@ -1,5 +1,7 @@
 # API Reference
 
+## TODO: Add documentation for client / db / reducers
+
 ## Rust Enums In Godot
 
 There is full support for rust enum sumtypes when derived from SpacetimeType.
