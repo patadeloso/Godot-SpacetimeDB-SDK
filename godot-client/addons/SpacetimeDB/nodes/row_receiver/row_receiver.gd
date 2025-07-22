@@ -119,6 +119,13 @@ func _subscribe_to_table(db: LocalDatabase, table_name_sn: StringName):
         return
     
     _print_log("Subscribing to table: %s" % table_name_sn)
+    
+    # Emit data that was inserted before we subscribed
+    var existing_data := await get_table_data()
+    if existing_data.size() > 0:
+        for row in existing_data:
+            _on_insert(row)
+        _on_transactions_completed()
 
     db.subscribe_to_inserts(table_name_sn, Callable(self, "_on_insert"))
     db.subscribe_to_updates(table_name_sn, Callable(self, "_on_update"))
