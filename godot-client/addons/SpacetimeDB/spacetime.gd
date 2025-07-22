@@ -1,6 +1,7 @@
 @tool
 class_name SpacetimePlugin extends EditorPlugin
 
+const LEGACY_DATA_PATH := "res://spacetime_data"
 const BINDINGS_PATH := "res://spacetime_bindings"
 const BINDINGS_SCHEMA_PATH := BINDINGS_PATH + "/schema"
 const AUTOLOAD_NAME := "SpacetimeDB"
@@ -149,7 +150,18 @@ func _on_generate_schema(uri: String, module_names: Array[String]):
     
     _cleanup_unused_classes(BINDINGS_SCHEMA_PATH, generated_files)
     
-    if not ProjectSettings.has_setting("autoload/" + AUTOLOAD_NAME):
+    if DirAccess.dir_exists_absolute(LEGACY_DATA_PATH):
+        print_log("Removing legacy data directory: %s" % LEGACY_DATA_PATH)
+        DirAccess.remove_absolute(LEGACY_DATA_PATH)
+    
+    var setting_name := "autoload/" + AUTOLOAD_NAME
+    if ProjectSettings.has_setting(setting_name):
+        var current_autoload: String = ProjectSettings.get_setting(setting_name)
+        if current_autoload != "*%s" % AUTOLOAD_PATH:
+            print_log("Removing old autoload path: %s" % current_autoload)
+            ProjectSettings.set_setting(setting_name, null)
+    
+    if not ProjectSettings.has_setting(setting_name):
         add_autoload_singleton(AUTOLOAD_NAME, AUTOLOAD_PATH)
     
     get_editor_interface().get_resource_filesystem().scan()
