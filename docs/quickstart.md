@@ -85,7 +85,7 @@ func _notification(what: int) -> void:
 
 ## Listen for Data Changes
 
-There are two main ways to listen for data changes:
+There are three ways to listen for data changes:
 
 ### A) Using the `RowReceiver` node (Recommended for specific tables)
 
@@ -122,7 +122,36 @@ func _on_player_receiver_delete(player: PlayerData):
     # ... despawn player visual ...
 ```
 
-### B) Using Global signals
+### B) Using generated table on_xxx methods (Alternative to `RowReceiver` node)
+
+Add listeners to a table via the `on_insert`, `on_update` and `on_delete` methods.
+
+```gdscript
+# Script needing player updates
+
+# Somewhere in your script
+SpacetimeDB.MyModule.db.PlayerData.on_insert(_on_player_receiver_insert)
+SpacetimeDB.MyModule.db.PlayerData.on_update(_on_player_receiver_update)
+SpacetimeDB.MyModule.db.PlayerData.on_delete(_on_player_receiver_delete)
+
+func _on_player_receiver_insert(player: PlayerData):
+    # Player inserted
+    print("Receiver Insert: Player %s ; Health: %d" % [player.name, player.health])
+    # ... spawn player visual ...
+
+func _on_player_receiver_update(previous_row: PlayerData, player: PlayerData):
+    # Player updated
+    print("Receiver Update: Player %s ; Health: %d" % [player.name, player.health])
+    print("Receiver Previous Value: Player %s ; Health: %d" % [previous_row.name, previous_row.health])
+    # ... update player visual ...
+
+func _on_player_receiver_delete(player: PlayerData):
+    # Player deleted
+    print("Receiver Delete: Player %s" % player.name)
+    # ... despawn player visual ...
+```
+
+### C) Using Global signals
 
 Connect directly to the module's signals for broader updates across all tables.
 
