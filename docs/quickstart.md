@@ -87,7 +87,7 @@ func _notification(what: int) -> void:
 
 There are three ways to listen for data changes:
 
-### A) Using the `RowReceiver` node (Recommended for specific tables)
+### Using the `RowReceiver` node (Recommended for specific tables)
 
 1.  Add a `RowReceiver` node to your scene.
 2.  In the Inspector, set `Table To Receive` to your schema resource via the dropdown menu (e.g., `PlayerData`).
@@ -122,7 +122,7 @@ func _on_player_receiver_delete(player: PlayerData):
     # ... despawn player visual ...
 ```
 
-### B) Using generated table on_xxx methods (Alternative to `RowReceiver` node)
+### Using generated table on_xxx methods (Alternative to `RowReceiver` node)
 
 Add listeners to a table via the `on_insert`, `on_update` and `on_delete` methods.
 
@@ -151,7 +151,7 @@ func _on_player_receiver_delete(player: PlayerData):
     # ... despawn player visual ...
 ```
 
-### C) Using Global signals
+### Using Global signals
 
 Connect directly to the module's signals for broader updates across all tables.
 
