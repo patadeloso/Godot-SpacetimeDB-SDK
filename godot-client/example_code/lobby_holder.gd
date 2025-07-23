@@ -3,13 +3,12 @@ extends Node
 signal user_join(user: MainUser)
 signal user_leave(user: MainUser)
 
-@export var receiver: RowReceiver
 var local_user: MainUser
 var users = {}
 
 func _ready() -> void:
-    receiver.insert.connect(_on_user_inserted)
-    receiver.delete.connect(_on_user_deleted)
+    SpacetimeDB.Main.db.user.on_insert(_on_user_inserted)
+    SpacetimeDB.Main.db.user.on_delete(_on_user_deleted)
 
 func _on_user_inserted(user: MainUser):
     if user.identity == SpacetimeDB.Main.get_local_identity():
