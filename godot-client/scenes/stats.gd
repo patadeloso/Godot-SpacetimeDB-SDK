@@ -5,18 +5,18 @@ func _ready() -> void:
     SpacetimeDB.Main._connection.total_bytes.connect(_total_bytes)
     SpacetimeDB.Main._connection.total_messages.connect(_total_messages)
 
-func _total_bytes(sended:int, received:int):
+func _total_bytes(sent: int, received: int):
     if received == 100:
         return
-    $HBoxContainer/VBoxContainer/bytes.text = format_bytes(sended)
+    $HBoxContainer/VBoxContainer/bytes.text = format_bytes(sent)
     $HBoxContainer/VBoxContainer2/bytes.text = format_bytes(received)
 
-func _total_messages(sended:int, received:int):
+func _total_messages(sent: int, received: int):
     #if received == 50:
     #	SpacetimeDB.Main._connection.total_bytes.disconnect(_total_bytes)
     #	SpacetimeDB.Main._connection.total_messages.disconnect(_total_messages)
     
-    $HBoxContainer/VBoxContainer/count.text = str(sended)
+    $HBoxContainer/VBoxContainer/count.text = str(sent)
     $HBoxContainer/VBoxContainer2/count.text = str(received)
 
 func format_bytes(bytes_value: int) -> String:

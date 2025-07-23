@@ -27,8 +27,8 @@ signal connected
 signal disconnected
 signal connection_error(code: int, reason: String)
 signal message_received(data: PackedByteArray) 
-signal total_messages(sended: int, received: int)
-signal total_bytes(sended: int, received: int)
+signal total_messages(sent: int, received: int)
+signal total_bytes(sent: int, received: int)
 
 
 func _init(options: SpacetimeDBConnectionOptions):
@@ -36,10 +36,10 @@ func _init(options: SpacetimeDBConnectionOptions):
     #Performance.add_custom_monitor("spacetime/second_received_bytes", get_second_received_bytes)
     #Performance.add_custom_monitor("spacetime/total_received_packets", get_received_packets)
     #Performance.add_custom_monitor("spacetime/total_received_kbytes", get_received_kbytes)
-    #Performance.add_custom_monitor("spacetime/second_sended_packets", get_second_sended_packets)
-    #Performance.add_custom_monitor("spacetime/second_sended_bytes", get_second_sended_bytes)
-    #Performance.add_custom_monitor("spacetime/total_sended_packets", get_sended_packets)
-    #Performance.add_custom_monitor("spacetime/total_sended_kbytes", get_sended_kbytes)
+    #Performance.add_custom_monitor("spacetime/second_sent_packets", get_second_sent_packets)
+    #Performance.add_custom_monitor("spacetime/second_sent_bytes", get_second_sent_bytes)
+    #Performance.add_custom_monitor("spacetime/total_sent_packets", get_sent_packets)
+    #Performance.add_custom_monitor("spacetime/total_sent_kbytes", get_sent_kbytes)
     
     _websocket.inbound_buffer_size = options.inbound_buffer_size
     _websocket.outbound_buffer_size = options.outbound_buffer_size
@@ -47,42 +47,41 @@ func _init(options: SpacetimeDBConnectionOptions):
     self._debug_mode = options.debug_mode
     set_process(false) # Don't process until connect is called
 
-func get_second_sended_bytes():
+func _print_log(log_message:String):
+    if _debug_mode:
+        print(log_message)
+
+func get_second_sent_bytes():
     var amount = _second_bytes_send
     _second_bytes_send = 0
-    return amount;
+    return amount
     
 func get_second_received_bytes():
     var amount = _second_bytes_received
     _second_bytes_received = 0
-    return amount;
+    return amount
     
-func get_second_sended_packets():
+func get_second_sent_packets():
     var amount = _second_messages_send
     _second_messages_send = 0
-    return amount;
+    return amount
 
 func get_second_received_packets():
     var amount = _second_messages_received
     _second_messages_received = 0
-    return amount;
+    return amount
 
-func get_sended_kbytes() -> float:
-    return float(float(_total_bytes_send)/1000.0);
+func get_sent_kbytes() -> float:
+    return float(float(_total_bytes_send)/1000.0)
     
 func get_received_kbytes() -> float:
-    return float(float(_total_bytes_received)/1000.0);
+    return float(float(_total_bytes_received)/1000.0)
     
-func get_sended_packets():
-    return _total_messages_send;
+func get_sent_packets():
+    return _total_messages_send
 
 func get_received_packets():
-    return _total_messages_received;
-
-func print_log(log_message:String):
-    if _debug_mode:
-        print(log_message)
-    pass;
+    return _total_messages_received
     
 func set_token(token: String):
     self._token = token
@@ -95,19 +94,19 @@ func send_bytes(bytes: PackedByteArray) -> Error:
     if err == OK:
         _second_bytes_send += bytes.size()
         _total_bytes_send += bytes.size()
-        _second_messages_send += 1;
-        _total_messages_send += 1;
+        _second_messages_send += 1
+        _total_messages_send += 1
         total_messages.emit(_total_messages_send, _total_messages_received)
         total_bytes.emit(_total_bytes_send, _total_bytes_received)
-    return err;
+    return err
     
 func connect_to_database(base_url: String, database_name: String, connection_id: String): # Added connection_id
     if _is_connected or _connection_requested:
-        print_log("SpacetimeDBConnection: Already connected or connecting.")
+        _print_log("SpacetimeDBConnection: Already connected or connecting.")
         return
 
     if _token.is_empty():
-        print_log("SpacetimeDBConnection: Cannot connect without auth token.")
+        _print_log("SpacetimeDBConnection: Cannot connect without auth token.")
         return
 
     if connection_id.is_empty():
@@ -145,7 +144,7 @@ func connect_to_database(base_url: String, database_name: String, connection_id:
         _websocket.handshake_headers = [auth_header] 
 
     _target_url = ws_url_base + query_params
-    print_log("SpacetimeDBConnection: Attempting to connect to: " + _target_url)
+    _print_log("SpacetimeDBConnection: Attempting to connect to: " + _target_url)
 
     _websocket.supported_protocols = [BSATN_PROTOCOL]
 
@@ -154,13 +153,13 @@ func connect_to_database(base_url: String, database_name: String, connection_id:
         printerr("SpacetimeDBConnection: Error initiating connection: ", err)
         emit_signal("connection_error", err, "Failed to initiate connection")
     else:
-        print_log("SpacetimeDBConnection: Connection initiated.")
+        _print_log("SpacetimeDBConnection: Connection initiated.")
         _connection_requested = true
         set_process(true)
 
 func disconnect_from_server(code: int = 1000, reason: String = "Client initiated disconnect"):
     if _websocket.get_ready_state() != WebSocketPeer.STATE_CLOSED:
-        print_log("SpacetimeDBConnection: Closing connection...")
+        _print_log("SpacetimeDBConnection: Closing connection...")
         _websocket.close(code, reason)
     _is_connected = false
     _connection_requested = false
@@ -178,7 +177,7 @@ func _physics_process(delta: float) -> void:
     match state:
         WebSocketPeer.STATE_OPEN:
             if not _is_connected:
-                print_log("SpacetimeDBConnection: Connection established.")
+                _print_log("SpacetimeDBConnection: Connection established.")
                 _is_connected = true
                 _connection_requested = false
                 connected.emit()
@@ -212,7 +211,7 @@ func _physics_process(delta: float) -> void:
                     printerr("SpacetimeDBConnection: Connection closed unexpectedly.")
                     emit_signal("connection_error", code, "Abnormal closure")
                 else:
-                    print_log("SpacetimeDBConnection: Connection closed (Code: %d, Reason: %s)" % [code, reason])
+                    _print_log("SpacetimeDBConnection: Connection closed (Code: %d, Reason: %s)" % [code, reason])
                     emit_signal("disconnected") # Normal closure signal
 
             _is_connected = false
