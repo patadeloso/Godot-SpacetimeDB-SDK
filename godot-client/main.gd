@@ -13,9 +13,9 @@ func _ready():
     # Disable threading (e.g., for web builds)
     # options.threading = false
 
-    SpacetimeDB.Main.connect_db( #WARNING <--- replace 'Main' with your module name
-        "http://127.0.0.1:3000", #WARNING <--- replace it with your url
-        "main", #WARNING <--- replace it with your database name
+    SpacetimeDB.Main.connect_db( # WARNING <--- replace 'Main' with your module name
+        "http://127.0.0.1:3000", # WARNING <--- replace it with your url
+        "main", # WARNING <--- replace it with your database name
         options
     )
 
@@ -49,8 +49,8 @@ func _on_self_loaded():
     if user:
         var user_obj := {
             identity = user.identity.hex_encode(),
-            online = user.online, 
-            lobby_id = user.lobby_id, 
+            online = user.online,
+            lobby_id = user.lobby_id,
             damage = user.damage,
             test_option_string = user.test_option_string,
             test_option_message = user.test_option_message
