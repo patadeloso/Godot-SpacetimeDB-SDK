@@ -129,6 +129,7 @@ func _on_generate_schema(uri: String, module_names: Array[String]):
     
     print_log("Fetching module schemas...")
     var module_schemas: Dictionary[String, String] = {}
+    var failed = false
     for module_name in module_names:
         var schema_uri := "%s/v1/database/%s/schema?version=9" % [uri, module_name]
         http_request.request(schema_uri)
@@ -138,12 +139,19 @@ func _on_generate_schema(uri: String, module_names: Array[String]):
             var snake_module_name = module_name.replace("-", "_")
             module_schemas[snake_module_name] = json
             print_log("Fetched schema for module: %s" % [module_name])
-        elif result[1] == 404:
+            continue
+        
+        if result[1] == 404:
             print_err("Module not found - %s" % [schema_uri])
         elif result[1] == 0:
             print_err("Request timeout - %s" % [schema_uri])
         else:
             print_err("Failed to fetch module schema: %s - Response code %s" % [module_name, result[1]])
+        failed = true
+    
+    if failed:
+        print_err("Code generation failed!")
+        return
     
     var codegen := SpacetimeCodegen.new(BINDINGS_SCHEMA_PATH)
     var generated_files := codegen.generate_bindings(module_schemas)
