@@ -445,9 +445,6 @@ func call_reducer(reducer_name: String, args: Array = [], types: Array = []) -> 
     if not is_connected_db():
         printerr("SpacetimeDBClient: Cannot call reducer, not connected.")
         return ERR_CONNECTION_ERROR
-        
-    # Generate a request ID (ensure it's u32 range if needed, but randi is fine for now)
-    var request_id := randi() & 0xFFFFFFFF # Ensure positive u32 range
     
     var args_bytes := _serializer._serialize_arguments(args, types)
 
@@ -455,7 +452,7 @@ func call_reducer(reducer_name: String, args: Array = [], types: Array = []) -> 
         printerr("Failed to serialize args for %s: %s" % [reducer_name, _serializer.get_last_error()])
         return ERR_PARSE_ERROR
     
-    var call_data := CallReducerMessage.new(reducer_name, args_bytes, request_id, 0)
+    var call_data := CallReducerMessage.new(reducer_name, args_bytes, 0, 0)
     var message_bytes := _serializer.serialize_client_message(
         SpacetimeDBClientMessage.CALL_REDUCER,
         call_data
