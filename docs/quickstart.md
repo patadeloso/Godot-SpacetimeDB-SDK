@@ -130,9 +130,9 @@ Add listeners to a table via the `on_insert`, `on_update` and `on_delete` method
 # Script needing player updates
 
 # Somewhere in your script
-SpacetimeDB.MyModule.db.PlayerData.on_insert(_on_player_receiver_insert)
-SpacetimeDB.MyModule.db.PlayerData.on_update(_on_player_receiver_update)
-SpacetimeDB.MyModule.db.PlayerData.on_delete(_on_player_receiver_delete)
+SpacetimeDB.MyModule.db.player_data.on_insert(_on_player_receiver_insert)
+SpacetimeDB.MyModule.db.player_data.on_update(_on_player_receiver_update)
+SpacetimeDB.MyModule.db.player_data.on_delete(_on_player_receiver_delete)
 
 func _on_player_receiver_insert(player: PlayerData):
     # Player inserted
@@ -207,14 +207,14 @@ Access the cached data synchronously at any time.
 func get_player_health(identity: PackedByteArray) -> int:
     if SpacetimeDB.MyModule.db:
         # Get a row via any unique index in a table
-        var player := SpacetimeDB.MyModule.db.PlayerData.identity.find(identity)
+        var player := SpacetimeDB.MyModule.db.player_data.identity.find(identity)
         if player:
             return player.health
     return -1 # Indicate not found or error
 
 func get_all_cached_players() -> Array[PlayerData]:
     if SpacetimeDB.MyModule.db:
-        return SpacetimeDB.MyModule.db.PlayerData.iter()
+        return SpacetimeDB.MyModule.db.player_data.iter()
     return []
 ```
 
