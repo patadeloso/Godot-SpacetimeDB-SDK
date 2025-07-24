@@ -42,11 +42,10 @@ Disconnects from the SpacetimeDB database.
 
 ```gdscript
 class SpacetimeDBClient:
-
     func get_local_database() -> LocalDatabase
 ```
 
-Get the untyped `LocalDatabase` instance by calling `SpacetimeDBClient.get_local_database()`.
+Get the untyped [`LocalDatabase`](#localdatabase-class) instance by calling `SpacetimeDBClient.get_local_database()`.
 
 ### Get the identity of the current connection
 
@@ -54,7 +53,6 @@ Get the untyped `LocalDatabase` instance by calling `SpacetimeDBClient.get_local
 
 ```gdscript
 class SpacetimeDBClient:
-
     func get_local_identity() -> PackedByteArray
 ```
 
@@ -69,6 +67,10 @@ class SpacetimeDBClient:
     func subscribe(queries: PackedStringArray) -> SpacetimeDBSubscription
 ```
 
+| Name    | Description                              |
+| ------- | ---------------------------------------- |
+| queries | An array of SQL queries to subscribe to. |
+
 Subscribe to queries by calling `subscribe(queries)`, which returns a [`SpacetimeDBSubscription`](#spacetimedbsubscription-class) instance.
 
 See the [SpacetimeDB SQL Reference](https://spacetimedb.com/docs/sql#subscriptions) for information on the queries SpacetimeDB supports.
@@ -79,6 +81,10 @@ See the [SpacetimeDB SQL Reference](https://spacetimedb.com/docs/sql#subscriptio
 class SpacetimeDBClient:
     func unsubscribe(query_id: int) -> Error
 ```
+
+| Name     | Description                             |
+| -------- | --------------------------------------- |
+| query_id | The query id of an active subscription. |
 
 Close a subscription by calling `unsubscribe(query_id)` with the query id of an existing query. A Godot `Error` is returned to indicate success or failure.
 
@@ -125,12 +131,12 @@ Returns the number of rows of the table in the local database, i.e. the total nu
 
 ```gdscript
 class ModuleTable:
-    func iter() -> Array[_ModuleTableType]
+    func iter() -> Array[Row]
 ```
 
 An array of all of the subscribed rows in the local database, i.e. those which match any of the subscribed queries.
 
-The `_ModuleTableType` type will be the auto-generated type which matches the row type defined in the module.
+The `Row` type will be the auto-generated type which matches the row type defined in the module.
 
 #### `on_insert` listener
 
@@ -141,12 +147,12 @@ class ModuleTable:
     func remove_on_insert(listener: Callable) -> void
 
 # Listener function signature
-func(row: _ModuleTableType) -> void
+func(row: Row) -> void
 ```
 
 The `on_insert` listener runs whenever a new row is inserted into the local database.
 
-The `_ModuleTableType` type will be the auto-generated type which matches the row type defined in the module.
+The `Row` type will be the auto-generated type which matches the row type defined in the module.
 
 Call `remove_on_insert` to un-register a previously registered listener.
 
@@ -159,12 +165,12 @@ class ModuleTable:
     func remove_on_update(listener: Callable) -> void
 
 # Listener function signature
-func(old_row: _ModuleTableType, new_row: _ModuleTableType) -> void
+func(old_row: Row, new_row: Row) -> void
 ```
 
 The `on_update` listener runs whenever a row already in the local database is updated.
 
-The `_ModuleTableType` type will be the auto-generated type which matches the row type defined in the module.
+The `Row` type will be the auto-generated type which matches the row type defined in the module.
 
 Call `remove_on_update` to un-register a previously registered listener.
 
@@ -177,12 +183,12 @@ class ModuleTable:
     func remove_on_delete(listener: Callable) -> void
 
 # Listener function signature
-func(row: _ModuleTableType) -> void
+func(row: Row) -> void
 ```
 
 The `on_delete` listener runs whenever a row already in the local database is deleted.
 
-The `_ModuleTableType` type will be the auto-generated type which matches the row type defined in the module.
+The `Row` type will be the auto-generated type which matches the row type defined in the module.
 
 Call `remove_on_delete` to un-register a previously registered listener.
 
@@ -192,10 +198,10 @@ For each unique constraint on a table, its table class has a property whose name
 
 ```gdscript
 class ModuleTableUniqueIndex:
-    func find(col_val: ColumnType) -> _ModuleTableType | null
+    func find(col_val: Col) -> Row | null
 ```
 
-Where `ColumnType` is the column data type and `_ModuleTableType` is the table row type. If a row with the `col_val` exists in the local database, the method returns that row, otherwise it returns `null`.
+Where `Col` is the column data type and `Row` is the table row type. If a row with the `col_val` exists in the local database, the method returns that row, otherwise it returns `null`.
 
 #### BTree index access
 
@@ -302,6 +308,10 @@ class SpacetimeDBConnectionOptions:
     func set_all_buffer_size(size: int) -> void
 ```
 
+| Name | Description                                             |
+| ---- | ------------------------------------------------------- |
+| size | The size of the inbound and outbound buffers, in bytes. |
+
 ## `SpacetimeDBSubscription` class
 
 **Inherits:** Node
@@ -344,6 +354,10 @@ class SpacetimeDBSubscription:
     async func wait_for_applied(timeout_sec: float = 5) -> Error
 ```
 
+| Name | Description |
+| --- | --- |
+| timeout_sec | The number of seconds to wait for the subscription to be applied before timing out. |
+
 Waits for the subscription to be applied, or until it times out.
 
 Returns an error if the subscription has already ended or if the timeout is reached.
@@ -354,6 +368,10 @@ Returns an error if the subscription has already ended or if the timeout is reac
 class SpacetimeDBSubscription:
     async func wait_for_end(timeout_sec: float = 5) -> Error
 ```
+
+| Name | Description |
+| --- | --- |
+| timeout_sec | The number of seconds to wait for the subscription to be terminated before timing out. |
 
 Waits for the subscription to be terminated, or until it times out.
 
