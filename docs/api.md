@@ -4,7 +4,7 @@
 
 **Inherits:** Node
 
-A connection to a SpacetimeDB database is controlled by the `SpacetimeDBClient` class. All generated [`ModuleClient`](#generated-moduleclient-classes) classes extend this class.
+A connection to a SpacetimeDB database is controlled by the `SpacetimeDBClient` class. All generated [`ModuleClient`](#generated-moduleclient-class) classes extend this class.
 
 ### Connect to a database
 
@@ -88,7 +88,7 @@ class SpacetimeDBClient:
 
 Close a subscription by calling `unsubscribe(query_id)` with the query id of an existing query. A Godot `Error` is returned to indicate success or failure.
 
-## Generated `ModuleClient` classes
+## Generated `ModuleClient` class
 
 **Inherits:** [SpacetimeDBClient](#spacetimedbclient-class) < Node
 
