@@ -76,6 +76,9 @@ func wait_for_end(timeout_sec: float = 5) -> Error:
     return OK
 
 func unsubscribe() -> Error:
+    if _ended:
+        return ERR_DOES_NOT_EXIST
+
     return _client.unsubscribe(query_id)
 
 func _on_applied_timeout() -> void:
