@@ -35,5 +35,5 @@ The generated bindings are placed in `res://spacetime_bindings/` and are structu
 
 ### Continue reading
 
--   [Quick Start](quickstart.md)
+-   [Quick Start guide](quickstart.md)
 -   [API Reference](api.md)

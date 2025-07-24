@@ -40,5 +40,5 @@ To enable the SpacetimeDB SDK plugin:
 ### Continue reading
 
 -   [Generate module bindings](codegen.md)
--   [Quick Start](quickstart.md)
+-   [Quick Start guide](quickstart.md)
 -   [API Reference](api.md)

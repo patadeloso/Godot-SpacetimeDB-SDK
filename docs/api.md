@@ -573,3 +573,11 @@ The SDK handles serialization between Godot types and SpacetimeDB's BSATN format
         1.  Obtain or create a GDExtension/GDNative module wrapping a Brotli library.
         2.  Modify `addons/SpacetimeDB/core/bsatn_deserializer.gd` (`_get_query_update_stream` function and potentially `parse_packet`) to call your native decompression function.
     -   **Recommendation:** Ensure your SpacetimeDB server is configured _not_ to send compressed messages, or only use `CompressionPreference.NONE` when connecting.
+
+---
+
+### Other documentation
+
+-   [Installation](installation.md)
+-   [Generate module bindings](codegen.md)
+-   [Quick Start guide](quickstart.md)
