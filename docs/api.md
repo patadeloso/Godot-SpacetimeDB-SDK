@@ -103,7 +103,7 @@ class ModuleClient:
     var db: ModuleDb
 ```
 
-The `db` field provides access to the subscribed view of the database's tables. See [Access the local database](#access-the-local-database).
+The `db` property provides access to the subscribed view of the database's tables. See [Access the local database](#access-the-local-database).
 
 #### `reducers` property
 
@@ -112,7 +112,7 @@ class ModuleClient:
     const reducers: ModuleReducers
 ```
 
-The `reducers` field provides access to reducers exposed by the module. See [Calling reducers](#calling-reducers).
+The `reducers` property provides access to reducers exposed by the module. See [Calling reducers](#calling-reducers).
 
 ### Access the local database
 
