@@ -18,7 +18,6 @@ This SDK provides the necessary tools to integrate your Godot Engine project wit
 
 -   **Option<T> and Vec<T>** Currently limited to 1 layer of nesting: Option<Vec<T>>, Vec<Option<T>> only. No Option<Option<T>> or Vec<Vec<T>> etc...
 -   **Compression:** Brotli - not supported.
--   **`unsubscribe()`:** May not function reliably in all cases.
 -   **Error Handling:** Can be improved, especially for reducer call failures beyond basic connection errors.
 -   **Configuration:** More options could be added (timeouts, reconnection).
 
