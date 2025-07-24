@@ -427,12 +427,12 @@ func _generate_db_gdscript(schema: SpacetimeParsedSchema) -> String:
     "class_name %sModuleDb extends Resource\n\n" % schema.module.to_pascal_case()
     for table_name in tables:
         var table_type := tables[table_name]
-        content += "var %s: %s\n" % [table_name, table_type]
+        content += "var %s: %s\n" % [table_name.to_snake_case(), table_type]
     
     content += "\nfunc _init(db: LocalDatabase) -> void:\n"
     for table_name in tables:
         content += "\t%s = preload('%s/tables/%s_%s_table.gd').new(db)\n" % \
-            [table_name, _schema_path, schema.module.to_snake_case(), table_name.to_snake_case()]
+            [table_name.to_snake_case(), _schema_path, schema.module.to_snake_case(), table_name.to_snake_case()]
     
     return content
 
