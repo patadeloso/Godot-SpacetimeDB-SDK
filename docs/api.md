@@ -69,7 +69,18 @@ class SpacetimeDBClient:
     func subscribe(queries: PackedStringArray) -> SpacetimeDBSubscription
 ```
 
-Subscribe to queries by calling `subscribe(queries)`.
+Subscribe to queries by calling `subscribe(queries)`, which returns a [`SpacetimeDBSubscription`](#spacetimedbsubscription-class) instance.
+
+See the [SpacetimeDB SQL Reference](https://spacetimedb.com/docs/sql#subscriptions) for information on the queries SpacetimeDB supports.
+
+#### `unsubscribe()` method
+
+```gdscript
+class SpacetimeDBClient:
+    func unsubscribe(query_id: int) -> Error
+```
+
+Close a subscription by calling `unsubscribe(query_id)` with the query id of an existing query. A Godot `Error` is returned to indicate success or failure.
 
 ## Generated `ModuleClient` classes
 
@@ -79,7 +90,7 @@ This class is generated per module and contains information about the types, tab
 
 ### Access tables and reducers
 
-### `db` property
+#### `db` property
 
 ```gdscript
 class ModuleClient:
@@ -88,7 +99,7 @@ class ModuleClient:
 
 The `db` field provides access to the subscribed view of the database's tables. See [Access the local database](#access-the-local-database).
 
-### `reducers` property
+#### `reducers` property
 
 ```gdscript
 class ModuleClient:
@@ -125,9 +136,12 @@ The `_ModuleTableType` type will be the auto-generated type which matches the ro
 
 ```gdscript
 class ModuleTable:
-    func on_insert(listener: (row: _ModuleTableType) -> void) -> void
+    func on_insert(listener: Callable) -> void
 
-    func remove_on_insert(listener: (row: _ModuleTableType) -> void) -> void
+    func remove_on_insert(listener: Callable) -> void
+
+# Listener function signature
+func(row: _ModuleTableType) -> void
 ```
 
 The `on_insert` listener runs whenever a new row is inserted into the local database.
@@ -140,9 +154,12 @@ Call `remove_on_insert` to un-register a previously registered listener.
 
 ```gdscript
 class ModuleTable:
-    func on_update(listener: (old_row: _ModuleTableType, new_row: _ModuleTableType) -> void) -> void
+    func on_update(listener: Callable) -> void
 
-    func remove_on_update(listener: (old_row: _ModuleTableType, new_row: _ModuleTableType) -> void) -> void
+    func remove_on_update(listener: Callable) -> void
+
+# Listener function signature
+func(old_row: _ModuleTableType, new_row: _ModuleTableType) -> void
 ```
 
 The `on_update` listener runs whenever a row already in the local database is updated.
@@ -155,9 +172,12 @@ Call `remove_on_update` to un-register a previously registered listener.
 
 ```gdscript
 class ModuleTable:
-    func on_delete(listener: (row: _ModuleTableType) -> void) -> void
+    func on_delete(listener: Callable) -> void
 
-    func remove_on_delete(listener: (row: _ModuleTableType) -> void) -> void
+    func remove_on_delete(listener: Callable) -> void
+
+# Listener function signature
+func(row: _ModuleTableType) -> void
 ```
 
 The `on_delete` listener runs whenever a row already in the local database is deleted.
@@ -179,7 +199,7 @@ Where `ColumnType` is the column data type and `_ModuleTableType` is the table r
 
 #### BTree index access
 
-This SDK does not currently support non-unique indexes.
+This SDK does not currently support non-unique BTree indexes.
 
 ### Calling reducers
 
@@ -189,8 +209,11 @@ Each public reducer defined by your module has a method on the `.reducers` prope
 static func example_reducer(
     arg1: String,
     arg2: int,
-    cb: (tx: TransactionUpdateMessage) -> void
+    callback: Callable
 ) -> void
+
+# Callback function signature
+func(tx: TransactionUpdateMessage) -> void
 ```
 
 ## `SpacetimeDBConnection` class
@@ -199,7 +222,7 @@ static func example_reducer(
 
 Holds and listens to the websocket connection to the SpacetimeDB server.
 
-### `CompressionPreference` enum
+#### `CompressionPreference` enum
 
 ```gdscript
 class SpacetimeDBConnection:
@@ -218,7 +241,7 @@ The compression preference for the connection.
 
 **Inherits:** Resource
 
-### `compression` property
+#### `compression` property
 
 ```gdscript
 class SpacetimeDBConnectionOptions:
@@ -227,7 +250,7 @@ class SpacetimeDBConnectionOptions:
 
 The [`CompressionPreference`](#compressionpreference-enum) for the connection
 
-### `threading` property
+#### `threading` property
 
 ```gdscript
 class SpacetimeDBConnectionOptions:
@@ -236,7 +259,7 @@ class SpacetimeDBConnectionOptions:
 
 Whether to use threading for processing database update messages
 
-### `one_time_token` property
+#### `one_time_token` property
 
 ```gdscript
 class SpacetimeDBConnectionOptions:
@@ -245,7 +268,7 @@ class SpacetimeDBConnectionOptions:
 
 Whether to use a one-time token for the connection
 
-### `debug_mode` property
+#### `debug_mode` property
 
 ```gdscript
 class SpacetimeDBConnectionOptions:
@@ -254,7 +277,7 @@ class SpacetimeDBConnectionOptions:
 
 Enables verbose logging
 
-### `inbound_buffer_size` property
+#### `inbound_buffer_size` property
 
 ```gdscript
 class SpacetimeDBConnectionOptions:
@@ -263,14 +286,14 @@ class SpacetimeDBConnectionOptions:
 
 The maximum size of the inbound buffer
 
-### `outbound_buffer_size` property
+#### `outbound_buffer_size` property
 
 ```gdscript
 class SpacetimeDBConnectionOptions:
     var outbound_buffer_size: int = 1024 * 1024 * 2
 ```
 
-### `set_all_buffer_size()` method
+#### `set_all_buffer_size()` method
 
 Sets the inbound and outbound buffer sizes:
 
@@ -279,7 +302,158 @@ class SpacetimeDBConnectionOptions:
     func set_all_buffer_size(size: int) -> void
 ```
 
-## Rust Enums in Godot
+## `SpacetimeDBSubscription` class
+
+**Inherits:** Node
+
+A handle to a subscription to the SpacetimeDB database. The handle does not contain or provide access to the subscribed data, all subscribed rows are available via the module's [`LocalDatabase`](#localdatabase-class). See [Access the local database](#access-the-local-database).
+
+#### `active` property
+
+```gdscript
+class SpacetimeDBSubscription:
+    var active: bool
+```
+
+Indicates whether this subscription has been applied and has not yet been unsubscribed.
+
+#### `ended` property
+
+```gdscript
+class SpacetimeDBSubscription:
+    var ended: bool
+```
+
+Indicates if this subscription has been terminated due to an unsubscribe request or an error.
+
+#### `unsubscribe()` method
+
+```gdscript
+class SpacetimeDBSubscription:
+    func unsubscribe() -> Error
+```
+
+Terminate this subscription, causing the subscribed rows to be removed from the [`LocalDatabase`](#localdatabase-class).
+
+Returns an error if the subscription has already ended, either due to a previous `unsubscribe()` call or an error.
+
+#### `wait_for_applied()` method
+
+```gdscript
+class SpacetimeDBSubscription:
+    async func wait_for_applied(timeout_sec: float = 5) -> Error
+```
+
+Waits for the subscription to be applied, or until it times out.
+
+Returns an error if the subscription has already ended or if the timeout is reached.
+
+#### `wait_for_end()` method
+
+```gdscript
+class SpacetimeDBSubscription:
+    async func wait_for_end(timeout_sec: float = 5) -> Error
+```
+
+Waits for the subscription to be terminated, or until it times out.
+
+Returns an error if the timeout is reached.
+
+#### `applied` signal
+
+```gdscript
+class SpacetimeDBSubscription:
+    signal applied
+```
+
+Emitted when the `SubscribeMultiApplied` message is received and the subscription is set to active.
+
+#### `end` signal
+
+```gdscript
+class SpacetimeDBSubscription:
+    signal end
+```
+
+Emitted when the `UnsubscribeMultiApplied` message is received and the subscription is set to ended.
+
+## `LocalDatabase` class
+
+**Inherits:** Node
+
+The underlying local database cache for a module.
+
+### Subscribe to inserts
+
+```gdscript
+class LocalDatabase:
+    func subscribe_to_inserts(table_name: StringName, callable: Callable) -> void
+
+    func unsubscribe_from_inserts(table_name: StringName, callable: Callable) -> void
+```
+
+The `callable` runs whenever a new row is inserted into the table with the given `table_name`.
+
+You can call `unsubscribe_from_inserts` with a `callable` that was previously registered.
+
+### Subscribe to updates
+
+```gdscript
+class LocalDatabase:
+    func subscribe_to_updates(table_name: StringName, callable: Callable) -> void
+
+    func unsubscribe_from_updates(table_name: StringName, callable: Callable) -> void
+```
+
+The `callable` runs whenever an existing row in the table with the given `table_name` receives an update.
+
+You can call `unsubscribe_from_updates` with a `callable` that was previously registered.
+
+### Subscribe to deletes
+
+```gdscript
+class LocalDatabase:
+    func subscribe_to_deletes(table_name: StringName, callable: Callable) -> void
+
+    func unsubscribe_from_deletes(table_name: StringName, callable: Callable) -> void
+```
+
+The `callable` runs whenever an existing row in the table with the given `table_name` is deleted.
+
+You can call `unsubscribe_from_deletes` with a `callable` that was previously registered.
+
+### Access untyped data in the local database
+
+#### `get_row_by_pk()` method
+
+```gdscript
+class LocalDatabase:
+    func get_row_by_pk(table_name: String, primary_key_value) -> _ModuleTableType
+```
+
+Returns the row in the table with the given `table_name` that has the given `primary_key_value`.
+
+If a table with the given `table_name` does not exist or no row with the given `primary_key_value` exists, the method returns `null`.
+
+#### `get_all_rows()` method
+
+```gdscript
+class LocalDatabase:
+    func get_all_rows(table_name: String) -> Array[_ModuleTableType]
+```
+
+Returns all subscribed rows in the table with the given `table_name`, if the table does not exist an empty array is returned.
+
+#### `count_all_rows()` method
+
+```gdscript
+class LocalDatabase:
+    func count_all_rows(table_name: String) -> int
+```
+
+Returns the number of subscribed rows in the table with the given `table_name`.
+
+# Rust Enums in Godot
 
 There is full support for rust enum sumtypes when derived from SpacetimeType.
 
@@ -336,11 +510,11 @@ Since BowOptions in rust is not being used as a sumtype in godot it becomes just
 
 ![image](https://github.com/user-attachments/assets/0c4b4c00-c479-47cc-a459-394b917457c1)
 
-## Technical Details
+# Technical Details
 
 [![Ask DeepWiki](https://deepwiki.com/badge.svg)](https://deepwiki.com/flametime/Godot-SpacetimeDB-SDK)
 
-### Type System & Serialization
+## Type System & Serialization
 
 The SDK handles serialization between Godot types and SpacetimeDB's BSATN format based on your schema Resources.
 
