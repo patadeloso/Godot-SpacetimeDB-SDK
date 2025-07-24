@@ -8,8 +8,8 @@ class_name SpacetimeDBClient extends Node
 @export var auto_request_token: bool = true
 @export var token_save_path: String = "user://spacetimedb_token.dat" # Use a more specific name
 @export var one_time_token: bool = false
-@export var compression: SpacetimeDBConnection.CompressionPreference;
-@export var debug_mode: bool = true;
+@export var compression: SpacetimeDBConnection.CompressionPreference
+@export var debug_mode: bool = true
 @export var current_subscriptions: Dictionary[int, SpacetimeDBSubscription]
 @export var use_threading: bool = true
 
@@ -68,7 +68,7 @@ func _exit_tree():
         deserializer_worker.wait_to_finish()
         deserializer_worker = null
         
-func print_log(log_message:String):
+func print_log(log_message: String):
     if debug_mode:
         print(log_message)
     
@@ -234,7 +234,7 @@ func _decompress_and_parse(raw_bytes: PackedByteArray) -> PackedByteArray:
     var compression = raw_bytes[0]
     var payload = raw_bytes.slice(1)
     match compression:
-        0: pass;
+        0: pass
         1: printerr("SpacetimeDBClient (Thread) : Brotli compression not supported!")
         2: payload = DataDecompressor.decompress_packet(payload)
     return payload
@@ -299,7 +299,7 @@ func _handle_parsed_message(message_resource: Resource):
         _connection_id = identity_token.connection_id
         self.connected.emit(_identity, _token)
 
-    elif message_resource is TransactionUpdateMessage: 
+    elif message_resource is TransactionUpdateMessage:
         var tx_update: TransactionUpdateMessage = message_resource
         #print_log("SpacetimeDBClient: Processing Transaction Update (Reducer: %s, Req ID: %d)" % [tx_update.reducer_call.reducer_name, tx_update.reducer_call.request_id])
         # Apply changes to local DB only if committed
@@ -319,6 +319,8 @@ func _handle_parsed_message(message_resource: Resource):
 
     else:
         print_log("SpacetimeDBClient: Received unhandled message resource type: " + message_resource.get_class())
+
+
 # --- Public API ---
 
 func connect_db(host_url: String, database_name: String, options: SpacetimeDBConnectionOptions = null):
@@ -334,14 +336,14 @@ func connect_db(host_url: String, database_name: String, options: SpacetimeDBCon
     
     if OS.has_feature("web") and use_threading == true:
         push_error("Threads are not supported on Web. Threading has been disabled.")
-        use_threading = false;
+        use_threading = false
         
     if use_threading:
         _packet_mutex = Mutex.new()
         _packet_semaphore = Semaphore.new()
         _result_mutex = Mutex.new()
         deserializer_worker = Thread.new()
-        deserializer_worker.start(_thread_loop) 
+        deserializer_worker.start(_thread_loop)
         
     if not _is_initialized:
         initialize_and_connect()
@@ -377,7 +379,7 @@ func subscribe(queries: PackedStringArray) -> SpacetimeDBSubscription:
     # 3. Serialize the complete ClientMessage using the universal function
     var message_bytes := _serializer.serialize_client_message(
         SpacetimeDBClientMessage.SUBSCRIBE_MULTI,
-        payload_data 
+        payload_data
     )
 
     if _serializer.has_error():
@@ -419,7 +421,7 @@ func unsubscribe(query_id: int) -> Error:
     # 2. Serialize the complete ClientMessage using the universal function
     var message_bytes := _serializer.serialize_client_message(
         SpacetimeDBClientMessage.UNSUBSCRIBE_MULTI,
-        payload_data 
+        payload_data
     )
 
     if _serializer.has_error():
@@ -439,10 +441,10 @@ func unsubscribe(query_id: int) -> Error:
     printerr("SpacetimeDBClient: Internal error - WebSocket peer not available in connection.")
     return ERR_CONNECTION_ERROR
     
-func call_reducer(reducer_name: String, args: Array = [], types: Array = []) -> int:
+func call_reducer(reducer_name: String, args: Array = [], types: Array = []) -> Error:
     if not is_connected_db():
         printerr("SpacetimeDBClient: Cannot call reducer, not connected.")
-        return -1 # Indicate error
+        return ERR_CONNECTION_ERROR
         
     # Generate a request ID (ensure it's u32 range if needed, but randi is fine for now)
     var request_id := randi() & 0xFFFFFFFF # Ensure positive u32 range
@@ -451,7 +453,7 @@ func call_reducer(reducer_name: String, args: Array = [], types: Array = []) -> 
 
     if _serializer.has_error():
         printerr("Failed to serialize args for %s: %s" % [reducer_name, _serializer.get_last_error()])
-        return -1
+        return ERR_PARSE_ERROR
     
     var call_data := CallReducerMessage.new(reducer_name, args_bytes, request_id, 0)
     var message_bytes := _serializer.serialize_client_message(
@@ -464,12 +466,11 @@ func call_reducer(reducer_name: String, args: Array = [], types: Array = []) -> 
         var err := _connection.send_bytes(message_bytes)
         if err != OK:
             print("SpacetimeDBClient: Error sending CallReducer JSON message: ", err)
-            return -1 # Indicate error
-        else:
-            return request_id
-    else:
-        print("SpacetimeDBClient: Internal error - WebSocket peer not available in connection.")
-        return -1
+        
+        return err
+
+    print("SpacetimeDBClient: Internal error - WebSocket peer not available in connection.")
+    return ERR_CONNECTION_ERROR
 
 func wait_for_reducer_response(request_id_to_match: int, timeout_seconds: float = 10.0) -> TransactionUpdateMessage:
     if request_id_to_match < 0:
