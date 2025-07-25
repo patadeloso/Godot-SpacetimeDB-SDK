@@ -2,6 +2,8 @@
 # FILE WILL NOT BE SAVED. MODIFY TABLES IN YOUR MODULE SOURCE CODE INSTEAD.
 class_name MainModuleDb extends Resource
 
+const table_names := ["lobby", "user", "user_data", "user_next"]
+
 var lobby: MainLobbyTable
 var user: MainUserTable
 var user_data: MainUserDataTable
