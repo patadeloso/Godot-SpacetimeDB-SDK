@@ -39,17 +39,17 @@ func _init() -> void:
 ## 8. direction: Vector2[br]
 ## 9. player_speed: float[br]
 ## 10. last_update: int[br]
-static func create(_identity: PackedByteArray, _online: bool, _name: String, _lobby_id: int, _color: Color, _test_vec: Array[String], _test_bytes_array: Array[int], _last_position: Vector3, _direction: Vector2, _player_speed: float, _last_update: int) -> MainUserData:
+static func create(p_identity: PackedByteArray, p_online: bool, p_name: String, p_lobby_id: int, p_color: Color, p_test_vec: Array[String], p_test_bytes_array: Array[int], p_last_position: Vector3, p_direction: Vector2, p_player_speed: float, p_last_update: int) -> MainUserData:
 	var result = MainUserData.new()
-	result.identity = _identity
-	result.online = _online
-	result.name = _name
-	result.lobby_id = _lobby_id
-	result.color = _color
-	result.test_vec = _test_vec
-	result.test_bytes_array = _test_bytes_array
-	result.last_position = _last_position
-	result.direction = _direction
-	result.player_speed = _player_speed
-	result.last_update = _last_update
+	result.identity = p_identity
+	result.online = p_online
+	result.name = p_name
+	result.lobby_id = p_lobby_id
+	result.color = p_color
+	result.test_vec = p_test_vec
+	result.test_bytes_array = p_test_bytes_array
+	result.last_position = p_last_position
+	result.direction = p_direction
+	result.player_speed = p_player_speed
+	result.last_update = p_last_update
 	return result

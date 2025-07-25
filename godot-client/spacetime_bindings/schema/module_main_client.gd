@@ -17,5 +17,5 @@ func _init() -> void:
 	set_meta("module_name", "Main")
 	name = "MainModule"
 
-func _init_db(local_db: LocalDatabase) -> void:
-	db = preload('res://spacetime_bindings/schema/module_main_db.gd').new(local_db)
+func _init_db(p_local_db: LocalDatabase) -> void:
+	db = preload('res://spacetime_bindings/schema/module_main_db.gd').new(p_local_db)

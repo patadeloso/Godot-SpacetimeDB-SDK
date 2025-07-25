@@ -4,10 +4,10 @@ class_name MainUserDataIdentityUniqueIndex extends _ModuleTableUniqueIndex
 
 var _cache: Dictionary[PackedByteArray, MainUserData] = {}
 
-func _init(db: LocalDatabase) -> void:
+func _init(p_local_db: LocalDatabase) -> void:
 	set_meta("table_name", "user_data")
 	set_meta("field_name", "identity")
-	_connect_cache_to_db(_cache, db)
+	_connect_cache_to_db(_cache, p_local_db)
 
 func find(col_val: PackedByteArray) -> MainUserData:
 	return _cache.get(col_val, null)

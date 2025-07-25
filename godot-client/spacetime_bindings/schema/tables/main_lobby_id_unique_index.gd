@@ -4,10 +4,10 @@ class_name MainLobbyIdUniqueIndex extends _ModuleTableUniqueIndex
 
 var _cache: Dictionary[int, MainLobby] = {}
 
-func _init(db: LocalDatabase) -> void:
+func _init(p_local_db: LocalDatabase) -> void:
 	set_meta("table_name", "lobby")
 	set_meta("field_name", "id")
-	_connect_cache_to_db(_cache, db)
+	_connect_cache_to_db(_cache, p_local_db)
 
 func find(col_val: int) -> MainLobby:
 	return _cache.get(col_val, null)

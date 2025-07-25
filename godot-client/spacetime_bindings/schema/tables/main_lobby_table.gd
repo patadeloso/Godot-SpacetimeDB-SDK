@@ -4,10 +4,10 @@ class_name MainLobbyTable extends _ModuleTable
 
 var id: MainLobbyIdUniqueIndex
 
-func _init(db: LocalDatabase) -> void:
-	super(db)
+func _init(p_local_db: LocalDatabase) -> void:
+	super(p_local_db)
 	set_meta("table_name", "lobby")
-	id = MainLobbyIdUniqueIndex.new(db)
+	id = MainLobbyIdUniqueIndex.new(p_local_db)
 
 func iter() -> Array[MainLobby]:
 	var rows: Array = super()

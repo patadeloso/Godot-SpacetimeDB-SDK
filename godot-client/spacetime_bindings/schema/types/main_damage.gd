@@ -14,9 +14,9 @@ func _init() -> void:
 ## 0. amount: int[br]
 ## 1. source: PackedByteArray[br]
 ## 2. int_vec: Array of int[br]
-static func create(_amount: int, _source: PackedByteArray, _int_vec: Array[int]) -> MainDamage:
+static func create(p_amount: int, p_source: PackedByteArray, p_int_vec: Array[int]) -> MainDamage:
 	var result = MainDamage.new()
-	result.amount = _amount
-	result.source = _source
-	result.int_vec = _int_vec
+	result.amount = p_amount
+	result.source = p_source
+	result.int_vec = p_int_vec
 	return result

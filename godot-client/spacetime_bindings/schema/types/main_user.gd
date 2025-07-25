@@ -27,12 +27,12 @@ func _init() -> void:
 ## 3. damage: MainDamage[br]
 ## 4. test_option_string: Option of Array of String[br]
 ## 5. test_option_message: Option of MainMessage[br]
-static func create(_identity: PackedByteArray, _online: bool, _lobby_id: int, _damage: MainDamage, _test_option_string: Option, _test_option_message: Option) -> MainUser:
+static func create(p_identity: PackedByteArray, p_online: bool, p_lobby_id: int, p_damage: MainDamage, p_test_option_string: Option, p_test_option_message: Option) -> MainUser:
 	var result = MainUser.new()
-	result.identity = _identity
-	result.online = _online
-	result.lobby_id = _lobby_id
-	result.damage = _damage
-	result.test_option_string = _test_option_string
-	result.test_option_message = _test_option_message
+	result.identity = p_identity
+	result.online = p_online
+	result.lobby_id = p_lobby_id
+	result.damage = p_damage
+	result.test_option_string = p_test_option_string
+	result.test_option_message = p_test_option_message
 	return result

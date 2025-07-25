@@ -15,8 +15,8 @@ func _init() -> void:
 
 ## 0. id: int[br]
 ## 1. player_count: int[br]
-static func create(_id: int, _player_count: int) -> MainLobby:
+static func create(p_id: int, p_player_count: int) -> MainLobby:
 	var result = MainLobby.new()
-	result.id = _id
-	result.player_count = _player_count
+	result.id = p_id
+	result.player_count = p_player_count
 	return result

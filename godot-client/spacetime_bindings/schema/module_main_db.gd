@@ -7,8 +7,8 @@ var user: MainUserTable
 var user_data: MainUserDataTable
 var user_next: MainUserNextTable
 
-func _init(db: LocalDatabase) -> void:
-	lobby = preload('res://spacetime_bindings/schema/tables/main_lobby_table.gd').new(db)
-	user = preload('res://spacetime_bindings/schema/tables/main_user_table.gd').new(db)
-	user_data = preload('res://spacetime_bindings/schema/tables/main_user_data_table.gd').new(db)
-	user_next = preload('res://spacetime_bindings/schema/tables/main_user_next_table.gd').new(db)
+func _init(p_local_db: LocalDatabase) -> void:
+	lobby = preload('res://spacetime_bindings/schema/tables/main_lobby_table.gd').new(p_local_db)
+	user = preload('res://spacetime_bindings/schema/tables/main_user_table.gd').new(p_local_db)
+	user_data = preload('res://spacetime_bindings/schema/tables/main_user_data_table.gd').new(p_local_db)
+	user_next = preload('res://spacetime_bindings/schema/tables/main_user_next_table.gd').new(p_local_db)
