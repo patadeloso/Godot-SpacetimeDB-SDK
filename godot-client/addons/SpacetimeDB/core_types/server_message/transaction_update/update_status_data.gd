@@ -1,3 +1,4 @@
+@tool
 class_name UpdateStatusData extends Resource
 
 enum StatusType {

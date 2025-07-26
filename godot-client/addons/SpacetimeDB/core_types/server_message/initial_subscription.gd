@@ -1,3 +1,4 @@
+@tool
 class_name InitialSubscriptionMessage extends Resource
 
 @export var database_update: DatabaseUpdateData

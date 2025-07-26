@@ -1,3 +1,4 @@
+@tool
 class_name TransactionUpdateMessage extends Resource
 
 @export var status: UpdateStatusData

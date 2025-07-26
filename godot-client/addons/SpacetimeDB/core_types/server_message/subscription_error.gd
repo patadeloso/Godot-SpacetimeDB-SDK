@@ -1,3 +1,4 @@
+@tool
 class_name SubscriptionErrorMessage extends Resource
 
 @export var total_host_execution_duration_micros: int # u64

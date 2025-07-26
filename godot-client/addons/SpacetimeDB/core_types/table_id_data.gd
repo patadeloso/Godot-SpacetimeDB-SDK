@@ -1,3 +1,4 @@
+@tool
 class_name TableIdData extends Resource
 
 @export var pascal_case: String

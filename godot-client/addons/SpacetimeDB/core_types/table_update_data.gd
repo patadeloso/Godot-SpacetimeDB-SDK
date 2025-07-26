@@ -1,3 +1,4 @@
+@tool
 class_name TableUpdateData extends Resource
 
 @export var table_id: int # u32
