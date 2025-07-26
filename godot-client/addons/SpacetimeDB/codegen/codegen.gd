@@ -539,11 +539,13 @@ func _generate_reducers_gdscript(schema: SpacetimeParsedSchema) -> String:
         
         content += "\n".join(description_comment) + "\n"
         var reducer_name: String = reducer.get("name", "")
-        content += "func %s(%s) -> void:\n" % [reducer_name, params_str] + \
-        "\tvar __id__: int = _client.call_reducer('%s', [%s], [%s])\n" % \
+        content += "func %s(%s) -> Error:\n" % [reducer_name, params_str] + \
+        "\tvar handle := _client.call_reducer('%s', [%s], [%s])\n" % \
         [reducer_name, param_names_str, param_bsatn_types_str] + \
-        "\tvar __result__ = await _client.wait_for_reducer_response(__id__)\n" + \
-        "\tcb.call(__result__)\n\n"
+        "\tif handle.error: return handle.error\n" + \
+        "\tvar __result__ = await handle.wait_for_response()\n" + \
+        "\tcb.call(__result__)\n" + \
+        "\treturn OK\n\n"
     
     if not content.is_empty():
         content = content.left(-2)

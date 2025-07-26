@@ -40,6 +40,7 @@ var _token: String
 var _is_initialized := false
 var _received_initial_subscription := false
 var _next_query_id := 0
+var _next_request_id := 0
 
 # --- Signals ---
 signal connected(identity: PackedByteArray, token: String)
@@ -451,18 +452,21 @@ func unsubscribe(query_id: int) -> Error:
     printerr("SpacetimeDBClient: Internal error - WebSocket peer not available in connection.")
     return ERR_CONNECTION_ERROR
     
-func call_reducer(reducer_name: String, args: Array = [], types: Array = []) -> Error:
+func call_reducer(reducer_name: String, args: Array = [], types: Array = []) -> SpacetimeDBReducerCall:
     if not is_connected_db():
         printerr("SpacetimeDBClient: Cannot call reducer, not connected.")
-        return ERR_CONNECTION_ERROR
+        return SpacetimeDBReducerCall.fail(ERR_CONNECTION_ERROR)
     
     var args_bytes := _serializer._serialize_arguments(args, types)
 
     if _serializer.has_error():
         printerr("Failed to serialize args for %s: %s" % [reducer_name, _serializer.get_last_error()])
-        return ERR_PARSE_ERROR
+        return SpacetimeDBReducerCall.fail(ERR_PARSE_ERROR)
     
-    var call_data := CallReducerMessage.new(reducer_name, args_bytes, 0, 0)
+    var request_id := _next_request_id
+    _next_request_id += 1
+    
+    var call_data := CallReducerMessage.new(reducer_name, args_bytes, request_id, 0)
     var message_bytes := _serializer.serialize_client_message(
         SpacetimeDBClientMessage.CALL_REDUCER,
         call_data
@@ -473,11 +477,12 @@ func call_reducer(reducer_name: String, args: Array = [], types: Array = []) -> 
         var err := _connection.send_bytes(message_bytes)
         if err != OK:
             print("SpacetimeDBClient: Error sending CallReducer JSON message: ", err)
+            return SpacetimeDBReducerCall.fail(err)
         
-        return err
+        return SpacetimeDBReducerCall.create(self, request_id)
 
     print("SpacetimeDBClient: Internal error - WebSocket peer not available in connection.")
-    return ERR_CONNECTION_ERROR
+    return SpacetimeDBReducerCall.fail(ERR_CONNECTION_ERROR)
 
 func wait_for_reducer_response(request_id_to_match: int, timeout_seconds: float = 10.0) -> TransactionUpdateMessage:
     if request_id_to_match < 0:
