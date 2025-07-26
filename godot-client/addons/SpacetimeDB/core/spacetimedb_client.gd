@@ -123,6 +123,11 @@ func _init_db(local_db: LocalDatabase) -> void:
     pass
 
 func _load_token_or_request():
+    if _token:
+        # If token is already set, use it
+        _on_token_received(_token)
+        return
+    
     if one_time_token == false:
     # Try loading saved token
         if FileAccess.file_exists(token_save_path):
@@ -331,6 +336,9 @@ func connect_db(host_url: String, database_name: String, options: SpacetimeDBCon
     self.database_name = database_name
     self.compression = options.compression
     self.one_time_token = options.one_time_token
+    if options.token:
+        self._token = options.token
+        self.one_time_token = false
     self.debug_mode = options.debug_mode
     self.use_threading = options.threading
     
@@ -352,6 +360,7 @@ func connect_db(host_url: String, database_name: String, options: SpacetimeDBCon
         _load_token_or_request()
 
 func disconnect_db():
+    _token = ""
     if _connection:
         _connection.disconnect_from_server()
 
