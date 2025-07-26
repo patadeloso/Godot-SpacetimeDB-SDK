@@ -131,7 +131,7 @@ func _load_token_or_request():
         return
     
     if one_time_token == false:
-    # Try loading saved token
+        # Try loading saved token
         if FileAccess.file_exists(token_save_path):
             var file := FileAccess.open(token_save_path, FileAccess.READ)
             if file:
@@ -161,7 +161,8 @@ func _generate_connection_id() -> String:
 func _on_token_received(received_token: String):
     print_log("SpacetimeDBClient: Token acquired.")
     self._token = received_token
-    _save_token(received_token)
+    if not one_time_token:
+        _save_token(received_token)
     var conn_id = _generate_connection_id()
     # Pass token to components that need it
     _connection.set_token(self._token)
@@ -340,7 +341,6 @@ func connect_db(host_url: String, database_name: String, options: SpacetimeDBCon
     self.one_time_token = options.one_time_token
     if options.token:
         self._token = options.token
-        self.one_time_token = false
     self.debug_mode = options.debug_mode
     self.use_threading = options.threading
     

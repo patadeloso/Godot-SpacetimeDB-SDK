@@ -314,7 +314,7 @@ class SpacetimeDBConnectionOptions:
     var token: String = ""
 ```
 
-The token to use for the connection, `one_time_token` is automatically set to `false` if a token is provided.
+The token to use for the connection, `one_time_token` determines whether this token is saved to disk.
 
 #### `debug_mode` property
 
