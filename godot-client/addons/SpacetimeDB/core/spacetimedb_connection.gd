@@ -1,3 +1,4 @@
+@tool
 class_name SpacetimeDBConnection extends Node
 
 var _websocket := WebSocketPeer.new()
