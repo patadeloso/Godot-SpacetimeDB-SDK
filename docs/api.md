@@ -103,7 +103,7 @@ class SpacetimeDBClient:
 | args         | The arguments to pass to the reducer.                    |
 | types        | The BSATN types of the arguments to pass to the reducer. |
 
-Call a reducer with `call_reducer(reducer_name, args, types)` a [`SpacetimeDBReducerCall`]() instance is returned which contains the request id or an error.
+Call a reducer with `call_reducer(reducer_name, args, types)` a [`SpacetimeDBReducerCall`](#spacetimedbreducercall-class) instance is returned which contains the request id or an error.
 
 It is recommended you use the auto-generated reducer methods rather than calling `call_reducer` directly. See [Calling reducers](#calling-reducers).
 
@@ -111,7 +111,7 @@ It is recommended you use the auto-generated reducer methods rather than calling
 
 ```gdscript
 class SpacetimeDBClient:
-    func wait_for_reducer_response(request_id: int, timeout_seconds: float = 10.0) -> TransactionUpdateMessage
+    async func wait_for_reducer_response(request_id: int, timeout_seconds: float = 10.0) -> TransactionUpdateMessage
 ```
 
 | Name            | Description                                                       |
@@ -245,11 +245,11 @@ This SDK does not currently support non-unique BTree indexes.
 Each public reducer defined by your module has a method on the `.reducers` property. The method name is the reducer name converted to `snake_case`. Each reducer method takes the arguments defined by the reducer and an optional callback function.
 
 ```gdscript
-static func example_reducer(
+static async func example_reducer(
     arg1: String,
     arg2: int,
     callback: Callable
-) -> void
+) -> Error
 
 # Callback function signature
 func(tx: TransactionUpdateMessage) -> void
