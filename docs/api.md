@@ -274,6 +274,15 @@ class SpacetimeDBConnectionOptions:
 
 Whether to use a one-time token for the connection
 
+#### `token` property
+
+```gdscript
+class SpacetimeDBConnectionOptions:
+    var token: String = ""
+```
+
+The token to use for the connection, `one_time_token` is automatically set to `false` if a token is provided.
+
 #### `debug_mode` property
 
 ```gdscript
