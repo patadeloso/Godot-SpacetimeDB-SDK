@@ -10,10 +10,6 @@
 
 [sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_ej8d4"]
 
-[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_k511v"]
-
-[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_raufm"]
-
 [sub_resource type="SystemFont" id="SystemFont_3cpcg"]
 font_names = PackedStringArray("Consolas", "Monospace")
 subpixel_positioning = 0
@@ -45,13 +41,17 @@ corner_radius_bottom_right = 2
 corner_radius_bottom_left = 2
 anti_aliasing = false
 
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_d0lf3"]
+
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_k511v"]
+
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_raufm"]
+
 [sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_43xhi"]
 
 [sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_3cpcg"]
 
 [sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_qc7xu"]
-
-[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_d0lf3"]
 
 [node name="Control" type="Control"]
 custom_minimum_size = Vector2(0, 250)
@@ -65,156 +65,51 @@ script = ExtResource("1_ej8d4")
 
 [node name="Prefabs" type="Node" parent="."]
 
-[node name="ModulePrefab" type="Panel" parent="Prefabs"]
+[node name="ModulePrefab" type="HBoxContainer" parent="Prefabs"]
 visible = false
 self_modulate = Color(1, 1, 1, 0)
 custom_minimum_size = Vector2(0, 31)
 offset_left = 902.0
 offset_top = 64.0
 offset_right = 1152.0
-offset_bottom = 95.0
+offset_bottom = 102.0
+theme_override_constants/separation = 5
 
 [node name="ModuleNameInput" type="LineEdit" parent="Prefabs/ModulePrefab"]
-layout_mode = 1
-anchors_preset = 15
-anchor_right = 1.0
-anchor_bottom = 1.0
-offset_right = -32.0
-grow_horizontal = 2
-grow_vertical = 2
+layout_mode = 2
+size_flags_horizontal = 3
 text = "ModuleName"
 placeholder_text = "Module"
 
 [node name="RemoveButton" type="Button" parent="Prefabs/ModulePrefab"]
-layout_mode = 1
-anchors_preset = -1
-anchor_left = 1.0
-anchor_top = 0.5
-anchor_right = 1.0
-anchor_bottom = 0.5
-offset_left = -26.0
-offset_top = -13.5
-offset_bottom = 13.5
-grow_horizontal = 0
-grow_vertical = 2
+custom_minimum_size = Vector2(26, 27)
+layout_mode = 2
+size_flags_horizontal = 8
+size_flags_vertical = 4
 tooltip_text = "Remove Module"
 theme_override_styles/focus = SubResource("StyleBoxEmpty_e5a4l")
 theme_override_styles/normal = SubResource("StyleBoxEmpty_ej8d4")
 icon = ExtResource("1_mgbt2")
 icon_alignment = 1
 
-[node name="Uri" type="LineEdit" parent="."]
-layout_mode = 1
-anchors_preset = 12
-anchor_top = 1.0
-anchor_right = 1.0
-anchor_bottom = 1.0
-offset_left = 158.0
-offset_top = -31.0
-offset_right = -97.0
-grow_horizontal = 2
-grow_vertical = 0
-text = "http://127.0.0.1:3000"
-placeholder_text = "Enter the server URI"
-
-[node name="NewModule" type="Panel" parent="."]
-self_modulate = Color(1, 1, 1, 0)
-layout_mode = 1
-anchors_preset = 3
-anchor_left = 1.0
-anchor_top = 1.0
-anchor_right = 1.0
-anchor_bottom = 1.0
-offset_left = -250.0
-offset_top = -101.0
-offset_bottom = -70.0
-grow_horizontal = 0
-grow_vertical = 0
-
-[node name="ModuleNameInput" type="LineEdit" parent="NewModule"]
+[node name="Main" type="VBoxContainer" parent="."]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
-offset_right = -32.0
 grow_horizontal = 2
 grow_vertical = 2
-placeholder_text = "Enter module name"
+theme_override_constants/separation = 4
 
-[node name="AddButton" type="Button" parent="NewModule"]
-layout_mode = 1
-anchors_preset = -1
-anchor_left = 1.0
-anchor_top = 0.5
-anchor_right = 1.0
-anchor_bottom = 0.5
-offset_left = -26.0
-offset_top = -13.5
-offset_bottom = 13.5
-grow_horizontal = 0
-grow_vertical = 2
-tooltip_text = "Add Module"
-theme_override_styles/focus = SubResource("StyleBoxEmpty_k511v")
-theme_override_styles/normal = SubResource("StyleBoxEmpty_raufm")
-icon = ExtResource("2_3cpcg")
-icon_alignment = 1
+[node name="Content" type="HBoxContainer" parent="Main"]
+layout_mode = 2
+size_flags_vertical = 3
+theme_override_constants/separation = 4
 
-[node name="ModulesContainer" type="ScrollContainer" parent="."]
-layout_mode = 1
-anchors_preset = -1
-anchor_left = 1.0
-anchor_right = 1.0
-anchor_bottom = 1.0
-offset_left = -250.0
-offset_top = 24.0
-offset_bottom = -105.0
-grow_horizontal = 0
-grow_vertical = 2
-
-[node name="VBox" type="VBoxContainer" parent="ModulesContainer"]
+[node name="Logs" type="RichTextLabel" parent="Main/Content"]
+custom_minimum_size = Vector2(0, 9)
 layout_mode = 2
 size_flags_horizontal = 3
-size_flags_vertical = 3
-
-[node name="Generate" type="Button" parent="."]
-layout_mode = 1
-anchors_preset = 3
-anchor_left = 1.0
-anchor_top = 1.0
-anchor_right = 1.0
-anchor_bottom = 1.0
-offset_left = -250.0
-offset_top = -66.0
-offset_bottom = -35.0
-grow_horizontal = 0
-grow_vertical = 0
-disabled = true
-text = "Generate schema"
-
-[node name="CheckUri" type="Button" parent="."]
-layout_mode = 1
-anchors_preset = 3
-anchor_left = 1.0
-anchor_top = 1.0
-anchor_right = 1.0
-anchor_bottom = 1.0
-offset_left = -93.0
-offset_top = -31.0
-grow_horizontal = 0
-grow_vertical = 0
-text = "Check URI"
-
-[node name="Logs" type="RichTextLabel" parent="."]
-custom_minimum_size = Vector2(0, 9)
-layout_mode = 1
-anchors_preset = 15
-anchor_right = 1.0
-anchor_bottom = 1.0
-offset_right = -254.0
-offset_bottom = -35.0
-grow_horizontal = 2
-grow_vertical = 2
-size_flags_vertical = 0
 focus_mode = 2
 theme_override_constants/line_separation = 3
 theme_override_fonts/normal_font = SubResource("SystemFont_3cpcg")
@@ -231,47 +126,27 @@ shortcut_keys_enabled = false
 selection_enabled = true
 deselect_on_focus_loss_enabled = false
 
-[node name="ClearLogsButton" type="Button" parent="."]
-layout_mode = 1
-anchors_preset = 2
-anchor_top = 1.0
-anchor_bottom = 1.0
-offset_top = -30.0
-offset_right = 26.0
-offset_bottom = -3.0
-grow_vertical = 0
-tooltip_text = "Clear Output (Ctrl+Alt+K)"
-theme_override_styles/focus = SubResource("StyleBoxEmpty_43xhi")
-theme_override_styles/normal = SubResource("StyleBoxEmpty_3cpcg")
-icon = ExtResource("4_raufm")
-icon_alignment = 1
+[node name="Sidebar" type="VBoxContainer" parent="Main/Content"]
+custom_minimum_size = Vector2(250, 0)
+layout_mode = 2
+theme_override_constants/separation = 4
 
-[node name="CopyLogsButton" type="Button" parent="."]
-layout_mode = 1
-anchors_preset = 2
-anchor_top = 1.0
-anchor_bottom = 1.0
-offset_left = 32.0
-offset_top = -30.0
-offset_right = 58.0
-offset_bottom = -3.0
-grow_vertical = 0
-tooltip_text = "Copy Selection (Ctrl+C)"
-theme_override_styles/focus = SubResource("StyleBoxEmpty_qc7xu")
-theme_override_styles/normal = SubResource("StyleBoxEmpty_3cpcg")
-icon = ExtResource("4_ej8d4")
-icon_alignment = 1
+[node name="ModulesLabel" type="Label" parent="Main/Content/Sidebar"]
+layout_mode = 2
+text = "Modules"
+horizontal_alignment = 1
 
-[node name="AddModuleHint" type="RichTextLabel" parent="."]
+[node name="Modules" type="Control" parent="Main/Content/Sidebar"]
+self_modulate = Color(1, 1, 1, 0)
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="AddModuleHint" type="RichTextLabel" parent="Main/Content/Sidebar/Modules"]
 layout_mode = 1
-anchors_preset = 11
-anchor_left = 1.0
+anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
-offset_left = -250.0
-offset_top = 24.0
-offset_bottom = -105.0
-grow_horizontal = 0
+grow_horizontal = 2
 grow_vertical = 2
 theme_override_styles/normal = SubResource("StyleBoxEmpty_d0lf3")
 bbcode_enabled = true
@@ -280,36 +155,94 @@ scroll_active = false
 horizontal_alignment = 1
 vertical_alignment = 1
 
-[node name="URILabel" type="Label" parent="."]
+[node name="ModulesList" type="ScrollContainer" parent="Main/Content/Sidebar/Modules"]
 layout_mode = 1
-anchors_preset = 2
-anchor_top = 1.0
+anchors_preset = 15
+anchor_right = 1.0
 anchor_bottom = 1.0
-offset_left = 72.0
-offset_top = -31.0
-offset_right = 158.0
-grow_vertical = 0
+grow_horizontal = 2
+grow_vertical = 2
+size_flags_vertical = 3
+
+[node name="VBox" type="VBoxContainer" parent="Main/Content/Sidebar/Modules/ModulesList"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+
+[node name="NewModule" type="HBoxContainer" parent="Main/Content/Sidebar"]
+self_modulate = Color(1, 1, 1, 0)
+custom_minimum_size = Vector2(0, 35)
+layout_mode = 2
+theme_override_constants/separation = 5
+
+[node name="ModuleNameInput" type="LineEdit" parent="Main/Content/Sidebar/NewModule"]
+layout_mode = 2
+size_flags_horizontal = 3
+placeholder_text = "Enter module name"
+
+[node name="AddButton" type="Button" parent="Main/Content/Sidebar/NewModule"]
+custom_minimum_size = Vector2(26, 27)
+layout_mode = 2
+size_flags_horizontal = 8
+size_flags_vertical = 4
+tooltip_text = "Add Module"
+theme_override_styles/focus = SubResource("StyleBoxEmpty_k511v")
+theme_override_styles/normal = SubResource("StyleBoxEmpty_raufm")
+icon = ExtResource("2_3cpcg")
+icon_alignment = 1
+
+[node name="GenerateButton" type="Button" parent="Main/Content/Sidebar"]
+custom_minimum_size = Vector2(0, 31)
+layout_mode = 2
+disabled = true
+text = "Generate schema"
+
+[node name="BottomBar" type="HBoxContainer" parent="Main"]
+layout_mode = 2
+theme_override_constants/separation = 4
+
+[node name="LogsControls" type="BoxContainer" parent="Main/BottomBar"]
+layout_mode = 2
+theme_override_constants/separation = 6
+alignment = 1
+
+[node name="ClearLogsButton" type="Button" parent="Main/BottomBar/LogsControls"]
+custom_minimum_size = Vector2(26, 27)
+layout_mode = 2
+tooltip_text = "Clear Output (Ctrl+Alt+K)"
+theme_override_styles/focus = SubResource("StyleBoxEmpty_43xhi")
+theme_override_styles/normal = SubResource("StyleBoxEmpty_3cpcg")
+icon = ExtResource("4_raufm")
+icon_alignment = 1
+
+[node name="CopyLogsButton" type="Button" parent="Main/BottomBar/LogsControls"]
+custom_minimum_size = Vector2(26, 27)
+layout_mode = 2
+tooltip_text = "Copy Selection (Ctrl+C)"
+theme_override_styles/focus = SubResource("StyleBoxEmpty_qc7xu")
+theme_override_styles/normal = SubResource("StyleBoxEmpty_3cpcg")
+icon = ExtResource("4_ej8d4")
+icon_alignment = 1
+
+[node name="VSeparator" type="VSeparator" parent="Main/BottomBar"]
+layout_mode = 2
+
+[node name="ServerUri" type="HBoxContainer" parent="Main/BottomBar"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/separation = 0
+
+[node name="Label" type="Label" parent="Main/BottomBar/ServerUri"]
+layout_mode = 2
 text = "Server URI:"
 vertical_alignment = 1
 
-[node name="ModulesLabel" type="Label" parent="."]
-layout_mode = 1
-anchors_preset = 1
-anchor_left = 1.0
-anchor_right = 1.0
-offset_left = -250.0
-offset_top = -2.0
-offset_bottom = 21.0
-grow_horizontal = 0
-text = "Modules"
-horizontal_alignment = 1
+[node name="UriInput" type="LineEdit" parent="Main/BottomBar/ServerUri"]
+layout_mode = 2
+size_flags_horizontal = 3
+text = "http://127.0.0.1:3000"
+placeholder_text = "Enter the server URI"
 
-[node name="VSeparator" type="VSeparator" parent="."]
-layout_mode = 1
-anchors_preset = 2
-anchor_top = 1.0
-anchor_bottom = 1.0
-offset_left = 62.0
-offset_top = -31.0
-offset_right = 67.0
-grow_vertical = 0
+[node name="CheckUri" type="Button" parent="Main/BottomBar"]
+layout_mode = 2
+text = "Check URI"

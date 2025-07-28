@@ -21,16 +21,16 @@ var _clear_logs_button: Button
 var _copy_logs_button: Button
 
 func _enter_tree() -> void:
-    _uri_input = $"Uri"
-    _modules_container = $"ModulesContainer/VBox"
-    _logs_label = $"Logs"
-    _add_module_hint_label = $"AddModuleHint"
-    _new_module_name_input = $"NewModule/ModuleNameInput"
-    _new_module_button = $"NewModule/AddButton"
-    _check_uri_button = $"CheckUri"
-    _generate_button = $"Generate"
-    _clear_logs_button = $"ClearLogsButton"
-    _copy_logs_button = $"CopyLogsButton"
+    _uri_input = $"Main/BottomBar/ServerUri/UriInput"
+    _modules_container = $"Main/Content/Sidebar/Modules/ModulesList/VBox"
+    _logs_label = $"Main/Content/Logs"
+    _add_module_hint_label = $"Main/Content/Sidebar/Modules/AddModuleHint"
+    _new_module_name_input = $"Main/Content/Sidebar/NewModule/ModuleNameInput"
+    _new_module_button = $"Main/Content/Sidebar/NewModule/AddButton"
+    _check_uri_button = $"Main/BottomBar/CheckUri"
+    _generate_button = $"Main/Content/Sidebar/GenerateButton"
+    _clear_logs_button = $"Main/BottomBar/LogsControls/ClearLogsButton"
+    _copy_logs_button = $"Main/BottomBar/LogsControls/CopyLogsButton"
     
     _check_uri_button.pressed.connect(_on_check_uri)
     _generate_button.pressed.connect(_on_generate_code)
@@ -52,7 +52,7 @@ func set_uri(uri: String) -> void:
     _uri_input.text = uri
 
 func add_module(name: String) -> void:
-    var new_module: Panel = $"Prefabs/ModulePrefab".duplicate() as Panel
+    var new_module: Control = $"Prefabs/ModulePrefab".duplicate() as Control
     var name_input: LineEdit = new_module.get_node("ModuleNameInput") as LineEdit
     name_input.text = name
     _modules_container.add_child(new_module)

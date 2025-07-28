@@ -1,4 +1,4 @@
-class_name _ModuleTable extends Resource
+class_name _ModuleTable extends RefCounted
 
 var _db: LocalDatabase
 

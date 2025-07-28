@@ -1,3 +1,4 @@
+@tool
 class_name ReducerCallInfoData extends Resource
 
 @export var reducer_name: String

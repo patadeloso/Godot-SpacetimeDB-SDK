@@ -1,8 +1,8 @@
 class_name SpacetimeDBSubscription extends Node
 
-@export var query_id: int = -1
-@export var queries: PackedStringArray
-@export var error: Error = OK
+var query_id: int = -1
+var queries: PackedStringArray
+var error: Error = OK
 
 signal applied
 signal end

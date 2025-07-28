@@ -88,6 +88,39 @@ class SpacetimeDBClient:
 
 Close a subscription by calling `unsubscribe(query_id)` with the query id of an existing query. A Godot `Error` is returned to indicate success or failure.
 
+### Call reducers
+
+#### `call_reducer()` method
+
+```gdscript
+class SpacetimeDBClient:
+    func call_reducer(reducer_name: String, args: Array = [], types: Array = []) -> SpacetimeDBReducerCall
+```
+
+| Name         | Description                                              |
+| ------------ | -------------------------------------------------------- |
+| reducer_name | The name of the reducer to call.                         |
+| args         | The arguments to pass to the reducer.                    |
+| types        | The BSATN types of the arguments to pass to the reducer. |
+
+Call a reducer with `call_reducer(reducer_name, args, types)` a [`SpacetimeDBReducerCall`](#spacetimedbreducercall-class) instance is returned which contains the request id or an error.
+
+It is recommended you use the auto-generated reducer methods rather than calling `call_reducer` directly. See [Calling reducers](#calling-reducers).
+
+#### `wait_for_reducer_response()` method
+
+```gdscript
+class SpacetimeDBClient:
+    async func wait_for_reducer_response(request_id: int, timeout_seconds: float = 10.0) -> TransactionUpdateMessage
+```
+
+| Name            | Description                                                       |
+| --------------- | ----------------------------------------------------------------- |
+| request_id      | The id of the reducer call request to wait for.                   |
+| timeout_seconds | The number of seconds to wait for the response before timing out. |
+
+Waits for the reducer call response and returns the received `TransactionUpdateMessage`, or returns `null` if there is an error or it times out.
+
 ## Generated `ModuleClient` class
 
 **Inherits:** [SpacetimeDBClient](#spacetimedbclient-class) < Node
@@ -212,11 +245,11 @@ This SDK does not currently support non-unique BTree indexes.
 Each public reducer defined by your module has a method on the `.reducers` property. The method name is the reducer name converted to `snake_case`. Each reducer method takes the arguments defined by the reducer and an optional callback function.
 
 ```gdscript
-static func example_reducer(
+static async func example_reducer(
     arg1: String,
     arg2: int,
     callback: Callable
-) -> void
+) -> Error
 
 # Callback function signature
 func(tx: TransactionUpdateMessage) -> void
@@ -274,6 +307,15 @@ class SpacetimeDBConnectionOptions:
 
 Whether to use a one-time token for the connection
 
+#### `token` property
+
+```gdscript
+class SpacetimeDBConnectionOptions:
+    var token: String = ""
+```
+
+The token to use for the connection, `one_time_token` determines whether this token is saved to disk.
+
 #### `debug_mode` property
 
 ```gdscript
@@ -317,6 +359,33 @@ class SpacetimeDBConnectionOptions:
 **Inherits:** Node
 
 A handle to a subscription to the SpacetimeDB database. The handle does not contain or provide access to the subscribed data, all subscribed rows are available via the module's [`LocalDatabase`](#localdatabase-class). See [Access the local database](#access-the-local-database).
+
+#### `query_id` property
+
+```gdscript
+class SpacetimeDBReducerCall:
+    var query_id: int
+```
+
+The id of the subscription.
+
+#### `queries` property
+
+```gdscript
+class SpacetimeDBReducerCall:
+    var queries: PackedStringArray
+```
+
+The SQL queries that were subscribed to.
+
+#### `error` property
+
+```gdscript
+class SpacetimeDBReducerCall:
+    var error: Error
+```
+
+A Godot `Error` that is either `OK` if the subscription was successful or an error if it failed.
 
 #### `active` property
 
@@ -394,6 +463,45 @@ class SpacetimeDBSubscription:
 ```
 
 Emitted when the `UnsubscribeMultiApplied` message is received and the subscription is set to ended.
+
+## `SpacetimeDBReducerCall` class
+
+**Inherits:** Resource
+
+A handle to a reducer call to the SpacetimeDB database.
+
+#### `request_id` property
+
+```gdscript
+class SpacetimeDBReducerCall:
+    var request_id: int
+```
+
+The id of the reducer call request.
+
+#### `error` property
+
+```gdscript
+class SpacetimeDBReducerCall:
+    var error: Error
+```
+
+A Godot `Error` that is either `OK` if the reducer call was successful or an error if it failed.
+
+#### `wait_for_response()` method
+
+```gdscript
+class SpacetimeDBReducerCall:
+    async func wait_for_response(timeout_sec: float = 10) -> TransactionUpdateMessage
+```
+
+| Name        | Description                                                       |
+| ----------- | ----------------------------------------------------------------- |
+| timeout_sec | The number of seconds to wait for the response before timing out. |
+
+Waits for the reducer call response, or until it times out.
+
+Returns the received `TransactionUpdateMessage`, or `null` if there was an error or it timed out.
 
 ## `LocalDatabase` class
 

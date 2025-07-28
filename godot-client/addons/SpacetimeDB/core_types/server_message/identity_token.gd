@@ -1,3 +1,4 @@
+@tool
 class_name IdentityTokenMessage extends Resource
 
 @export var identity: PackedByteArray

@@ -99,7 +99,9 @@ func read_string_with_u32_len(spb: StreamPeerBuffer) -> String:
         _set_error("Failed to decode UTF-8 string length %d" % length, start_pos); return ""
     return str_result
 func read_identity(spb: StreamPeerBuffer) -> PackedByteArray:
-    return read_bytes(spb, IDENTITY_SIZE)
+    var identity := read_bytes(spb, IDENTITY_SIZE)
+    identity.reverse() # We receive the identity bytes in reverse
+    return identity
 func read_connection_id(spb: StreamPeerBuffer) -> PackedByteArray:
     return read_bytes(spb, CONNECTION_ID_SIZE)
 func read_timestamp(spb: StreamPeerBuffer) -> int:

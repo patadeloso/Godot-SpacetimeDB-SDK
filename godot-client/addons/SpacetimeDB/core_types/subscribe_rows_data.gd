@@ -1,3 +1,4 @@
+@tool
 class_name SubscribeRowsData extends Resource
 
 @export var table_id: int # u32 (TableId is likely u32)

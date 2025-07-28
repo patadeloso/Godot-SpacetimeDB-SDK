@@ -1,3 +1,4 @@
+@tool
 class_name SubscribeAppliedMessage extends Resource
 
 @export var request_id: int # u32
