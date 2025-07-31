@@ -79,6 +79,7 @@ func write_string_with_u32_len(v: String) -> void:
     if str_bytes.size() > 0: write_bytes(str_bytes)
 
 func write_identity(v: PackedByteArray) -> void:
+    v.reverse()
     if v == null or v.size() != IDENTITY_SIZE:
         _set_error("Invalid Identity value (null or size != %d)" % IDENTITY_SIZE)
         var default_bytes = PackedByteArray(); default_bytes.resize(IDENTITY_SIZE)
@@ -87,6 +88,7 @@ func write_identity(v: PackedByteArray) -> void:
     write_bytes(v)
 
 func write_connection_id(v: PackedByteArray) -> void:
+    v.reverse()
     if v == null or v.size() != CONNECTION_ID_SIZE:
         _set_error("Invalid ConnectionId value (null or size != %d)" % CONNECTION_ID_SIZE)
         var default_bytes = PackedByteArray(); default_bytes.resize(CONNECTION_ID_SIZE)
