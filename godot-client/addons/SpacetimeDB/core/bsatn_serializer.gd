@@ -64,6 +64,15 @@ func write_f32_le(v: float) -> void:
 func write_f64_le(v: float) -> void:
     _spb.put_double(v)
 
+func write_u128(v: PackedByteArray) -> void:
+    if v == null or v.size() != U128_SIZE:
+        _set_error("Invalid U128 value (null or size != %d)" % U128_SIZE)
+        var default_bytes = PackedByteArray(); default_bytes.resize(U128_SIZE)
+        write_bytes(default_bytes) # Write default value to avoid stopping serialization
+        return
+    v.reverse()
+    write_bytes(v)
+
 func write_bool(v: bool) -> void:
     _spb.put_u8(1 if v else 0)
 
@@ -79,30 +88,21 @@ func write_string_with_u32_len(v: String) -> void:
     if str_bytes.size() > 0: write_bytes(str_bytes)
 
 func write_identity(v: PackedByteArray) -> void:
-    v.reverse()
     if v == null or v.size() != IDENTITY_SIZE:
         _set_error("Invalid Identity value (null or size != %d)" % IDENTITY_SIZE)
         var default_bytes = PackedByteArray(); default_bytes.resize(IDENTITY_SIZE)
         write_bytes(default_bytes) # Write default value to avoid stopping serialization
         return
+    v.reverse()
     write_bytes(v)
 
 func write_connection_id(v: PackedByteArray) -> void:
-    v.reverse()
     if v == null or v.size() != CONNECTION_ID_SIZE:
         _set_error("Invalid ConnectionId value (null or size != %d)" % CONNECTION_ID_SIZE)
         var default_bytes = PackedByteArray(); default_bytes.resize(CONNECTION_ID_SIZE)
         write_bytes(default_bytes) # Write default value
         return
-    write_bytes(v)
-
-func write_u128(v: PackedByteArray) -> void:
     v.reverse()
-    if v == null or v.size() != U128_SIZE:
-        _set_error("Invalid U128 value (null or size != %d)" % U128_SIZE)
-        var default_bytes = PackedByteArray(); default_bytes.resize(U128_SIZE)
-        write_bytes(default_bytes) # Write default value to avoid stopping serialization
-        return
     write_bytes(v)
 
 func write_timestamp(v: int) -> void:

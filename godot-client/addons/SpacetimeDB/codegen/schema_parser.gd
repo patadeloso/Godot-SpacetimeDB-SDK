@@ -27,10 +27,10 @@ const GDNATIVE_TYPES: Dictionary[String, String] = {
 
 const DEFAULT_TYPE_MAP: Dictionary[String, String] = {
     "__identity__": "PackedByteArray",
-    "U128": "PackedByteArray",
     "__connection_id__": "PackedByteArray",
     "__timestamp_micros_since_unix_epoch__": "int",
     "__time_duration_micros__": "int",
+    "U128": "PackedByteArray",
 }
 
 const DEFAULT_META_TYPE_MAP: Dictionary[String, String] = {
