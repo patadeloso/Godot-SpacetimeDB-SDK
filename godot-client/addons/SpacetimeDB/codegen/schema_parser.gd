@@ -27,6 +27,7 @@ const GDNATIVE_TYPES: Dictionary[String, String] = {
 
 const DEFAULT_TYPE_MAP: Dictionary[String, String] = {
     "__identity__": "PackedByteArray",
+    "U128": "PackedByteArray",
     "__connection_id__": "PackedByteArray",
     "__timestamp_micros_since_unix_epoch__": "int",
     "__time_duration_micros__": "int",
@@ -43,6 +44,7 @@ const DEFAULT_META_TYPE_MAP: Dictionary[String, String] = {
     "U64": "u64",
     "F32": "f32",
     "F64": "f64",
+    "U128": "u128",
     "String": "string", # For BSATN, e.g. option_string or vec_String (if Option<Array<String>>)
     "Bool": "bool",   # For BSATN, e.g. option_bool
     "Nil": "nil",     # For BSATN Option<()>

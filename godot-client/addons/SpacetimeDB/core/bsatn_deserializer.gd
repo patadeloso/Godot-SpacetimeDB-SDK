@@ -102,6 +102,10 @@ func read_identity(spb: StreamPeerBuffer) -> PackedByteArray:
     var identity := read_bytes(spb, IDENTITY_SIZE)
     identity.reverse() # We receive the identity bytes in reverse
     return identity
+func read_u128(spb: StreamPeerBuffer) -> PackedByteArray:
+    var num := read_bytes(spb, 16)
+    num.reverse() # We receive the bytes in reverse
+    return num
 func read_connection_id(spb: StreamPeerBuffer) -> PackedByteArray:
     return read_bytes(spb, CONNECTION_ID_SIZE)
 func read_timestamp(spb: StreamPeerBuffer) -> int:
@@ -179,6 +183,7 @@ func _get_primitive_reader_from_bsatn_type(bsatn_type_str: String) -> Callable:
         &"i16": return Callable(self, "read_i16_le")
         &"u8": return Callable(self, "read_u8")
         &"i8": return Callable(self, "read_i8")
+        &"u128": return Callable(self, "read_u128")
         &"identity": return Callable(self, "read_identity")
         &"connection_id": return Callable(self, "read_connection_id")
         &"timestamp": return Callable(self, "read_timestamp")

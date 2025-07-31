@@ -3,6 +3,7 @@ class_name BSATNSerializer extends RefCounted
 # --- Constants ---
 const IDENTITY_SIZE := 32
 const CONNECTION_ID_SIZE := 16
+const U128_SIZE := 16
 
 # --- Properties ---
 var _last_error: String = ""
@@ -90,6 +91,15 @@ func write_connection_id(v: PackedByteArray) -> void:
         _set_error("Invalid ConnectionId value (null or size != %d)" % CONNECTION_ID_SIZE)
         var default_bytes = PackedByteArray(); default_bytes.resize(CONNECTION_ID_SIZE)
         write_bytes(default_bytes) # Write default value
+        return
+    write_bytes(v)
+
+func write_u128(v: PackedByteArray) -> void:
+    v.reverse()
+    if v == null or v.size() != U128_SIZE:
+        _set_error("Invalid U128 value (null or size != %d)" % U128_SIZE)
+        var default_bytes = PackedByteArray(); default_bytes.resize(U128_SIZE)
+        write_bytes(default_bytes) # Write default value to avoid stopping serialization
         return
     write_bytes(v)
 
@@ -209,6 +219,7 @@ func _get_specific_writer_method_name(bsatn_type_value) -> StringName:
         &"vec_u8": return &"write_vec_u8"
         &'string': return &'write_string_with_u32_len'
         &'bool': return &'write_bool'
+        &'u128': return &'write_u128'
         # Add other specific types mapped to writer methods if needed
         _: return &"" # Unknown or non-primitive type
 
