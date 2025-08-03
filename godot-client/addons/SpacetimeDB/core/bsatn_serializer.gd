@@ -432,21 +432,6 @@ func _generate_default_type(rust_type: String) -> Variant:
         &"Quaternion": return Quaternion.IDENTITY
         _: return null
 
-# Helper to serialize a single Resource argument into raw bytes (e.g., for reducer calls)
-func _serialize_resource_argument(resource_arg: Resource) -> PackedByteArray:
-    if not resource_arg: _set_error("Cannot serialize null resource argument."); return PackedByteArray()
-    var arg_spb := StreamPeerBuffer.new(); arg_spb.big_endian = false
-    var original_main_spb := _spb; _spb = arg_spb # Redirect writes
-
-    if not _serialize_resource_fields(resource_arg):
-        # Error should be set by _serialize_resource_fields
-        push_error("Failed to serialize resource argument fields.") # Add context
-        _spb = original_main_spb # Restore
-        return PackedByteArray()
-
-    _spb = original_main_spb # Restore
-    return arg_spb.data_array if not has_error() else PackedByteArray()
-
 # --- Public API ---
 
 # Serializes a complete ClientMessage (variant tag + payload resource fields).
