@@ -464,8 +464,6 @@ func call_reducer(reducer_name: String, args: Array = [], types: Array = []) -> 
         printerr("Failed to serialize args for %s: %s" % [reducer_name, _serializer.get_last_error()])
         return SpacetimeDBReducerCall.fail(ERR_PARSE_ERROR)
     
-    if debug_mode: print("DEBUG: call_reducer: Argument bytes: %s" % args_bytes)
-    
     var request_id := _next_request_id
     _next_request_id += 1
     
@@ -474,12 +472,12 @@ func call_reducer(reducer_name: String, args: Array = [], types: Array = []) -> 
         SpacetimeDBClientMessage.CALL_REDUCER,
         call_data
     )
-    
-    if debug_mode: print("DEBUG: call_reducer: Message bytes: %s" % message_bytes)
-    
+        
     if _serializer.has_error():
         printerr("SpacetimeDBClient: Failed to serialize CallReducer message: %s" % _serializer.get_last_error())
         return SpacetimeDBReducerCall.fail(ERR_PARSE_ERROR)
+    
+    if debug_mode: print("DEBUG: call_reducer: Calling reducer '%s' with request id '%d' and message bytes: %s (argument bytes: %s)" % [reducer_name, request_id, message_bytes, args_bytes])
     
     # Access the internal _websocket peer directly (might need adjustment if _connection API changes)
     if _connection and _connection._websocket: # Basic check
