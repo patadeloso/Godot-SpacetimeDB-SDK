@@ -327,6 +327,14 @@ func write_nested_resource(resource: Resource, bsatn_type: String, prop: Diction
 
 # --- Core Serialization Logic ---
 
+func _get_value_class_name(value: Variant) -> String:
+    if value is Resource:
+        var script = value.get_script()
+        return script.get_global_name() if script and script.get_global_name() else value.resource_path
+    
+    if typeof(value) == TYPE_OBJECT: return value.get_class()
+    return type_string(typeof(value))
+
 # Helper to get the specific BSATN writer METHOD NAME based on metadata value.
 func _get_primitive_writer_from_bsatn_type(bsatn_type_str: String) -> Callable:
     match bsatn_type_str:
@@ -458,7 +466,7 @@ func _write_value_from_bsatn_type(value: Variant, bsatn_type_str: String, contex
             return true
     
     # 2. Create a temporary "prototype" dictionary for the value
-    var value_class_name = value.resource_path if value is Resource and value.resource_path else (value.get_class() if value_type == TYPE_OBJECT else type_string(value_type))
+    var value_class_name = _get_value_class_name(value)
     var prop_sim = {
         "name": context_prop_name_for_prototype,
         "type": value_type,
@@ -565,8 +573,8 @@ func _serialize_arguments(args_array: Array, bsatn_types: Array) -> PackedByteAr
             bsatn_type = bsatn_types[i]
             
         if debug_mode:
-            var arg_type_id = arg_value.resource_path if arg_value is Resource and arg_value.resource_path else (arg_value.get_class() if typeof(arg_value) == TYPE_OBJECT else type_string(typeof(arg_value)))
-            print("DEBUG: _serialize_arguments: Serializing argument at %d from '%s' to bsatn type '%s'" % [i, arg_type_id, bsatn_type])
+            var arg_type_name: String = _get_value_class_name(arg_value)
+            print("DEBUG: _serialize_arguments: Serializing argument at %d from '%s' to bsatn type '%s'" % [i, arg_type_name, bsatn_type])
         
         if not _write_argument_value(arg_value, bsatn_type, "arg[%s]" % i): # Use dedicated argument writer
             # Error should be set by _write_argument_value
@@ -581,7 +589,7 @@ func _serialize_arguments(args_array: Array, bsatn_types: Array) -> PackedByteAr
 func _write_argument_value(value, bsatn_type: String = "", context_prop_name_for_error: StringName = &"") -> bool:
     # 1. Create a temporary "prototype" dictionary for the argument
     var value_type = typeof(value)
-    var value_class_name = value.resource_path if value is Resource and value.resource_path else (value.get_class() if value_type == TYPE_OBJECT else type_string(value_type))
+    var value_class_name = _get_value_class_name(value)
     var prop_sim = {
         "name": context_prop_name_for_error,
         "type": value_type,
