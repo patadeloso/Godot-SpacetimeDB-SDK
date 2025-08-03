@@ -126,7 +126,7 @@ func write_vec_u8(v: PackedByteArray) -> void:
 ## Writes a Rust sumtype enum
 func write_rust_enum(rust_enum: RustEnum) -> void:
     write_u8(rust_enum.value)
-    var sub_class: String = rust_enum.get_meta("enum_options")[rust_enum.value]
+    var sub_class: String = str(rust_enum.get_meta("enum_options")[rust_enum.value]).to_lower()
     var data = rust_enum.data
     if sub_class.begins_with("vec"):
         if data is not Array:
@@ -415,7 +415,7 @@ func _get_writer_callable_for_property(prop: Dictionary, bsatn_type_str: String)
     
     # --- Debug Print (Optional) ---
     if debug_mode:
-        var type_name = prop.class_name if prop.class_name != &"" else type_string(prop.type)
+        var type_name = prop.class_name if prop.class_name != &"" else (type_string(prop.type) if prop.type != TYPE_MAX else "Unknown")
         print("DEBUG: _get_writer_callable: For '%s' of type '%s', returning: %s" % [prop.name, type_name, writer_callable.get_method() if writer_callable.is_valid() else "INVALID"])
     # --- End Debug ---
     
