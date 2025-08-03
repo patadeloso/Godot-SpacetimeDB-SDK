@@ -46,57 +46,71 @@ func _set_error(msg: String) -> void:
 # These directly write basic types to the internal StreamPeerBuffer.
 
 func write_i8(v: int) -> void:
+    #print("write_i8(%s)" % v)
     if v < -128 or v > 127: _set_error("Value %d out of range for i8" % v); v = 0
     _spb.put_u8(v if v >= 0 else v + 256)
 
 func write_i16_le(v: int) -> void:
+    #print("write_i16_le(%s)" % v)
     if v < -32768 or v > 32767: _set_error("Value %d out of range for i16" % v); v = 0
     _spb.put_u16(v if v >= 0 else v + 65536)
 
 func write_i32_le(v: int) -> void:
+    #print("write_i32_le(%s)" % v)
     if v < -2147483648 or v > 2147483647: _set_error("Value %d out of range for i32" % v); v = 0
     _spb.put_u32(v) # put_u32 handles negative i32 correctly via two's complement
 
 func write_i64_le(v: int) -> void:
+    #print("write_i64_le(%s)" % v)
     _spb.put_u64(v) # put_u64 handles negative i64 correctly via two's complement
 
 func write_u8(v: int) -> void:
+    #print("write_u8(%s)" % v)
     if v < 0 or v > 255: _set_error("Value %d out of range for u8" % v); v = 0
     _spb.put_u8(v)
 
 func write_u16_le(v: int) -> void:
+    #print("write_u16_le(%s)" % v)
     if v < 0 or v > 65535: _set_error("Value %d out of range for u16" % v); v = 0
     _spb.put_u16(v)
 
 func write_u32_le(v: int) -> void:
+    #print("write_u32_le(%s)" % v)
     if v < 0 or v > 4294967295: _set_error("Value %d out of range for u32" % v); v = 0
     _spb.put_u32(v)
 
 func write_u64_le(v: int) -> void:
+    #print("write_u64_le(%s)" % v)
     if v < 0: _set_error("Value %d out of range for u64" % v); v = 0
     _spb.put_u64(v)
 
 func write_f32_le(v: float) -> void:
+    #print("write_f32_le(%s)" % v)
     _spb.put_float(v)
 
 func write_f64_le(v: float) -> void:
+    #print("write_f64_le(%s)" % v)
     _spb.put_double(v)
 
 func write_bool(v: bool) -> void:
+    #print("write_bool(%s)" % v)
     _spb.put_u8(1 if v else 0)
 
 func write_bytes(v: PackedByteArray) -> void:
+    #print("write_bytes(%s)" % v)
     if v == null: v = PackedByteArray() # Avoid error on null
     var result = _spb.put_data(v)
     if result != OK: _set_error("StreamPeerBuffer.put_data failed with code %d" % result)
 
 func write_string_with_u32_len(v: String) -> void:
+    #print("write_string_with_u32_len(%s)" % v)
     if v == null: v = ""
     var str_bytes := v.to_utf8_buffer()
     write_u32_le(str_bytes.size())
     if str_bytes.size() > 0: write_bytes(str_bytes)
 
 func write_identity(v: PackedByteArray) -> void:
+    #print("write_identity(%s)" % v)
     if v == null or v.size() != IDENTITY_SIZE:
         _set_error("Invalid Identity value (null or size != %d)" % IDENTITY_SIZE)
         var default_bytes = PackedByteArray(); default_bytes.resize(IDENTITY_SIZE)
@@ -105,6 +119,7 @@ func write_identity(v: PackedByteArray) -> void:
     write_bytes(v)
 
 func write_connection_id(v: PackedByteArray) -> void:
+    #print("write_connection_id(%s)" % v)
     if v == null or v.size() != CONNECTION_ID_SIZE:
         _set_error("Invalid ConnectionId value (null or size != %d)" % CONNECTION_ID_SIZE)
         var default_bytes = PackedByteArray(); default_bytes.resize(CONNECTION_ID_SIZE)
@@ -113,10 +128,12 @@ func write_connection_id(v: PackedByteArray) -> void:
     write_bytes(v)
 
 func write_timestamp(v: int) -> void:
+    #print("write_timestamp(%s)" % v)
     write_i64_le(v) # Timestamps are typically i64
 
 # Writes a PackedByteArray prefixed with its u32 length (Vec<u8> format)
 func write_vec_u8(v: PackedByteArray) -> void:
+    #print("write_vec_u8(%s)" % v)
     if v == null: v = PackedByteArray()
     write_u32_le(v.size())
     if v.size() > 0: write_bytes(v) # Avoid calling put_data with empty array if possible
@@ -125,6 +142,7 @@ func write_vec_u8(v: PackedByteArray) -> void:
 
 ## Writes a Rust sumtype enum
 func write_rust_enum(rust_enum: RustEnum) -> void:
+    #print("write_rust_enum(%s)" % rust_enum)
     write_u8(rust_enum.value)
     var sub_class: String = str(rust_enum.get_meta("enum_options")[rust_enum.value]).to_lower()
     var data = rust_enum.data
@@ -157,6 +175,7 @@ func write_rust_enum(rust_enum: RustEnum) -> void:
 
 ## Writes an option value
 func write_option(option_value: Option, bsatn_type: String, prop: Dictionary) -> bool:
+    #print("write_option(%s)" % option_value)
     var prop_name: StringName = prop.name
     
     if not option_value is Option:
@@ -185,6 +204,7 @@ func write_option(option_value: Option, bsatn_type: String, prop: Dictionary) ->
 
 ## Writes an array type
 func write_array(v: Array, bsatn_type: String, prop: Dictionary) -> void:
+    #print("write_array(%s)" % str(v))
     var prop_name: StringName = prop.name
     
     # 1. Write array length (u32)
@@ -268,6 +288,7 @@ func write_array(v: Array, bsatn_type: String, prop: Dictionary) -> void:
 
 ## Writes a native array-like value
 func write_native_arraylike(v: Variant, bsatn_type: String, prop: Dictionary) -> void:
+    #print("write_native_arraylike(%s)" % v)
     var prop_name: StringName = prop.name
     
     if bsatn_type.is_empty():
@@ -314,6 +335,7 @@ func write_native_arraylike(v: Variant, bsatn_type: String, prop: Dictionary) ->
         _write_value_from_bsatn_type(value, bsatn_component_type, prop_name + "[%s]" % i)
 
 func write_nested_resource(resource: Resource, bsatn_type: String, prop: Dictionary) -> void:
+    #print("write_nested_resource(%s)" % _get_value_class_name(resource))
     if resource is not Resource:
         _set_error("Cannot serialize non-Resource Object argument.")
         return
@@ -508,7 +530,7 @@ func _create_serialization_plan(script: Script, resource: Resource) -> Array:
         if resource.has_meta(meta_key):
             # This metadata applies to the field itself, or to the *elements* if it's an array.
             bsatn_type_str = str(resource.get_meta(meta_key)).to_lower()
-            
+        
         var writer_callable: Callable = _get_writer_callable_for_property(prop, bsatn_type_str)
         
         if not writer_callable.is_valid():
