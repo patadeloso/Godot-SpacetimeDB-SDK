@@ -250,37 +250,6 @@ func _get_reader_callable_for_property(resource: Resource, prop: Dictionary) -> 
 
     return reader_callable
 
-# Reads a value for a specific property using the determined reader.
-func _read_value_for_property(spb: StreamPeerBuffer, resource: Resource, prop: Dictionary):	
-    var meta: String = ""
-    if resource.has_meta("bsatn_type_" + prop.name):
-        meta = resource.get_meta("bsatn_type_" + prop.name).to_lower()
-    if prop.class_name == &'Option':
-        return _read_option(spb, resource, prop, meta)
-
-    var reader_callable := _get_reader_callable_for_property(resource, prop)
-
-    if not reader_callable.is_valid():
-        _set_error("Unsupported property type '%s' or missing reader for property '%s' in resource '%s'" % [type_string(prop.type), prop.name, resource.resource_path if resource else "Unknown"], spb.get_position())
-        return null # Return null on error/unsupported
-
-    # Call the determined reader function.
-    if reader_callable.get_object() == self:
-        var method_name = reader_callable.get_method()
-        # Check if the method requires the full context (spb, resource, prop)
-        # Typically needed for recursive or context-aware readers.
-        match method_name:
-            "_read_array", "_read_nested_resource", "_read_array_of_table_updates", "_read_option":
-                return reader_callable.call(spb, resource, prop) # Pass full context
-            _: 
-                # Standard primitive/complex readers usually only need the buffer.
-                # This includes _read_update_status.
-                return reader_callable.call(spb) # Pass only spb		
-    else:
-        # Should not happen with Callables created above, but handle defensively
-        _set_error("Internal error: Invalid reader callable.", spb.get_position())
-        return null
-
 # Populates an existing Resource instance from the buffer based on its exported properties.
 func _populate_resource_from_bytes(resource: Resource, spb: StreamPeerBuffer) -> bool:
     var script := resource.get_script()
