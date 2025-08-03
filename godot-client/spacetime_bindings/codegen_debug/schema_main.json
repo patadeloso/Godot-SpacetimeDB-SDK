@@ -227,6 +227,11 @@
 					"type": "U8"
 				},
 				{
+					"name": "test_dynamic_arraylike",
+					"type": "Vector4",
+					"type_idx": 8
+				},
+				{
 					"name": "last_position",
 					"type": "Vector3",
 					"type_idx": 2
@@ -277,6 +282,29 @@
 				{
 					"name": "a",
 					"type": "F32"
+				}
+			]
+		},
+		{
+			"name": "Vector4",
+			"gd_native": true,
+			"gd_arraylike": true,
+			"struct": [
+				{
+					"name": "x",
+					"type": "F64"
+				},
+				{
+					"name": "y",
+					"type": "F64"
+				},
+				{
+					"name": "z",
+					"type": "F64"
+				},
+				{
+					"name": "w",
+					"type": "F64"
 				}
 			]
 		}
@@ -924,6 +952,14 @@
 					},
 					{
 						"name": {
+							"some": "test_dynamic_arraylike"
+						},
+						"algebraic_type": {
+							"Ref": 8.0
+						}
+					},
+					{
+						"name": {
 							"some": "last_position"
 						},
 						"algebraic_type": {
@@ -1001,6 +1037,44 @@
 						},
 						"algebraic_type": {
 							"F32": []
+						}
+					}
+				]
+			}
+		},
+		{
+			"Product": {
+				"elements": [
+					{
+						"name": {
+							"some": "x"
+						},
+						"algebraic_type": {
+							"F64": []
+						}
+					},
+					{
+						"name": {
+							"some": "y"
+						},
+						"algebraic_type": {
+							"F64": []
+						}
+					},
+					{
+						"name": {
+							"some": "z"
+						},
+						"algebraic_type": {
+							"F64": []
+						}
+					},
+					{
+						"name": {
+							"some": "w"
+						},
+						"algebraic_type": {
+							"F64": []
 						}
 					}
 				]
