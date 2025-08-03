@@ -147,6 +147,26 @@ static func parse_schema(schema: Dictionary, module_name: String) -> SpacetimePa
                 else:
                     SpacetimePlugin.print_log("Type '%s' has no Product/Sum definition in typespace and is not GDNative. Skipping." % type_name)
     
+    for parsed_type in parsed_types_list:
+        if not parsed_type.has("struct"):
+            continue
+        
+        for field_type in parsed_type.get("struct", []):
+            var type_name = field_type.get("type", null)
+            if not type_name or GDNATIVE_PRIMITIVE_TYPES.has(type_name) or DEFAULT_TYPE_MAP.has(type_name):
+                continue
+            
+            var type_idx = 0
+            var type_found = false
+            for pt in parsed_types_list:
+                if pt.name == type_name:
+                    type_found = true
+                    break
+                type_idx += 1
+            
+            if type_found:
+                field_type["type_idx"] = type_idx
+    
     var parsed_tables_list: Array[Dictionary] = []
     var scheduled_reducers: Array[String] = []
     for table_info in schema_tables:
@@ -241,6 +261,18 @@ static func parse_schema(schema: Dictionary, module_name: String) -> SpacetimePa
             var data = {"name": raw_param.get("name", {}).get("some", null)}
             var type = _parse_field_type(raw_param.get("algebraic_type", {}), data, schema_types_raw)
             data["type"] = type
+            
+            var type_idx = 0
+            var type_found = false
+            if type and not (GDNATIVE_PRIMITIVE_TYPES.has(type) or DEFAULT_TYPE_MAP.has(type)):
+                for pt in parsed_types_list:
+                    if pt.name == type:
+                        type_found = true
+                        break
+                    type_idx += 1
+                
+            if type_found:
+                data["type_idx"] = type_idx
             reducer_params.append(data)	
         reducer_data["params"] = reducer_params
         
