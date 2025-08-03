@@ -14,4 +14,4 @@ func _init():
     set_meta("bsatn_type_caller_identity", "identity")
     set_meta("bsatn_type_caller_connection_id", "connection_id")
     set_meta("bsatn_type_energy_quanta_used", "u64")
-    set_meta("bsatn_type_energy_total_host_execution_duration_ns", "i64")
+    set_meta("bsatn_type_total_host_execution_duration_ns", "i64")
