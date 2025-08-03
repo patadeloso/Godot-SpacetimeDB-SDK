@@ -24,8 +24,11 @@ func _init() -> void:
 	set_meta('bsatn_type_online', &'bool')
 	set_meta('bsatn_type_name', &'string')
 	set_meta('bsatn_type_lobby_id', &'u64')
+	set_meta('bsatn_type_color', &'color[f32,f32,f32,f32]')
 	set_meta('bsatn_type_test_vec', &'string')
 	set_meta('bsatn_type_test_bytes_array', &'u8')
+	set_meta('bsatn_type_last_position', &'vector3[f32,f32,f32]')
+	set_meta('bsatn_type_direction', &'vector2[f32,f32]')
 	set_meta('bsatn_type_player_speed', &'f32')
 	set_meta('bsatn_type_last_update', &'i64')
 

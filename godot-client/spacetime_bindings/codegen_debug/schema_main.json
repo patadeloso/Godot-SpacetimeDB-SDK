@@ -26,6 +26,7 @@
 		{
 			"name": "Vector2",
 			"gd_native": true,
+			"gd_arraylike": true,
 			"struct": [
 				{
 					"name": "x",
@@ -40,6 +41,7 @@
 		{
 			"name": "Vector3",
 			"gd_native": true,
+			"gd_arraylike": true,
 			"struct": [
 				{
 					"name": "x",
@@ -106,7 +108,8 @@
 						"Option"
 					],
 					"is_option": true,
-					"type": "Damage"
+					"type": "Damage",
+					"type_idx": 4
 				}
 			]
 		},
@@ -148,7 +151,8 @@
 				},
 				{
 					"name": "damage",
-					"type": "Damage"
+					"type": "Damage",
+					"type_idx": 4
 				},
 				{
 					"name": "test_option_string",
@@ -166,7 +170,8 @@
 						"Option"
 					],
 					"is_option": true,
-					"type": "Message"
+					"type": "Message",
+					"type_idx": 3
 				}
 			],
 			"table_names": [
@@ -202,7 +207,8 @@
 				},
 				{
 					"name": "color",
-					"type": "Color"
+					"type": "Color",
+					"type_idx": 7
 				},
 				{
 					"name": "test_vec",
@@ -222,11 +228,13 @@
 				},
 				{
 					"name": "last_position",
-					"type": "Vector3"
+					"type": "Vector3",
+					"type_idx": 2
 				},
 				{
 					"name": "direction",
-					"type": "Vector2"
+					"type": "Vector2",
+					"type_idx": 1
 				},
 				{
 					"name": "player_speed",
@@ -252,6 +260,7 @@
 		{
 			"name": "Color",
 			"gd_native": true,
+			"gd_arraylike": true,
 			"struct": [
 				{
 					"name": "r",
@@ -282,11 +291,13 @@
 			"params": [
 				{
 					"name": "new_input",
-					"type": "Vector2"
+					"type": "Vector2",
+					"type_idx": 1
 				},
 				{
 					"name": "global_position",
-					"type": "Vector3"
+					"type": "Vector3",
+					"type_idx": 2
 				}
 			]
 		},
@@ -336,7 +347,8 @@
 			"params": [
 				{
 					"name": "message",
-					"type": "Message"
+					"type": "Message",
+					"type_idx": 3
 				}
 			]
 		}
@@ -429,17 +441,17 @@
 		"F32": "float",
 		"F64": "float",
 		"String": "String",
+		"Bool": "bool",
+		"Nil": "null",
 		"Vector4": "Vector4",
 		"Vector4I": "Vector4i",
 		"Vector3": "Vector3",
 		"Vector3I": "Vector3i",
 		"Vector2": "Vector2",
 		"Vector2I": "Vector2i",
-		"Plane": "Plane",
-		"Color": "Color",
 		"Quaternion": "Quaternion",
-		"Bool": "bool",
-		"Nil": "null",
+		"Color": "Color",
+		"Plane": "Plane",
 		"Lobby": "MainLobby",
 		"Message": "MainMessage",
 		"Damage": "MainDamage",
@@ -460,6 +472,14 @@
 		"String": "string",
 		"Bool": "bool",
 		"Nil": "nil",
+		"Vector4": "vector4",
+		"Vector4I": "vector4i",
+		"Vector3": "vector3",
+		"Vector3I": "vector3i",
+		"Vector2": "vector2",
+		"Vector2I": "vector2i",
+		"Quaternion": "quaternion",
+		"Color": "color",
 		"__identity__": "identity",
 		"__connection_id__": "connection_id",
 		"__timestamp_micros_since_unix_epoch__": "i64",
