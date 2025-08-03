@@ -259,7 +259,7 @@ func write_array(v: Array, bsatn_type: String, prop: Dictionary) -> void:
             _set_error("Array '%s' of Options has empty 'bsatn_type' metadata. Inner type T for Option<T> cannot be determined." % prop_name)
             return
     else:
-        if not bsatn_type.is_empty():
+        if not bsatn_type.is_empty() and element_type_code != TYPE_ARRAY:
             element_writer_callable = _get_primitive_writer_from_bsatn_type(bsatn_type)
             if not element_writer_callable.is_valid() and debug_mode:
                 push_warning("Array '%s' has 'bsatn_type' metadata ('%s'), but it doesn't map to a primitive reader. Falling back to element type hint." % [prop_name, bsatn_type])
