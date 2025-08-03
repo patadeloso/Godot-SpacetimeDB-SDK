@@ -409,31 +409,32 @@ func _get_writer_callable_for_property(prop: Dictionary, bsatn_type_str: String)
                 push_warning("Unknown 'bsatn_type' metadata value: '%s' for property '%s'. Falling back to default type." % [bsatn_type_str, prop_name])
 
         # 2. Fallback to default reader based on property's Variant.Type if metadata didn't provide a valid reader
-        match prop_type:
-            TYPE_NIL: _set_error("Cannot serialize null argument.")
-            TYPE_BOOL: writer_callable = Callable(self, "write_bool")
-            TYPE_INT: 
-                match bsatn_type_str:
-                    &"u8": writer_callable = Callable(self, "write_u8")
-                    &"u16": writer_callable = Callable(self, "write_u16_le")
-                    &"u32": writer_callable = Callable(self, "write_u32_le")
-                    &"u64": writer_callable = Callable(self, "write_u64_le")
-                    &"i8": writer_callable = Callable(self, "write_i8")
-                    &"i16": writer_callable = Callable(self, "write_i16_le")
-                    &"i32": writer_callable = Callable(self, "write_i32_le")
-                    _: writer_callable = Callable(self, "write_i64_le") #Default i64
-            TYPE_FLOAT: 
-                match bsatn_type_str:
-                    &"f64": writer_callable = Callable(self, "write_f64_le")
-                    _: writer_callable = Callable(self, "write_f32_le") # Default f32
-            TYPE_STRING: writer_callable = Callable(self, "write_string_with_u32_len")
-            TYPE_PACKED_BYTE_ARRAY: writer_callable = Callable(self, "write_vec_u8") # Default Vec<u8> for arguments
-            TYPE_OBJECT:
-                writer_callable = Callable(self, "write_nested_resource") # Handle nested resources
-            # TYPE_ARRAY, and native array-like types (TYPE_VECTOR2, TYPE_QUATERNION, etc.) are handled above
-            _:
-                # Writer remains invalid for unsupported types
-                pass
+        if not writer_callable.is_valid():
+            match prop_type:
+                TYPE_NIL: _set_error("Cannot serialize null argument.")
+                TYPE_BOOL: writer_callable = Callable(self, "write_bool")
+                TYPE_INT: 
+                    match bsatn_type_str:
+                        &"u8": writer_callable = Callable(self, "write_u8")
+                        &"u16": writer_callable = Callable(self, "write_u16_le")
+                        &"u32": writer_callable = Callable(self, "write_u32_le")
+                        &"u64": writer_callable = Callable(self, "write_u64_le")
+                        &"i8": writer_callable = Callable(self, "write_i8")
+                        &"i16": writer_callable = Callable(self, "write_i16_le")
+                        &"i32": writer_callable = Callable(self, "write_i32_le")
+                        _: writer_callable = Callable(self, "write_i64_le") #Default i64
+                TYPE_FLOAT: 
+                    match bsatn_type_str:
+                        &"f64": writer_callable = Callable(self, "write_f64_le")
+                        _: writer_callable = Callable(self, "write_f32_le") # Default f32
+                TYPE_STRING: writer_callable = Callable(self, "write_string_with_u32_len")
+                TYPE_PACKED_BYTE_ARRAY: writer_callable = Callable(self, "write_vec_u8") # Default Vec<u8> for arguments
+                TYPE_OBJECT:
+                    writer_callable = Callable(self, "write_nested_resource") # Handle nested resources
+                # TYPE_ARRAY, and native array-like types (TYPE_VECTOR2, TYPE_QUATERNION, etc.) are handled above
+                _:
+                    # Writer remains invalid for unsupported types
+                    pass
     
     # --- Debug Print (Optional) ---
     if debug_mode:
