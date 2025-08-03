@@ -446,15 +446,17 @@ func _generate_default_type(bsatn_type_name: String) -> Variant:
 ## Helper function to serialize a value based on BSATN type string.
 ## Assumes bsatn_type_str is already to_lower() if it's from metadata.
 func _write_value_from_bsatn_type(value: Variant, bsatn_type_str: String, context_prop_name_for_prototype: StringName) -> bool:
-    # 1. Try primitive writer (expects lowercase bsatn_type_str)
-    var primitive_writer := _get_primitive_writer_from_bsatn_type(bsatn_type_str)
-    if primitive_writer.is_valid():
-        primitive_writer.call(value)
-        if has_error(): return false
-        return true
+    var value_type = typeof(value)
+    
+    # 1. Try primitive writer (expects lowercase bsatn_type_str) if not an array
+    if value_type != TYPE_ARRAY:
+        var primitive_writer := _get_primitive_writer_from_bsatn_type(bsatn_type_str)
+        if primitive_writer.is_valid():
+            primitive_writer.call(value)
+            if has_error(): return false
+            return true
     
     # 2. Create a temporary "prototype" dictionary for the value
-    var value_type = typeof(value)
     var value_class_name = value.resource_path if value is Resource and value.resource_path else (value.get_class() if value_type == TYPE_OBJECT else type_string(value_type))
     var prop_sim = {
         "name": context_prop_name_for_prototype,
