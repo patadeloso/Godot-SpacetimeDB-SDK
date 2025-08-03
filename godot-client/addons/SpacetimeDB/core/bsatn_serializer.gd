@@ -217,7 +217,7 @@ func write_array(v: Array, bsatn_type: String, prop: Dictionary) -> void:
             element_class_name = parts[1]
         else:
             element_type_code = int(main_type_str)
-    else:
+    elif bsatn_type.is_empty():
         _set_error("Array '%s' needs a typed hint for serialization. Hint: %d, HintString: '%s'" % [prop_name, hint, hint_string])
         return
     
