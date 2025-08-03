@@ -407,7 +407,8 @@ func _get_writer_callable_for_property(prop: Dictionary, bsatn_type_str: String)
     
     # --- Debug Print (Optional) ---
     if debug_mode:
-        print("DEBUG: _get_writer_callable: For '%s' of '%s', returning: %s" % [prop.name, prop.class_name, writer_callable.get_method() if writer_callable.is_valid() else "INVALID"])
+        var type_name = prop.class_name if prop.class_name != &"" else type_string(prop.type)
+        print("DEBUG: _get_writer_callable: For '%s' of type '%s', returning: %s" % [prop.name, type_name, writer_callable.get_method() if writer_callable.is_valid() else "INVALID"])
     # --- End Debug ---
     
     return writer_callable
@@ -484,7 +485,7 @@ func _write_value_from_bsatn_type(value: Variant, bsatn_type_str: String, contex
     
     return not has_error()
 
-func _create_serialization_plan(script, resource: Resource) -> Array:
+func _create_serialization_plan(script: Script, resource: Resource) -> Array:
     if debug_mode: print("DEBUG: Creating serialization plan for script: %s" % script.resource_path)
     
     var plan = []
