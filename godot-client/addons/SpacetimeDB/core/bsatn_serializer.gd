@@ -349,18 +349,18 @@ func _serialize_resource_fields(resource: Resource) -> bool:
 
 # --- Argument Serialization Helpers (Optional - Keep if needed for specific use cases) ---
 
-# Serializes an array of arguments into a single PackedByteArray block.
-# Note: This uses default serialization rules and ignores metadata.
-func _serialize_arguments(args_array: Array, rust_types: Array) -> PackedByteArray:
+## Serializes an array of arguments into a single PackedByteArray block.
+func _serialize_arguments(args_array: Array, bsatn_types: Array) -> PackedByteArray:
     var args_spb := StreamPeerBuffer.new(); args_spb.big_endian = false
     var original_main_spb := _spb; _spb = args_spb # Temporarily redirect writes
-
+    
     for i in range(args_array.size()):
         var arg_value = args_array[i]
-        var rust_type = ""
-        if i < rust_types.size():
-            rust_type = rust_types[i]
-        if not _write_argument_value(arg_value, rust_type): # Use dedicated argument writer
+        var bsatn_type = ""
+        if i < bsatn_types.size():
+            bsatn_type = bsatn_types[i]
+            
+        if not _write_argument_value(arg_value, bsatn_type, "arg[%s]" % i): # Use dedicated argument writer
             # Error should be set by _write_argument_value
             push_error("Failed to serialize argument %d." % i) # Add context
             _spb = original_main_spb # Restore main buffer
@@ -436,7 +436,10 @@ func _generate_default_type(rust_type: String) -> Variant:
 
 # Serializes a complete ClientMessage (variant tag + payload resource fields).
 func serialize_client_message(variant_tag: int, payload_resource: Resource) -> PackedByteArray:
-    clear_error(); _spb.data_array = PackedByteArray(); _spb.seek(0) # Reset state
+    # Reset state
+    clear_error()
+    _spb.data_array = PackedByteArray()
+    _spb.seek(0)
 
     # 1. Write the message variant tag (u8)
     write_u8(variant_tag)
@@ -447,6 +450,8 @@ func serialize_client_message(variant_tag: int, payload_resource: Resource) -> P
         if not _serialize_resource_fields(payload_resource):
             if not has_error(): _set_error("Failed to serialize payload resource for tag %d" % variant_tag)
             return PackedByteArray()
-    # else: No payload to serialize
+    else:
+        # No payload to serialize
+        _set_error("Cannot serialize a null payload resource for tag %d" % variant_tag)
 
     return _spb.data_array if not has_error() else PackedByteArray()

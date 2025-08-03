@@ -44,66 +44,100 @@ func _check_read(spb: StreamPeerBuffer, bytes_needed: int) -> bool:
     return true
 
 # --- Primitive Value Readers ---
+# These directly read basic types from the internal StreamPeerBuffer.
+
 func read_i8(spb: StreamPeerBuffer) -> int:
     if not _check_read(spb, 1): return 0
-    return spb.get_8();
+    return spb.get_8()
+
 func read_i16_le(spb: StreamPeerBuffer) -> int:
     if not _check_read(spb, 2): return 0
-    spb.big_endian = false; return spb.get_16();
+    spb.big_endian = false
+    return spb.get_16()
+
 func read_i32_le(spb: StreamPeerBuffer) -> int:
     if not _check_read(spb, 4): return 0
-    spb.big_endian = false; return spb.get_32();
+    spb.big_endian = false
+    return spb.get_32()
+
 func read_i64_le(spb: StreamPeerBuffer) -> int:
     if not _check_read(spb, 8): return 0
-    spb.big_endian = false; return spb.get_64();
+    spb.big_endian = false
+    return spb.get_64()
+
 func read_u8(spb: StreamPeerBuffer) -> int:
     if not _check_read(spb, 1): return 0
     return spb.get_u8()
+
 func read_u16_le(spb: StreamPeerBuffer) -> int:
     if not _check_read(spb, 2): return 0
-    spb.big_endian = false; return spb.get_u16()
+    spb.big_endian = false
+    return spb.get_u16()
+
 func read_u32_le(spb: StreamPeerBuffer) -> int:
     if not _check_read(spb, 4): return 0
-    spb.big_endian = false; return spb.get_u32()
+    spb.big_endian = false
+    return spb.get_u32()
+
 func read_u64_le(spb: StreamPeerBuffer) -> int:
     if not _check_read(spb, 8): return 0
-    spb.big_endian = false; return spb.get_u64()
+    spb.big_endian = false
+    return spb.get_u64()
+
 func read_f32_le(spb: StreamPeerBuffer) -> float:
     if not _check_read(spb, 4): return 0.0
-    spb.big_endian = false; return spb.get_float()
+    spb.big_endian = false
+    return spb.get_float()
+
 func read_f64_le(spb: StreamPeerBuffer) -> float:
     if not _check_read(spb, 8): return 0.0
-    spb.big_endian = false; return spb.get_double()
+    spb.big_endian = false
+    return spb.get_double()
+
 func read_bool(spb: StreamPeerBuffer) -> bool:
     var byte := read_u8(spb)
     if has_error(): return false
-    if byte != 0 and byte != 1: _set_error("Invalid boolean value: %d (expected 0 or 1)" % byte, spb.get_position() - 1); return false
+    if byte != 0 and byte != 1:
+        _set_error("Invalid boolean value: %d (expected 0 or 1)" % byte, spb.get_position() - 1)
+        return false
     return byte == 1
+
 func read_bytes(spb: StreamPeerBuffer, num_bytes: int) -> PackedByteArray:
-    if num_bytes < 0: _set_error("Attempted to read negative bytes: %d" % num_bytes, spb.get_position()); return PackedByteArray()
+    if num_bytes < 0:
+        _set_error("Attempted to read negative bytes: %d" % num_bytes, spb.get_position())
+        return PackedByteArray()
     if num_bytes == 0: return PackedByteArray()
     if not _check_read(spb, num_bytes): return PackedByteArray()
     var result: Array = spb.get_data(num_bytes)
-    if result[0] != OK: _set_error("StreamPeerBuffer.get_data failed: %d" % result[0], spb.get_position() - num_bytes); return PackedByteArray()
+    if result[0] != OK:
+        _set_error("StreamPeerBuffer.get_data failed: %d" % result[0], spb.get_position() - num_bytes)
+        return PackedByteArray()
     return result[1]
+
 func read_string_with_u32_len(spb: StreamPeerBuffer) -> String:
     var start_pos := spb.get_position()
     var length := read_u32_le(spb)
     if has_error() or length == 0: return ""
-    if length > MAX_STRING_LEN: _set_error("String length %d exceeds limit %d" % [length, MAX_STRING_LEN], start_pos); return ""
+    if length > MAX_STRING_LEN:
+        _set_error("String length %d exceeds limit %d" % [length, MAX_STRING_LEN], start_pos)
+        return ""
     var str_bytes := read_bytes(spb, length)
     if has_error(): return ""
     var str_result := str_bytes.get_string_from_utf8()
     # More robust check for UTF-8 decoding errors
     if str_result == "" and length > 0 and (str_bytes.get_string_from_ascii() == "" or str_bytes.find(0) != -1):
-        _set_error("Failed to decode UTF-8 string length %d" % length, start_pos); return ""
+        _set_error("Failed to decode UTF-8 string length %d" % length, start_pos)
+        return ""
     return str_result
+
 func read_identity(spb: StreamPeerBuffer) -> PackedByteArray:
     var identity := read_bytes(spb, IDENTITY_SIZE)
     identity.reverse() # We receive the identity bytes in reverse
     return identity
+
 func read_connection_id(spb: StreamPeerBuffer) -> PackedByteArray:
     return read_bytes(spb, CONNECTION_ID_SIZE)
+
 func read_timestamp(spb: StreamPeerBuffer) -> int:
     return read_i64_le(spb) # Timestamps are i64
 func read_vector3(spb: StreamPeerBuffer) -> Vector3:
@@ -121,11 +155,14 @@ func read_color(spb: StreamPeerBuffer) -> Color:
 func read_quaternion(spb: StreamPeerBuffer) -> Quaternion:
     var x := read_f32_le(spb); var y := read_f32_le(spb); var z := read_f32_le(spb); var w := read_f32_le(spb)
     return Quaternion.IDENTITY if has_error() else Quaternion(x, y, z, w)
+
 func read_vec_u8(spb: StreamPeerBuffer) -> PackedByteArray:
     var start_pos := spb.get_position()
     var length := read_u32_le(spb)
     if has_error(): return PackedByteArray()
-    if length > MAX_BYTE_ARRAY_LEN: _set_error("Vec<u8> length %d exceeds limit %d" % [length, MAX_BYTE_ARRAY_LEN], start_pos); return PackedByteArray()
+    if length > MAX_BYTE_ARRAY_LEN:
+        _set_error("Vec<u8> length %d exceeds limit %d" % [length, MAX_BYTE_ARRAY_LEN], start_pos)
+        return PackedByteArray()
     if length == 0: return PackedByteArray()
     return read_bytes(spb, length)
 
@@ -173,8 +210,10 @@ func _get_primitive_reader_from_bsatn_type(bsatn_type_str: String) -> Callable:
     match bsatn_type_str:
         &"u64": return Callable(self, "read_u64_le")
         &"i64": return Callable(self, "read_i64_le")
+        &"f64": return Callable(self, "read_f64_le")
         &"u32": return Callable(self, "read_u32_le")
         &"i32": return Callable(self, "read_i32_le")
+        &"f32": return Callable(self, "read_f32_le")
         &"u16": return Callable(self, "read_u16_le")
         &"i16": return Callable(self, "read_i16_le")
         &"u8": return Callable(self, "read_u8")
@@ -182,8 +221,6 @@ func _get_primitive_reader_from_bsatn_type(bsatn_type_str: String) -> Callable:
         &"identity": return Callable(self, "read_identity")
         &"connection_id": return Callable(self, "read_connection_id")
         &"timestamp": return Callable(self, "read_timestamp")
-        &"f64": return Callable(self, "read_f64_le")
-        &"f32": return Callable(self, "read_f32_le")
         &"vec_u8": return Callable(self, "read_vec_u8")
         &"bool": return Callable(self, "read_bool")
         &"string": return Callable(self, "read_string_with_u32_len")
@@ -193,7 +230,6 @@ func _get_primitive_reader_from_bsatn_type(bsatn_type_str: String) -> Callable:
 func _get_reader_callable_for_property(resource: Resource, prop: Dictionary) -> Callable:
     var prop_name: StringName = prop.name
     var prop_type: Variant.Type = prop.type
-    var meta_key := "bsatn_type_" + prop_name
 
     var reader_callable := Callable() # Initialize with invalid Callable
 
@@ -215,8 +251,9 @@ func _get_reader_callable_for_property(resource: Resource, prop: Dictionary) -> 
     else:
         # Handle non-array, non-special-case properties
         # 1. Check for specific BSATN type override via metadata
+        var meta_key := "bsatn_type_" + prop_name
         if resource.has_meta(meta_key):
-            var bsatn_type_str: String = str(resource.get_meta(meta_key)).to_lower()
+            var bsatn_type_str := str(resource.get_meta(meta_key)).to_lower()
             reader_callable = _get_primitive_reader_from_bsatn_type(bsatn_type_str)
             if not reader_callable.is_valid() and debug_mode:
                 # Metadata exists but doesn't map to a primitive reader
@@ -342,8 +379,8 @@ func _populate_enum_data_from_bytes(resource: Resource, spb: StreamPeerBuffer) -
 # --- Special Readers ---
 # Add this new function to the BSATNDeserializer class
 
-# Helper function to deserialize a value based on BSATN type string.
-# Assumes bsatn_type_str is already to_lower() if it's from metadata.
+## Helper function to deserialize a value based on BSATN type string.
+## Assumes bsatn_type_str is already to_lower() if it's from metadata.
 func _read_value_from_bsatn_type(spb: StreamPeerBuffer, bsatn_type_str: String, context_prop_name_for_error: StringName) -> Variant:
     var value = null
     var start_pos_val_read = spb.get_position() # For error reporting
