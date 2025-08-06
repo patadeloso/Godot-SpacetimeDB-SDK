@@ -6,6 +6,7 @@ const MAX_VEC_LEN := 131072            # Limit for vector elements (used by read
 const MAX_BYTE_ARRAY_LEN := 16 * 1024 * 1024 # Limit for Vec<u8> style byte arrays
 const IDENTITY_SIZE := 32
 const CONNECTION_ID_SIZE := 16
+const U128_SIZE := 16
 
 const COMPRESSION_NONE := 0x00
 const COMPRESSION_BROTLI := 0x01
@@ -99,6 +100,11 @@ func read_u64_le(spb: StreamPeerBuffer) -> int:
     if not _check_read(spb, 8): return 0
     spb.big_endian = false
     return spb.get_u64()
+    
+func read_u128(spb: StreamPeerBuffer) -> PackedByteArray:
+    var num := read_bytes(spb, U128_SIZE)
+    num.reverse() # We receive the bytes in reverse
+    return num
 
 func read_f32_le(spb: StreamPeerBuffer) -> float:
     if not _check_read(spb, 4): return 0.0
@@ -109,7 +115,7 @@ func read_f64_le(spb: StreamPeerBuffer) -> float:
     if not _check_read(spb, 8): return 0.0
     spb.big_endian = false
     return spb.get_double()
-
+    
 func read_bool(spb: StreamPeerBuffer) -> bool:
     var byte := read_u8(spb)
     if has_error(): return false
@@ -443,6 +449,7 @@ func _get_primitive_reader_from_bsatn_type(bsatn_type_str: String) -> Callable:
         &"i16": return Callable(self, "read_i16_le")
         &"u8": return Callable(self, "read_u8")
         &"i8": return Callable(self, "read_i8")
+        &"u128": return Callable(self, "read_u128")
         &"identity": return Callable(self, "read_identity")
         &"connection_id": return Callable(self, "read_connection_id")
         &"timestamp": return Callable(self, "read_timestamp")

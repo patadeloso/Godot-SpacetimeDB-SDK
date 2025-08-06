@@ -36,6 +36,7 @@ const DEFAULT_TYPE_MAP: Dictionary[String, String] = {
     "__connection_id__": "PackedByteArray",
     "__timestamp_micros_since_unix_epoch__": "int",
     "__time_duration_micros__": "int",
+    "U128": "PackedByteArray",
 }
 
 const DEFAULT_META_TYPE_MAP: Dictionary[String, String] = {
@@ -47,6 +48,7 @@ const DEFAULT_META_TYPE_MAP: Dictionary[String, String] = {
     "U16": "u16",
     "U32": "u32",
     "U64": "u64",
+    "U128": "u128",
     "F32": "f32",
     "F64": "f64",
     "String": "string",         # For BSATN, e.g. option_string or vec_String (if Option<Array<String>>)

@@ -3,6 +3,7 @@ class_name BSATNSerializer extends RefCounted
 # --- Constants ---
 const IDENTITY_SIZE := 32
 const CONNECTION_ID_SIZE := 16
+const U128_SIZE := 16
 
 # Native type handling
 const NATIVE_ARRAYLIKE_TYPES := [
@@ -92,6 +93,15 @@ func write_f64_le(v: float) -> void:
     #print("write_f64_le(%s)" % v)
     _spb.put_double(v)
 
+func write_u128(v: PackedByteArray) -> void:
+    if v == null or v.size() != U128_SIZE:
+        _set_error("Invalid U128 value (null or size != %d)" % U128_SIZE)
+        var default_bytes = PackedByteArray(); default_bytes.resize(U128_SIZE)
+        write_bytes(default_bytes) # Write default value to avoid stopping serialization
+        return
+    v.reverse()
+    write_bytes(v)
+
 func write_bool(v: bool) -> void:
     #print("write_bool(%s)" % v)
     _spb.put_u8(1 if v else 0)
@@ -116,6 +126,7 @@ func write_identity(v: PackedByteArray) -> void:
         var default_bytes = PackedByteArray(); default_bytes.resize(IDENTITY_SIZE)
         write_bytes(default_bytes) # Write default value to avoid stopping serialization
         return
+    v.reverse()
     write_bytes(v)
 
 func write_connection_id(v: PackedByteArray) -> void:
@@ -125,6 +136,7 @@ func write_connection_id(v: PackedByteArray) -> void:
         var default_bytes = PackedByteArray(); default_bytes.resize(CONNECTION_ID_SIZE)
         write_bytes(default_bytes) # Write default value
         return
+    v.reverse()
     write_bytes(v)
 
 func write_timestamp(v: int) -> void:
@@ -360,6 +372,7 @@ func _get_value_class_name(value: Variant) -> String:
 # Helper to get the specific BSATN writer METHOD NAME based on metadata value.
 func _get_primitive_writer_from_bsatn_type(bsatn_type_str: String) -> Callable:
     match bsatn_type_str:
+        &'u128': return Callable(self, "write_u128")
         &"u64": return Callable(self, "write_u64_le")
         &"i64": return Callable(self, "write_i64_le")
         &"f64": return Callable(self, "write_f64_le")
