@@ -8,49 +8,49 @@ func _init(p_client: SpacetimeDBClient) -> void:
 	_client = p_client
 
 func change_color_random(cb: Callable = func(_t: TransactionUpdateMessage): pass) -> Error:
-	var handle := _client.call_reducer('change_color_random', [], [])
-	if handle.error: return handle.error
-	var __result__ = await handle.wait_for_response()
+	var __handle__ := _client.call_reducer('change_color_random', [], [])
+	if __handle__.error: return __handle__.error
+	var __result__ = await __handle__.wait_for_response()
 	cb.call(__result__)
 	return OK
 
 ## 0. new_input: Vector2 [br]
 ## 1. global_position: Vector3 [br]
 func move_user(new_input: Vector2, global_position: Vector3, cb: Callable = func(_t: TransactionUpdateMessage): pass) -> Error:
-	var handle := _client.call_reducer('move_user', [new_input, global_position], [&'Vector2', &'Vector3'])
-	if handle.error: return handle.error
-	var __result__ = await handle.wait_for_response()
+	var __handle__ := _client.call_reducer('move_user', [new_input, global_position], [&'vector2[f32,f32]', &'vector3[f32,f32,f32]'])
+	if __handle__.error: return __handle__.error
+	var __result__ = await __handle__.wait_for_response()
 	cb.call(__result__)
 	return OK
 
 ## 0. bytes: Array of int [br]
 func save_my_bytes(bytes: Array[int], cb: Callable = func(_t: TransactionUpdateMessage): pass) -> Error:
-	var handle := _client.call_reducer('save_my_bytes', [bytes], [&'u8'])
-	if handle.error: return handle.error
-	var __result__ = await handle.wait_for_response()
+	var __handle__ := _client.call_reducer('save_my_bytes', [bytes], [&'u8'])
+	if __handle__.error: return __handle__.error
+	var __result__ = await __handle__.wait_for_response()
 	cb.call(__result__)
 	return OK
 
 ## 0. option: Option of String [br]
 func test_option_single(option: Option, cb: Callable = func(_t: TransactionUpdateMessage): pass) -> Error:
-	var handle := _client.call_reducer('test_option_single', [option], [&'string'])
-	if handle.error: return handle.error
-	var __result__ = await handle.wait_for_response()
+	var __handle__ := _client.call_reducer('test_option_single', [option], [&'string'])
+	if __handle__.error: return __handle__.error
+	var __result__ = await __handle__.wait_for_response()
 	cb.call(__result__)
 	return OK
 
 ## 0. option: Option of Array of String [br]
 func test_option_vec(option: Option, cb: Callable = func(_t: TransactionUpdateMessage): pass) -> Error:
-	var handle := _client.call_reducer('test_option_vec', [option], [&'vec_string'])
-	if handle.error: return handle.error
-	var __result__ = await handle.wait_for_response()
+	var __handle__ := _client.call_reducer('test_option_vec', [option], [&'vec_string'])
+	if __handle__.error: return __handle__.error
+	var __result__ = await __handle__.wait_for_response()
 	cb.call(__result__)
 	return OK
 
 ## 0. message: MainMessage [br]
 func test_struct(message: MainMessage, cb: Callable = func(_t: TransactionUpdateMessage): pass) -> Error:
-	var handle := _client.call_reducer('test_struct', [message], [&'MainMessage'])
-	if handle.error: return handle.error
-	var __result__ = await handle.wait_for_response()
+	var __handle__ := _client.call_reducer('test_struct', [message], [&'MainMessage'])
+	if __handle__.error: return __handle__.error
+	var __result__ = await __handle__.wait_for_response()
 	cb.call(__result__)
 	return OK

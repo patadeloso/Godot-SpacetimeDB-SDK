@@ -262,43 +262,51 @@ func _generate_struct_gdscript(schema: SpacetimeParsedSchema, type_def: Dictiona
     for i in fields.size():
         var field: Dictionary = fields[i]
         var field_name: String = field.get("name", "")
-        var original_inner_type_name: String = field.get("type", "Variant")
+        var original_type_name: String = field.get("type", "Variant")
+        var field_type = schema.types[field.type_idx] if field.has("type_idx") else null
         var gd_field_type: String
         var bsatn_meta_type_string: String
         var documentation_comment: String
         var nested_type: Array = field.get("nested_type", []).duplicate()
-        nested_type.append(schema.type_map.get(original_inner_type_name, "Variant"))
+        nested_type.append(schema.type_map.get(original_type_name, "Variant"))
+        var add_meta_for_field = false
         
         if field.has("is_option"):
             gd_field_type = OPTION_CLASS_NAME
             documentation_comment = "## %s" % [" of ".join(nested_type)]
             create_func_documentation_comment += format_cfdc.call(i, field_name, nested_type)
             if field.has("is_array_inside_option"):
-                bsatn_meta_type_string = "vec_%s" % schema.meta_type_map.get(original_inner_type_name, "Variant")
+                bsatn_meta_type_string = "vec_%s" % schema.meta_type_map.get(original_type_name, "Variant")
             else:
-                bsatn_meta_type_string = schema.meta_type_map.get(original_inner_type_name, original_inner_type_name)
+                bsatn_meta_type_string = schema.meta_type_map.get(original_type_name, original_type_name)
+            add_meta_for_field = true
         elif field.has("is_array"):
-            var element_gd_type = schema.type_map.get(original_inner_type_name, "Variant")
+            var element_gd_type = schema.type_map.get(original_type_name, "Variant")
             if field.has("is_option_inside_array"):
                 element_gd_type = OPTION_CLASS_NAME
                 documentation_comment = "## %s" % [" of ".join(nested_type)]
             create_func_documentation_comment += format_cfdc.call(i, field_name, nested_type)
             gd_field_type = "Array[%s]" % element_gd_type
-            var inner_meta = schema.meta_type_map.get(original_inner_type_name, original_inner_type_name)
+            var inner_meta = schema.meta_type_map.get(original_type_name, original_type_name)
             bsatn_meta_type_string = "%s" % inner_meta
-        else:
-            gd_field_type = schema.type_map.get(original_inner_type_name, "Variant")
-            bsatn_meta_type_string = schema.meta_type_map.get(original_inner_type_name, original_inner_type_name)
+            add_meta_for_field = true
+        elif field_type and field_type.has("gd_arraylike"):
             create_func_documentation_comment += format_cfdc.call(i, field_name, nested_type)
+            gd_field_type = schema.type_map.get(original_type_name, "Variant")
+            var outer_bsatn_type = schema.meta_type_map.get(original_type_name, original_type_name)
+            var inner_meta_bsatn_types: Array[String] = []
+            for el in field_type.struct:
+                var inner_bsatn_type = schema.meta_type_map.get(el.type, "f32")
+                inner_meta_bsatn_types.append(inner_bsatn_type)
+            bsatn_meta_type_string = "%s[%s]" % [outer_bsatn_type, ",".join(inner_meta_bsatn_types)]
+            add_meta_for_field = true
+        else:
+            gd_field_type = schema.type_map.get(original_type_name, "Variant")
+            bsatn_meta_type_string = schema.meta_type_map.get(original_type_name, original_type_name)
+            create_func_documentation_comment += format_cfdc.call(i, field_name, nested_type)
+            add_meta_for_field = schema.meta_type_map.has(original_type_name) \
+                or not SpacetimeSchemaParser._is_gd_native(original_type_name)
 
-        var add_meta_for_field = false
-        if field.has("is_option") or field.has("is_array"):
-            add_meta_for_field = true
-        elif not SpacetimeSchemaParser.GDNATIVE_TYPES.has(original_inner_type_name):
-            add_meta_for_field = true
-        elif schema.meta_type_map.has(original_inner_type_name):
-            add_meta_for_field = true
-        
         if add_meta_for_field and not bsatn_meta_type_string.is_empty():
             meta_data.append("set_meta('bsatn_type_%s', &'%s')" % [field_name, bsatn_meta_type_string])
         
@@ -518,6 +526,7 @@ func _generate_reducers_gdscript(schema: SpacetimeParsedSchema) -> String:
         
         var param_bsatn_types_list = (reducer.get("params", []) as Array).map(func(x):
             var original_inner_type_name_bsatn: String = x.get("type", "Variant")
+            var param_type = schema.types[x.type_idx] if x.has("type_idx") else null
             var bsatn_param_type: String
 
             if x.has("is_option"):
@@ -527,6 +536,13 @@ func _generate_reducers_gdscript(schema: SpacetimeParsedSchema) -> String:
                 else:
                     inner_meta_for_option = schema.meta_type_map.get(original_inner_type_name_bsatn, original_inner_type_name_bsatn)
                 bsatn_param_type = "%s" % inner_meta_for_option
+            elif param_type and param_type.has("gd_arraylike"):
+                var outer_bsatn_type = schema.meta_type_map.get(original_inner_type_name_bsatn, original_inner_type_name_bsatn)
+                var inner_meta_bsatn_types: Array[String] = []
+                for el in param_type.struct:
+                    var inner_bsatn_type = schema.meta_type_map.get(el.type, "f32")
+                    inner_meta_bsatn_types.append(inner_bsatn_type)
+                bsatn_param_type = "%s[%s]" % [outer_bsatn_type, ",".join(inner_meta_bsatn_types)]
             else:
                 bsatn_param_type = schema.meta_type_map.get(original_inner_type_name_bsatn, original_inner_type_name_bsatn)
             

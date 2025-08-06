@@ -13,6 +13,14 @@ pub struct Vector3 {
     pub z: f32,
 }
 
+#[derive(SpacetimeType, Debug, Clone, Copy)]
+pub struct Vector4 {
+    pub x: f64,
+    pub y: f64,
+    pub z: f64,
+    pub w: f64,
+}
+
 impl Vector3 {
     pub fn get_random_position(ctx: &ReducerContext) -> Vector3 {
         let x = ctx.rng().gen_range(-10.0..10.0);

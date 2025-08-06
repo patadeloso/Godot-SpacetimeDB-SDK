@@ -13,6 +13,7 @@ const table_names: Array[String] = ['user_data']
 @export var color: Color 
 @export var test_vec: Array[String] 
 @export var test_bytes_array: Array[int] 
+@export var test_dynamic_arraylike: Vector4 
 @export var last_position: Vector3 
 @export var direction: Vector2 
 @export var player_speed: float 
@@ -24,8 +25,12 @@ func _init() -> void:
 	set_meta('bsatn_type_online', &'bool')
 	set_meta('bsatn_type_name', &'string')
 	set_meta('bsatn_type_lobby_id', &'u64')
+	set_meta('bsatn_type_color', &'color[f32,f32,f32,f32]')
 	set_meta('bsatn_type_test_vec', &'string')
 	set_meta('bsatn_type_test_bytes_array', &'u8')
+	set_meta('bsatn_type_test_dynamic_arraylike', &'vector4[f64,f64,f64,f64]')
+	set_meta('bsatn_type_last_position', &'vector3[f32,f32,f32]')
+	set_meta('bsatn_type_direction', &'vector2[f32,f32]')
 	set_meta('bsatn_type_player_speed', &'f32')
 	set_meta('bsatn_type_last_update', &'i64')
 
@@ -36,11 +41,12 @@ func _init() -> void:
 ## 4. color: Color[br]
 ## 5. test_vec: Array of String[br]
 ## 6. test_bytes_array: Array of int[br]
-## 7. last_position: Vector3[br]
-## 8. direction: Vector2[br]
-## 9. player_speed: float[br]
-## 10. last_update: int[br]
-static func create(p_identity: PackedByteArray, p_online: bool, p_name: String, p_lobby_id: int, p_color: Color, p_test_vec: Array[String], p_test_bytes_array: Array[int], p_last_position: Vector3, p_direction: Vector2, p_player_speed: float, p_last_update: int) -> MainUserData:
+## 7. test_dynamic_arraylike: Vector4[br]
+## 8. last_position: Vector3[br]
+## 9. direction: Vector2[br]
+## 10. player_speed: float[br]
+## 11. last_update: int[br]
+static func create(p_identity: PackedByteArray, p_online: bool, p_name: String, p_lobby_id: int, p_color: Color, p_test_vec: Array[String], p_test_bytes_array: Array[int], p_test_dynamic_arraylike: Vector4, p_last_position: Vector3, p_direction: Vector2, p_player_speed: float, p_last_update: int) -> MainUserData:
 	var result = MainUserData.new()
 	result.identity = p_identity
 	result.online = p_online
@@ -49,6 +55,7 @@ static func create(p_identity: PackedByteArray, p_online: bool, p_name: String, 
 	result.color = p_color
 	result.test_vec = p_test_vec
 	result.test_bytes_array = p_test_bytes_array
+	result.test_dynamic_arraylike = p_test_dynamic_arraylike
 	result.last_position = p_last_position
 	result.direction = p_direction
 	result.player_speed = p_player_speed

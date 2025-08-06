@@ -2,7 +2,7 @@ pub mod main_types;
 
 use main_types::color::Color;
 use main_types::lobby::{assign_user_to_lobby, user_disconnected};
-use main_types::vectors::{Vector2, Vector3};
+use main_types::vectors::{Vector2, Vector3, Vector4};
 
 use spacetimedb::SpacetimeType;
 use spacetimedb::{
@@ -52,6 +52,7 @@ pub struct UserData {
     color: Color,
     test_vec: Vec<String>,
     test_bytes_array: Vec<u8>,
+    test_dynamic_arraylike: Vector4,
     last_position: Vector3,
     direction: Vector2,
     player_speed: f32,
@@ -119,6 +120,7 @@ pub fn client_connected(ctx: &ReducerContext) {
             color: Color::random(&ctx),
             test_vec,
             test_bytes_array: Vec::new(),
+            test_dynamic_arraylike: Vector4 { x: 1.2, y: 3.4, z: 5.6, w: 7.8 },
             last_position: Vector3::get_random_position(&ctx),
             player_speed: PLAYER_SPEED,
             direction: Vector2 { x: 0.0, y: 0.0 },
