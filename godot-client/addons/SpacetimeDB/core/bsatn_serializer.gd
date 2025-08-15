@@ -99,8 +99,9 @@ func write_u128(v: PackedByteArray) -> void:
         var default_bytes = PackedByteArray(); default_bytes.resize(U128_SIZE)
         write_bytes(default_bytes) # Write default value to avoid stopping serialization
         return
-    v.reverse()
-    write_bytes(v)
+    var v_copy := v.duplicate()
+    v_copy.reverse()
+    write_bytes(v_copy)
 
 func write_bool(v: bool) -> void:
     #print("write_bool(%s)" % v)
@@ -126,8 +127,9 @@ func write_identity(v: PackedByteArray) -> void:
         var default_bytes = PackedByteArray(); default_bytes.resize(IDENTITY_SIZE)
         write_bytes(default_bytes) # Write default value to avoid stopping serialization
         return
-    v.reverse()
-    write_bytes(v)
+    var v_copy := v.duplicate()
+    v_copy.reverse()
+    write_bytes(v_copy)
 
 func write_connection_id(v: PackedByteArray) -> void:
     #print("write_connection_id(%s)" % v)
@@ -136,8 +138,9 @@ func write_connection_id(v: PackedByteArray) -> void:
         var default_bytes = PackedByteArray(); default_bytes.resize(CONNECTION_ID_SIZE)
         write_bytes(default_bytes) # Write default value
         return
-    v.reverse()
-    write_bytes(v)
+    var v_copy := v.duplicate()
+    v_copy.reverse()
+    write_bytes(v_copy)
 
 func write_timestamp(v: int) -> void:
     #print("write_timestamp(%s)" % v)
