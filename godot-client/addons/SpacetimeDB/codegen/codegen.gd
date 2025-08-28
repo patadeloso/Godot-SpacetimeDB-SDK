@@ -563,8 +563,9 @@ func _generate_reducers_gdscript(schema: SpacetimeParsedSchema) -> String:
         "\tcb.call(__result__)\n" + \
         "\treturn OK\n\n"
     
-    if not content.is_empty():
-        content = content.left(-2)
+    # Clean up trailing newlines
+    while content.ends_with("\n"):
+        content = content.left(-1)
     return content
 
 func _generate_autoload_gdscript(modules: Array[String]) -> String:
