@@ -52,7 +52,8 @@ func _generate_module_bindings(module_name: String, json_string: String) -> Arra
     file.store_string("You can delete this directory and files. It's only used for codegen debugging.")
     file = FileAccess.open("%s/schema_%s.json" % [debug_dir_path, module_name], FileAccess.WRITE)
     file.store_string(JSON.stringify(schema.to_dictionary(), "\t", false))
-    
+    file = FileAccess.open("%s/unparsed_schema_%s.json" % [debug_dir_path, module_name], FileAccess.WRITE)
+    file.store_string(JSON.stringify(json, "\t", false))
     var generated_files := _generate_gdscript_from_schema(schema)
     return generated_files
 

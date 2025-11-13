@@ -78,7 +78,7 @@ static func parse_schema(schema: Dictionary, module_name: String) -> SpacetimePa
     schema_types_raw.sort_custom(func(a, b): return a.get("ty", -1) < b.get("ty", -1))
     var schema_reducers: Array = schema.get("reducers", [])
     var typespace: Array = schema.get("typespace", {}).get("types", [])
-    
+    var misc_exports: Array = schema.get("misc_exports", [])
     var parsed_schema := SpacetimeParsedSchema.new()
     parsed_schema.module = module_name.to_pascal_case()
     
@@ -281,7 +281,70 @@ static func parse_schema(schema: Dictionary, module_name: String) -> SpacetimePa
         if r_name in scheduled_reducers:
             reducer_data["is_scheduled"] = true
         parsed_reducers_list.append(reducer_data)
-
+    
+    for view_dict :Dictionary in misc_exports:
+        var view : Dictionary = view_dict.get("View", {})
+        if view.is_empty():
+            continue
+        var name :String = view["name"]
+        var return_type_dict = view["return_type"]
+        if return_type_dict.get("Array", {}).is_empty():
+            SpacetimePlugin.print_err("view return type not yet supported in the parser: %s" % [return_type_dict])
+            continue
+        var type_index := int(return_type_dict["Array"]["Ref"])
+        var return_type = parsed_types_list[type_index]
+        if return_type.is_empty():
+            SpacetimePlugin.print_err("view return type not found: %s" % [return_type_dict])
+            continue
+        SpacetimePlugin.print_log("view return type changes start")
+        if return_type.get("table_names", []).is_empty():
+            return_type = {
+                "name": return_type["name"],
+                "struct": return_type["struct"],
+                &"table_names": [
+                    "%s" % name
+                ],
+                &"table_name": "%s"% name,
+                &"primary_key": 0,
+                &"primary_key_name": "",
+                &"is_public": [
+                    true
+                ]
+            }
+            SpacetimePlugin.print_log("view return type changes rewritten")
+            SpacetimePlugin.print_log(return_type)
+        else:
+            var type_table_list = return_type["table_names"]
+            type_table_list.append(name)
+            return_type["table_names"] = type_table_list
+            var is_public_list = return_type["is_public"]
+            is_public_list.append(true)
+            return_type["is_public"] = is_public_list
+            SpacetimePlugin.print_log("view return type changes appended")
+            SpacetimePlugin.print_log(return_type)
+        parsed_types_list[type_index] = return_type
+        
+        var tables_of_same_type : Array = parsed_tables_list.filter(func(table:Dictionary): return table.get("type_idx", -1) == type_index)
+        var new_table_dict : Dictionary
+        SpacetimePlugin.print_log("table dict %s" % new_table_dict)
+        if tables_of_same_type.is_empty():
+            new_table_dict = {
+            "name": name,
+            "type_idx": type_index,
+            "primary_key": 0,
+            "primary_key_name": "",
+            "unique_indexes": [],
+            "is_public": true
+            }
+        else:
+            new_table_dict = tables_of_same_type[0]
+            new_table_dict["name"] = name
+            new_table_dict["is_public"] = true
+        parsed_tables_list.append(new_table_dict)
+        
+        
+        
+    SpacetimePlugin.print_log("Schema parser finished")
     parsed_schema.types = parsed_types_list
     parsed_schema.reducers = parsed_reducers_list
     parsed_schema.tables = parsed_tables_list
