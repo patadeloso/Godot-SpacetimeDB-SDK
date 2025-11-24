@@ -4,4 +4,4 @@ class_name OneOffQueryMessage extends Resource
 @export var query: String
 
 func _init(p_query: String = ""):
-    query = p_query
+	query = p_query
