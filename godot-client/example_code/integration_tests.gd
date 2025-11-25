@@ -1,6 +1,17 @@
-extends Node3D
+extends Control
 
-func _ready():
+
+@onready var test_table_datatypes_main: RowReceiver = $"Receiver [MainTestTableDatatypes]"
+@onready var test_table_datatypes_view_all: RowReceiver = $"Receiver [MainTestTableDatatypes]2"
+@onready var test_table_datatypes_first_row: RowReceiver = $"Receiver [MainTestTableDatatypes]3"
+@onready var test_table_datatypes_at_30: RowReceiver = $"Receiver [MainTestTableDatatypes]4"
+@onready var test_scheduled_table_private: RowReceiver = $"Receiver [MainTestScheduledTable]"
+@onready var test_scheduled_table_public: RowReceiver = $"Receiver [MainTestScheduledTable]2"
+
+
+
+# Called when the node enters the scene tree for the first time.
+func _ready() -> void:
 	var options = SpacetimeDBConnectionOptions.new()
 
 	options.one_time_token = true # <--- anonymous-like. set to false to persist
@@ -27,36 +38,6 @@ func _ready():
 func _on_spacetimedb_connected(identity: PackedByteArray, token: String):
 	print("Game: Connected to SpacetimeDB!")
 	print("Game: My Identity: 0x%s" % [identity.hex_encode()])
-	subscribe_self_updates()
-	
-func subscribe_self_updates():
-	var id = SpacetimeDB.Main.get_local_identity()
-	var query_string := [
-		"SELECT * FROM user WHERE identity = '0x%s'" % id.hex_encode()
-	]
-	var sub := SpacetimeDB.Main.subscribe(query_string)
-	if sub.error:
-		printerr("Game: Failed to send subscription request.")
-		return
-	
-	sub.applied.connect(_on_self_loaded)
-	print("Game: Subscription request sent (Query ID: %d)." % sub.query_id)
-	
-func _on_self_loaded():
-	var id = SpacetimeDB.Main.get_local_identity()
-	var user := SpacetimeDB.Main.db.user.identity.find(id)
-	if user:
-		var user_obj := {
-			identity = user.identity.hex_encode(),
-			online = user.online,
-			lobby_id = user.lobby_id,
-			damage = user.damage,
-			test_option_string = user.test_option_string,
-			test_option_message = user.test_option_message
-		}
-		print("Game: Received user from subscription: %s" % user_obj)
-	else:
-		print("Game: User subscription applied but no user with identity: 0x%s" % id.hex_encode())
 
 func _on_spacetimedb_disconnected():
 	print("Game: Disconnected from SpacetimeDB.")
@@ -66,3 +47,21 @@ func _on_spacetimedb_connection_error(code: int, reason: String):
 
 func _on_spacetimedb_database_init():
 	print("Game: Database initialised")
+
+
+func _on_button_pressed() -> void:
+	SpacetimeDB.Main.reducers.start_integration_tests()
+	var query_string := [
+		"SELECT * FROM test_table_datatypes" 
+	]
+	var sub := SpacetimeDB.Main.subscribe(query_string)
+	if sub.error:
+		printerr("Game: Failed to send subscription request.")
+		return
+	
+	sub.applied.connect(func(): print("subsciptions applied"))
+	print("Game: Subscription request sent (Query ID: %d)." % sub.query_id)
+
+
+func _on_button_2_pressed() -> void:
+	SpacetimeDB.Main.reducers.clear_integration_tests() # Replace with function body.

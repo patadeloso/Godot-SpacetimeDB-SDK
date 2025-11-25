@@ -26,6 +26,7 @@ pub fn user_disconnected(ctx: &ReducerContext, lobby_id: u64) {
     } else {
         log::warn!("Lobby {} not found for disconnecting user", lobby_id);
     }
+
 }
 pub fn assign_user_to_lobby(ctx: &ReducerContext, user_identity: Identity) {
     let mut lobby_to_assign_id: Option<u64> = None;

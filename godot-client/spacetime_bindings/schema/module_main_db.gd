@@ -2,15 +2,19 @@
 # FILE WILL NOT BE SAVED. MODIFY TABLES IN YOUR MODULE SOURCE CODE INSTEAD.
 class_name MainModuleDb extends RefCounted
 
-const table_names := ["lobby", "user", "user_data", "user_next"]
+const table_names := ["lobby", "test_public_scheduled_count", "test_u32_at_30", "user", "user_data", "user_next", "test_u32_at_30", "test_u32_at_30", "test_public_scheduled_count", "test_public_scheduled_count", "test_u32_at_30"]
 
 var lobby: MainLobbyTable
+var test_public_scheduled_count: MainTestPublicScheduledCountTable
+var test_u_32_at_30: MainTestU32At30Table
 var user: MainUserTable
 var user_data: MainUserDataTable
 var user_next: MainUserNextTable
 
 func _init(p_local_db: LocalDatabase) -> void:
 	lobby = preload('res://spacetime_bindings/schema/tables/main_lobby_table.gd').new(p_local_db)
+	test_public_scheduled_count = preload('res://spacetime_bindings/schema/tables/main_test_public_scheduled_count_table.gd').new(p_local_db)
+	test_u_32_at_30 = preload('res://spacetime_bindings/schema/tables/main_test_u_32_at_30_table.gd').new(p_local_db)
 	user = preload('res://spacetime_bindings/schema/tables/main_user_table.gd').new(p_local_db)
 	user_data = preload('res://spacetime_bindings/schema/tables/main_user_data_table.gd').new(p_local_db)
 	user_next = preload('res://spacetime_bindings/schema/tables/main_user_next_table.gd').new(p_local_db)

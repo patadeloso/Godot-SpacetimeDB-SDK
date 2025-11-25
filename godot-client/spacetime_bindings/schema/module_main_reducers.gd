@@ -14,6 +14,14 @@ func change_color_random(cb: Callable = func(_t: TransactionUpdateMessage): pass
 	cb.call(__result__)
 	return OK
 
+
+func clear_integration_tests(cb: Callable = func(_t: TransactionUpdateMessage): pass) -> Error:
+	var __handle__ := _client.call_reducer('clear_integration_tests', [], [])
+	if __handle__.error: return __handle__.error
+	var __result__ = await __handle__.wait_for_response()
+	cb.call(__result__)
+	return OK
+
 ## 0. new_input: Vector2 [br]
 ## 1. global_position: Vector3 [br]
 func move_user(new_input: Vector2, global_position: Vector3, cb: Callable = func(_t: TransactionUpdateMessage): pass) -> Error:
@@ -26,6 +34,14 @@ func move_user(new_input: Vector2, global_position: Vector3, cb: Callable = func
 ## 0. bytes: Array of int [br]
 func save_my_bytes(bytes: Array[int], cb: Callable = func(_t: TransactionUpdateMessage): pass) -> Error:
 	var __handle__ := _client.call_reducer('save_my_bytes', [bytes], [&'u8'])
+	if __handle__.error: return __handle__.error
+	var __result__ = await __handle__.wait_for_response()
+	cb.call(__result__)
+	return OK
+
+
+func start_integration_tests(cb: Callable = func(_t: TransactionUpdateMessage): pass) -> Error:
+	var __handle__ := _client.call_reducer('start_integration_tests', [], [])
 	if __handle__.error: return __handle__.error
 	var __result__ = await __handle__.wait_for_response()
 	cb.call(__result__)

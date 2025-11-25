@@ -6,6 +6,8 @@ class_name MainModuleClient extends SpacetimeDBClient
 const Types = preload('res://spacetime_bindings/schema/module_main_types.gd')
 
 const Lobby = Types.Lobby
+const TestTableDatatypes = Types.TestTableDatatypes
+const TestScheduledTable = Types.TestScheduledTable
 const Message = Types.Message
 const Damage = Types.Damage
 const User = Types.User

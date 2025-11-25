@@ -1,0 +1,179 @@
+use core::{f32, f64};
+use std::{i8, u16, u32, u64, u8};
+
+use spacetimedb::{rand::seq::index, *};
+
+#[table(name = test_table_datatypes, public)]
+pub struct TestTableDatatypes {
+    #[primary_key]
+    #[auto_inc]
+    
+    pub t_u64: u64,
+    pub t_u8: u8,
+    pub t_u16: u16,
+    #[index(btree)]
+    pub t_u32: u32,
+    pub t_u128: u128,
+    // pub f16: f16, // stdb doesn't support it
+    pub t_f32: f32,
+    pub t_f64: f64,
+    //pub f128: f128, // stdb doesn't support it
+    pub t_i8: i8,
+    pub t_i16: i16,
+    pub t_i32: i32,
+    pub t_i64: i64,
+    // pub t_i128: i128, // client BSATNDeserializer doesn't support it
+    pub t_string: String,
+    pub t_vec_string: Vec<String>,
+    pub t_vec_u64: Vec<u64>,
+    pub t_opt_string: Option<String>,
+    pub t_opt_u64: Option<u64>,
+}
+
+#[table(name = test_scheduled_table, scheduled(test_scheduled_reducer))]
+pub struct TestScheduledTable {
+    #[primary_key]
+    #[auto_inc]
+    scheduled_id: u64,
+    scheduled_at: spacetimedb::ScheduleAt,
+    pub public_count: u64,
+    pub private_count: u64,
+}
+
+#[reducer]
+pub fn test_scheduled_reducer(ctx: &ReducerContext, mut row: TestScheduledTable) {
+    row.private_count += 1;
+    row.public_count += 1;
+    ctx.db.test_scheduled_table().scheduled_id().update(row);
+    if ctx.db.test_table_datatypes().count() < 100 {
+        ctx.db.test_table_datatypes().insert(TestTableDatatypes {
+            t_u64: 0,
+            t_u8: u8::MIN,
+            t_u16: u16::MIN,
+            t_u32: u32::MIN,
+            t_u128: u128::MIN,
+            t_f32: f32::MIN,
+            t_f64: f64::MIN,
+            t_i8: i8::MIN,
+            t_i16: i16::MIN,
+            t_i32: i32::MIN,
+            t_i64: i64::MIN,
+            //t_i128: i128::MIN,
+            t_string: "".to_string(),
+            t_vec_string: vec![],
+            t_vec_u64: vec![],
+            t_opt_string: None,
+            t_opt_u64: None,
+        });
+    }
+    for row in ctx.db.test_table_datatypes().iter() {
+        ctx.db
+            .test_table_datatypes()
+            .t_u64()
+            .update(TestTableDatatypes {
+                t_u64: row.t_u64,
+                t_u8: row.t_u8 + 1,
+                t_u16: row.t_u16 + 1,
+                t_u32: row.t_u32 + 1,
+                t_u128: row.t_u128 + 1,
+                t_f32: row.t_f32 - 0.0001,
+                t_f64: row.t_f64 - 0.0001,
+                t_i8: row.t_i8 - 1,
+                t_i16: row.t_i16 - 1,
+                t_i32: row.t_i32 - 1,
+                t_i64: row.t_i64 - 1,
+                //t_i128: row.t_i128 - 1,
+                t_string: row.t_u8.to_string(),
+                t_vec_string: vec![row.t_u8.to_string()],
+                t_vec_u64: vec![row.t_u64],
+                t_opt_string: if row.t_opt_string.is_some() {
+                    None
+                } else {
+                    Some("Some".to_string())
+                },
+                t_opt_u64: if row.t_opt_u64.is_some() {
+                    None
+                } else {
+                    Some(row.t_u64)
+                },
+            });
+    }
+}
+
+#[reducer]
+pub fn start_integration_tests(ctx: &ReducerContext) {
+    ctx.db.test_scheduled_table().insert(TestScheduledTable {
+        scheduled_id: 0,
+        scheduled_at: TimeDuration::from_micros(1000000).into(),
+        public_count: 0,
+        private_count: 0,
+    });
+    ctx.db.test_table_datatypes().insert(TestTableDatatypes {
+        t_u64: 0,
+        t_u8: u8::MAX,
+        t_u16: u16::MAX,
+        t_u32: u32::MAX,
+        t_u128: u128::MAX,
+        t_f32: f32::MAX,
+        t_f64: f64::MAX,
+        t_i8: i8::MAX,
+        t_i16: i16::MAX,
+        t_i32: i32::MAX,
+        t_i64: i64::MAX,
+        //t_i128: i128::MAX,
+        t_string: "a String example that is some text to decode.".to_string(),
+        t_vec_string: vec![
+            "a string inside a vec that needs to be decoded.".to_string(),
+            "another text in the vec to be decoded".to_string(),
+        ],
+        t_vec_u64: (0..20).collect(),
+        t_opt_string: Some("Some option String to decode".to_string()),
+        t_opt_u64: Some(u64::MAX),
+    });
+}
+
+#[reducer]
+pub fn clear_integration_tests(ctx: &ReducerContext){
+    for row in ctx.db.test_scheduled_table().iter(){
+        ctx.db.test_scheduled_table().delete(row);
+    }
+     for row in ctx.db.test_table_datatypes().iter(){
+        ctx.db.test_table_datatypes().delete(row);
+    }
+    
+}
+
+#[view(name = test_anonymous_all_types, public)]
+pub fn view_test_anonymous_all_types(ctx: &AnonymousViewContext)-> Vec<TestTableDatatypes>{
+    ctx.db.test_table_datatypes().t_u32().filter(0..u32::MAX).collect::<Vec<TestTableDatatypes>>()
+}
+
+#[view(name = test_first_type_row, public)]
+pub fn view_test_first_type_row(ctx: &ViewContext) -> Vec<TestTableDatatypes>{
+    vec![ctx.db.test_table_datatypes().t_u32().filter(0..u32::MAX).next().unwrap()]
+}
+
+#[view(name = test_u32_at_30, public)]
+pub fn view_test_u32_at_30(ctx: &AnonymousViewContext) -> Vec<TestTableDatatypes>{
+    ctx.db.test_table_datatypes().t_u32().filter(30u32).collect::<Vec<TestTableDatatypes>>()
+}
+
+
+#[view(name = test_public_scheduled_count, public)]
+pub fn view_test_public_scheduled_count(ctx: &ViewContext)-> Vec<TestScheduledTable>{
+    if let Some(row) = ctx.db.test_scheduled_table().scheduled_id().find(1){
+        vec![TestScheduledTable{ scheduled_id: row.scheduled_id, scheduled_at: row.scheduled_at, public_count: row.public_count, private_count: 0 }]
+    }else {
+        vec![]
+    }
+}
+
+#[view(name = test_private_scheduled_count, public)]
+pub fn view_test_private_scheduled_count(ctx: &ViewContext)-> Vec<TestScheduledTable>{
+    if let Some(row) = ctx.db.test_scheduled_table().scheduled_id().find(1){
+        vec![TestScheduledTable{ scheduled_id: row.scheduled_id, scheduled_at: row.scheduled_at, public_count: row.public_count, private_count: row.private_count }]
+    }else {
+        vec![]
+    }
+    
+}
