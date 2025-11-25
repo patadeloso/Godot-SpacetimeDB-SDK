@@ -186,7 +186,7 @@
 			"primary_key": 0,
 			"primary_key_name": "scheduled_id",
 			"is_public": [
-				false,
+				true,
 				true,
 				true
 			],

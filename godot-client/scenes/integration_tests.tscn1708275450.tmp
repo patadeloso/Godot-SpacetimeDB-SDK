@@ -82,27 +82,27 @@ layout_mode = 2
 size_flags_vertical = 3
 current_tab = 0
 
-[node name="TestTableDatatypes" parent="VBoxContainer/TabContainer" unique_id=1146099436 node_paths=PackedStringArray("row_receiver") instance=ExtResource("2_p8i4h")]
+[node name="Control" parent="VBoxContainer/TabContainer" unique_id=1146099436 node_paths=PackedStringArray("row_receiver") instance=ExtResource("2_p8i4h")]
 layout_mode = 2
 row_receiver = NodePath("Receiver [MainTestTableDatatypes]")
 metadata/_tab_index = 0
 
-[node name="Receiver [MainTestTableDatatypes]" type="Node" parent="VBoxContainer/TabContainer/TestTableDatatypes" unique_id=2138347038]
+[node name="Receiver [MainTestTableDatatypes]" type="Node" parent="VBoxContainer/TabContainer/Control" unique_id=2138347038]
 script = ExtResource("2_3ljp4")
 table_to_receive = SubResource("Resource_m5x7f")
 selected_table_name = "test_table_datatypes"
 metadata/_custom_type_script = "uid://jvk6ou7i2d4s"
 
-[node name="TestScheduledTable" parent="VBoxContainer/TabContainer" unique_id=1202664408 node_paths=PackedStringArray("row_receiver") instance=ExtResource("2_p8i4h")]
+[node name="Control2" parent="VBoxContainer/TabContainer" unique_id=1202664408 node_paths=PackedStringArray("row_receiver") instance=ExtResource("2_p8i4h")]
 visible = false
 layout_mode = 2
 row_receiver = NodePath("Receiver [MainTestScheduledTable]")
 metadata/_tab_index = 1
 
-[node name="Receiver [MainTestScheduledTable]" type="Node" parent="VBoxContainer/TabContainer/TestScheduledTable" unique_id=74907839]
+[node name="Receiver [MainTestScheduledTable]" type="Node" parent="VBoxContainer/TabContainer/Control2" unique_id=74907839]
 script = ExtResource("2_3ljp4")
 table_to_receive = SubResource("Resource_7ntsj")
-selected_table_name = "test_scheduled_table"
+selected_table_name = "test_private_scheduled_count"
 metadata/_custom_type_script = "uid://jvk6ou7i2d4s"
 
 [node name="HBoxContainer" type="HBoxContainer" parent="VBoxContainer" unique_id=1146252556]

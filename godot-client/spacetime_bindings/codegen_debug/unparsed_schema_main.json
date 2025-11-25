@@ -953,7 +953,7 @@
 				"User": []
 			},
 			"table_access": {
-				"Private": []
+				"Public": []
 			}
 		},
 		{

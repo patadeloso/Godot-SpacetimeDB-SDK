@@ -13,6 +13,19 @@ func _ready() -> void:
 	row_receiver.insert.connect(row_insert)
 	row_receiver.update.connect(row_update)
 	row_receiver.delete.connect(row_delete)
+	SpacetimeDB.Main.connected.connect(_on_spacetimedb_connected)
+
+func _on_spacetimedb_connected(identity: PackedByteArray, token: String):
+	var query_string := [
+		"SELECT * FROM %s" % row_receiver.selected_table_name
+	]
+	var sub := SpacetimeDB.Main.subscribe(query_string)
+	if sub.error:
+		printerr("Game: Failed to send subscription request.")
+		return
+	
+	sub.applied.connect(func(): print("subsciptions applied"))
+	print("Game: Subscription request sent (Query ID: %d)." % sub.query_id)
 
 func row_insert(new_row:_ModuleTableType):
 	var row_ui:TableRowUI = TABLE_ROW_UI.instantiate()

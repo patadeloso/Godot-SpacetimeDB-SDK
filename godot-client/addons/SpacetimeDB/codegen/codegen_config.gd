@@ -3,7 +3,7 @@ class_name SpacetimeCodegenConfig extends RefCounted
 const CONFIG_VERSION := 2
 const DEFAULT_CONFIG := {
 	"config_version": CONFIG_VERSION,
-	"hide_scheduled_reducers": true,
+	"hide_scheduled_reducers": false,
 	"hide_private_tables": true
 }
 

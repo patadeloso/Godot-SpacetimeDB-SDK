@@ -1,15 +1,6 @@
 extends Control
 
 
-@onready var test_table_datatypes_main: RowReceiver = $"Receiver [MainTestTableDatatypes]"
-@onready var test_table_datatypes_view_all: RowReceiver = $"Receiver [MainTestTableDatatypes]2"
-@onready var test_table_datatypes_first_row: RowReceiver = $"Receiver [MainTestTableDatatypes]3"
-@onready var test_table_datatypes_at_30: RowReceiver = $"Receiver [MainTestTableDatatypes]4"
-@onready var test_scheduled_table_private: RowReceiver = $"Receiver [MainTestScheduledTable]"
-@onready var test_scheduled_table_public: RowReceiver = $"Receiver [MainTestScheduledTable]2"
-
-
-
 # Called when the node enters the scene tree for the first time.
 func _ready() -> void:
 	var options = SpacetimeDBConnectionOptions.new()
@@ -51,16 +42,7 @@ func _on_spacetimedb_database_init():
 
 func _on_button_pressed() -> void:
 	SpacetimeDB.Main.reducers.start_integration_tests()
-	var query_string := [
-		"SELECT * FROM test_table_datatypes" 
-	]
-	var sub := SpacetimeDB.Main.subscribe(query_string)
-	if sub.error:
-		printerr("Game: Failed to send subscription request.")
-		return
 	
-	sub.applied.connect(func(): print("subsciptions applied"))
-	print("Game: Subscription request sent (Query ID: %d)." % sub.query_id)
 
 
 func _on_button_2_pressed() -> void:

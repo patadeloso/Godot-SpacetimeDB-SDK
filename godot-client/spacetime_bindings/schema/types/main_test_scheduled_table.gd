@@ -4,7 +4,7 @@
 class_name MainTestScheduledTable extends _ModuleTableType
 
 const module_name := "Main"
-const table_names: Array[String] = ['test_private_scheduled_count', 'test_public_scheduled_count']
+const table_names: Array[String] = ['test_scheduled_table', 'test_private_scheduled_count', 'test_public_scheduled_count']
 
 @export var scheduled_id: int 
 @export var scheduled_at: int 

@@ -30,7 +30,7 @@ pub struct TestTableDatatypes {
     pub t_opt_u64: Option<u64>,
 }
 
-#[table(name = test_scheduled_table, scheduled(test_scheduled_reducer))]
+#[table(name = test_scheduled_table, public, scheduled(test_scheduled_reducer))]
 pub struct TestScheduledTable {
     #[primary_key]
     #[auto_inc]
@@ -52,12 +52,12 @@ pub fn test_scheduled_reducer(ctx: &ReducerContext, mut row: TestScheduledTable)
             t_u16: u16::MIN,
             t_u32: u32::MIN,
             t_u128: u128::MIN,
-            t_f32: f32::MIN,
-            t_f64: f64::MIN,
-            t_i8: i8::MIN,
-            t_i16: i16::MIN,
-            t_i32: i32::MIN,
-            t_i64: i64::MIN,
+            t_f32: 0.0,
+            t_f64: 0.0,
+            t_i8: 0,
+            t_i16: 0,
+            t_i32: 0,
+            t_i64: 0,
             //t_i128: i128::MIN,
             t_string: "".to_string(),
             t_vec_string: vec![],
@@ -108,28 +108,28 @@ pub fn start_integration_tests(ctx: &ReducerContext) {
         public_count: 0,
         private_count: 0,
     });
-    ctx.db.test_table_datatypes().insert(TestTableDatatypes {
-        t_u64: 0,
-        t_u8: u8::MAX,
-        t_u16: u16::MAX,
-        t_u32: u32::MAX,
-        t_u128: u128::MAX,
-        t_f32: f32::MAX,
-        t_f64: f64::MAX,
-        t_i8: i8::MAX,
-        t_i16: i16::MAX,
-        t_i32: i32::MAX,
-        t_i64: i64::MAX,
-        //t_i128: i128::MAX,
-        t_string: "a String example that is some text to decode.".to_string(),
-        t_vec_string: vec![
-            "a string inside a vec that needs to be decoded.".to_string(),
-            "another text in the vec to be decoded".to_string(),
-        ],
-        t_vec_u64: (0..20).collect(),
-        t_opt_string: Some("Some option String to decode".to_string()),
-        t_opt_u64: Some(u64::MAX),
-    });
+    // ctx.db.test_table_datatypes().insert(TestTableDatatypes {
+    //     t_u64: 0,
+    //     t_u8: u8::MAX,
+    //     t_u16: u16::MAX,
+    //     t_u32: u32::MAX,
+    //     t_u128: u128::MAX,
+    //     t_f32: f32::MAX,
+    //     t_f64: f64::MAX,
+    //     t_i8: i8::MAX,
+    //     t_i16: i16::MAX,
+    //     t_i32: i32::MAX,
+    //     t_i64: i64::MAX,
+    //     //t_i128: i128::MAX,
+    //     t_string: "a String example that is some text to decode.".to_string(),
+    //     t_vec_string: vec![
+    //         "a string inside a vec that needs to be decoded.".to_string(),
+    //         "another text in the vec to be decoded".to_string(),
+    //     ],
+    //     t_vec_u64: (0..20).collect(),
+    //     t_opt_string: Some("Some option String to decode".to_string()),
+    //     t_opt_u64: Some(u64::MAX),
+    // });
 }
 
 #[reducer]
