@@ -9,6 +9,10 @@ const TABLE_ROW_UI = preload("uid://dp3rr1360qvna")
 
 # Called when the node enters the scene tree for the first time.
 func _ready() -> void:
+	if not row_receiver:
+		return
+	if row_receiver.selected_table_name.is_empty():
+		return 
 	header_row.create_header_row(row_receiver.table_to_receive)
 	row_receiver.insert.connect(row_insert)
 	row_receiver.update.connect(row_update)
