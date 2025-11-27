@@ -165,8 +165,16 @@
 					"type": "U64"
 				},
 				{
+					"name": "h1",
+					"type": "String"
+				},
+				{
 					"name": "scheduled_at",
 					"type": "__time_duration_micros__"
+				},
+				{
+					"name": "h2",
+					"type": "String"
 				},
 				{
 					"name": "public_count",
@@ -195,7 +203,7 @@
 					"some": "test_scheduled_table_sched"
 				},
 				"reducer_name": "test_scheduled_reducer",
-				"scheduled_at_column": 1.0
+				"scheduled_at_column": 2.0
 			}
 		},
 		{
@@ -574,7 +582,7 @@
 					"some": "test_scheduled_table_sched"
 				},
 				"reducer_name": "test_scheduled_reducer",
-				"scheduled_at_column": 1.0
+				"scheduled_at_column": 2.0
 			}
 		},
 		{
@@ -693,7 +701,7 @@
 					"some": "test_scheduled_table_sched"
 				},
 				"reducer_name": "test_scheduled_reducer",
-				"scheduled_at_column": 1.0
+				"scheduled_at_column": 2.0
 			}
 		},
 		{
@@ -714,7 +722,7 @@
 					"some": "test_scheduled_table_sched"
 				},
 				"reducer_name": "test_scheduled_reducer",
-				"scheduled_at_column": 1.0
+				"scheduled_at_column": 2.0
 			}
 		},
 		{
@@ -1071,6 +1079,14 @@
 					},
 					{
 						"name": {
+							"some": "h1"
+						},
+						"algebraic_type": {
+							"String": []
+						}
+					},
+					{
+						"name": {
 							"some": "scheduled_at"
 						},
 						"algebraic_type": {
@@ -1116,6 +1132,14 @@
 									}
 								]
 							}
+						}
+					},
+					{
+						"name": {
+							"some": "h2"
+						},
+						"algebraic_type": {
+							"String": []
 						}
 					},
 					{

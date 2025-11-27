@@ -1,7 +1,7 @@
 use core::{f32, f64};
-use std::{i8, u16, u32, u64, u8};
+use std::{i8, time::Duration, u8, u16, u32, u64};
 
-use spacetimedb::{rand::seq::index, *};
+use spacetimedb::{rand::seq::index, sats::timestamp, *};
 
 #[table(name = test_table_datatypes, public)]
 pub struct TestTableDatatypes {
@@ -35,9 +35,12 @@ pub struct TestScheduledTable {
     #[primary_key]
     #[auto_inc]
     scheduled_id: u64,
+    pub h1: String,
     scheduled_at: spacetimedb::ScheduleAt,
+    pub h2: String,
     pub public_count: u64,
     pub private_count: u64,
+    
 }
 
 #[reducer]
@@ -104,9 +107,12 @@ pub fn test_scheduled_reducer(ctx: &ReducerContext, mut row: TestScheduledTable)
 pub fn start_integration_tests(ctx: &ReducerContext) {
     ctx.db.test_scheduled_table().insert(TestScheduledTable {
         scheduled_id: 0,
-        scheduled_at: TimeDuration::from_micros(1000000).into(),
+        h1: "before scheduledat".to_string(),
+        scheduled_at: ctx.timestamp.checked_add_duration(Duration::from_micros(1000000)).unwrap().into(),
+        h2: "after scheduledat".to_string(),
         public_count: 0,
         private_count: 0,
+        
     });
     // ctx.db.test_table_datatypes().insert(TestTableDatatypes {
     //     t_u64: 0,
@@ -162,7 +168,7 @@ pub fn view_test_u32_at_30(ctx: &AnonymousViewContext) -> Vec<TestTableDatatypes
 #[view(name = test_public_scheduled_count, public)]
 pub fn view_test_public_scheduled_count(ctx: &ViewContext)-> Vec<TestScheduledTable>{
     if let Some(row) = ctx.db.test_scheduled_table().scheduled_id().find(1){
-        vec![TestScheduledTable{ scheduled_id: row.scheduled_id, scheduled_at: row.scheduled_at, public_count: row.public_count, private_count: 0 }]
+        vec![TestScheduledTable{ scheduled_id: row.scheduled_id,h1: "before scheduledat".to_string(), scheduled_at: row.scheduled_at,h2: "after scheduledat".to_string(), public_count: row.public_count, private_count: 0 }]
     }else {
         vec![]
     }
@@ -171,7 +177,7 @@ pub fn view_test_public_scheduled_count(ctx: &ViewContext)-> Vec<TestScheduledTa
 #[view(name = test_private_scheduled_count, public)]
 pub fn view_test_private_scheduled_count(ctx: &ViewContext)-> Vec<TestScheduledTable>{
     if let Some(row) = ctx.db.test_scheduled_table().scheduled_id().find(1){
-        vec![TestScheduledTable{ scheduled_id: row.scheduled_id, scheduled_at: row.scheduled_at, public_count: row.public_count, private_count: row.private_count }]
+        vec![TestScheduledTable{ scheduled_id: row.scheduled_id,h1: "before scheduledat".to_string(), scheduled_at: row.scheduled_at,h2: "after scheduledat".to_string(), public_count: row.public_count, private_count: row.private_count }]
     }else {
         vec![]
     }

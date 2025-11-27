@@ -33,14 +33,14 @@ signal total_bytes(sent: int, received: int)
 
 
 func _init(options: SpacetimeDBConnectionOptions):
-	#Performance.add_custom_monitor("spacetime/second_received_packets", get_second_received_packets)
-	#Performance.add_custom_monitor("spacetime/second_received_bytes", get_second_received_bytes)
-	#Performance.add_custom_monitor("spacetime/total_received_packets", get_received_packets)
-	#Performance.add_custom_monitor("spacetime/total_received_kbytes", get_received_kbytes)
-	#Performance.add_custom_monitor("spacetime/second_sent_packets", get_second_sent_packets)
-	#Performance.add_custom_monitor("spacetime/second_sent_bytes", get_second_sent_bytes)
-	#Performance.add_custom_monitor("spacetime/total_sent_packets", get_sent_packets)
-	#Performance.add_custom_monitor("spacetime/total_sent_kbytes", get_sent_kbytes)
+	Performance.add_custom_monitor("spacetime/second_received_packets", get_second_received_packets)
+	Performance.add_custom_monitor("spacetime/second_received_bytes", get_second_received_bytes)
+	Performance.add_custom_monitor("spacetime/total_received_packets", get_received_packets)
+	Performance.add_custom_monitor("spacetime/total_received_kbytes", get_received_kbytes)
+	Performance.add_custom_monitor("spacetime/second_sent_packets", get_second_sent_packets)
+	Performance.add_custom_monitor("spacetime/second_sent_bytes", get_second_sent_bytes)
+	Performance.add_custom_monitor("spacetime/total_sent_packets", get_sent_packets)
+	Performance.add_custom_monitor("spacetime/total_sent_kbytes", get_sent_kbytes)
 	
 	_websocket.inbound_buffer_size = options.inbound_buffer_size
 	_websocket.outbound_buffer_size = options.outbound_buffer_size
@@ -191,6 +191,7 @@ func _physics_process(delta: float) -> void:
 				_total_bytes_received += packet_bytes.size()
 				_second_bytes_received += packet_bytes.size()
 				_total_messages_received += 1
+				_second_messages_received += 1
 				
 				message_received.emit(packet_bytes)
 				total_messages.emit(_total_messages_send, _total_messages_received)

@@ -7,25 +7,33 @@ const module_name := "Main"
 const table_names: Array[String] = ['test_scheduled_table', 'test_private_scheduled_count', 'test_public_scheduled_count']
 
 @export var scheduled_id: int 
+@export var h1: String 
 @export var scheduled_at: int 
+@export var h2: String 
 @export var public_count: int 
 @export var private_count: int 
 
 func _init() -> void:
 	set_meta('primary_key', 'scheduled_id')
 	set_meta('bsatn_type_scheduled_id', &'u64')
+	set_meta('bsatn_type_h1', &'string')
 	set_meta('bsatn_type_scheduled_at', &'i64')
+	set_meta('bsatn_type_h2', &'string')
 	set_meta('bsatn_type_public_count', &'u64')
 	set_meta('bsatn_type_private_count', &'u64')
 
 ## 0. scheduled_id: int[br]
-## 1. scheduled_at: int[br]
-## 2. public_count: int[br]
-## 3. private_count: int[br]
-static func create(p_scheduled_id: int, p_scheduled_at: int, p_public_count: int, p_private_count: int) -> MainTestScheduledTable:
+## 1. h1: String[br]
+## 2. scheduled_at: int[br]
+## 3. h2: String[br]
+## 4. public_count: int[br]
+## 5. private_count: int[br]
+static func create(p_scheduled_id: int, p_h1: String, p_scheduled_at: int, p_h2: String, p_public_count: int, p_private_count: int) -> MainTestScheduledTable:
 	var result = MainTestScheduledTable.new()
 	result.scheduled_id = p_scheduled_id
+	result.h1 = p_h1
 	result.scheduled_at = p_scheduled_at
+	result.h2 = p_h2
 	result.public_count = p_public_count
 	result.private_count = p_private_count
 	return result
