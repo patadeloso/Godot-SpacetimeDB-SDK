@@ -166,7 +166,7 @@
 				},
 				{
 					"name": "h1",
-					"type": "String"
+					"type": "U16"
 				},
 				{
 					"name": "scheduled_at",
@@ -174,7 +174,7 @@
 				},
 				{
 					"name": "h2",
-					"type": "String"
+					"type": "U16"
 				},
 				{
 					"name": "public_count",
@@ -1082,7 +1082,7 @@
 							"some": "h1"
 						},
 						"algebraic_type": {
-							"String": []
+							"U16": []
 						}
 					},
 					{
@@ -1139,7 +1139,7 @@
 							"some": "h2"
 						},
 						"algebraic_type": {
-							"String": []
+							"U16": []
 						}
 					},
 					{

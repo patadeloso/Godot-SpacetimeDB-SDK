@@ -1,7 +1,8 @@
 use core::{f32, f64};
-use std::{i8, time::Duration, u8, u16, u32, u64};
+use std::{time::Duration};
 
-use spacetimedb::{rand::seq::index, sats::timestamp, *};
+use spacetimedb::{AnonymousViewContext, ProcedureContext, ReducerContext, Table, ViewContext, procedure, reducer, table, view};
+
 
 #[table(name = test_table_datatypes, public)]
 pub struct TestTableDatatypes {
@@ -30,14 +31,14 @@ pub struct TestTableDatatypes {
     pub t_opt_u64: Option<u64>,
 }
 
-#[table(name = test_scheduled_table, public, scheduled(test_scheduled_reducer))]
+#[table(name = test_scheduled_table, public, scheduled(test_scheduled_reducer), index(name = get_by_public_count, btree(columns = [public_count])))]
 pub struct TestScheduledTable {
     #[primary_key]
     #[auto_inc]
     scheduled_id: u64,
-    pub h1: String,
+    pub h1: u16,
     scheduled_at: spacetimedb::ScheduleAt,
-    pub h2: String,
+    pub h2: u16,
     pub public_count: u64,
     pub private_count: u64,
     
@@ -107,9 +108,9 @@ pub fn test_scheduled_reducer(ctx: &ReducerContext, mut row: TestScheduledTable)
 pub fn start_integration_tests(ctx: &ReducerContext) {
     ctx.db.test_scheduled_table().insert(TestScheduledTable {
         scheduled_id: 0,
-        h1: "before scheduledat".to_string(),
-        scheduled_at: ctx.timestamp.checked_add_duration(Duration::from_micros(1000000)).unwrap().into(),
-        h2: "after scheduledat".to_string(),
+        h1: 1,
+        scheduled_at: Duration::from_micros(1000000).into(),
+        h2: 1,
         public_count: 0,
         private_count: 0,
         
@@ -143,10 +144,9 @@ pub fn clear_integration_tests(ctx: &ReducerContext){
     for row in ctx.db.test_scheduled_table().iter(){
         ctx.db.test_scheduled_table().delete(row);
     }
-     for row in ctx.db.test_table_datatypes().iter(){
+    for row in ctx.db.test_table_datatypes().iter(){
         ctx.db.test_table_datatypes().delete(row);
     }
-    
 }
 
 #[view(name = test_anonymous_all_types, public)]
@@ -156,7 +156,11 @@ pub fn view_test_anonymous_all_types(ctx: &AnonymousViewContext)-> Vec<TestTable
 
 #[view(name = test_first_type_row, public)]
 pub fn view_test_first_type_row(ctx: &ViewContext) -> Vec<TestTableDatatypes>{
-    vec![ctx.db.test_table_datatypes().t_u32().filter(0..u32::MAX).next().unwrap()]
+    if let Some(row) = ctx.db.test_table_datatypes().t_u32().filter(0..u32::MAX).next(){
+        vec![row]
+    } else{
+        vec![]
+    }
 }
 
 #[view(name = test_u32_at_30, public)]
@@ -167,8 +171,8 @@ pub fn view_test_u32_at_30(ctx: &AnonymousViewContext) -> Vec<TestTableDatatypes
 
 #[view(name = test_public_scheduled_count, public)]
 pub fn view_test_public_scheduled_count(ctx: &ViewContext)-> Vec<TestScheduledTable>{
-    if let Some(row) = ctx.db.test_scheduled_table().scheduled_id().find(1){
-        vec![TestScheduledTable{ scheduled_id: row.scheduled_id,h1: "before scheduledat".to_string(), scheduled_at: row.scheduled_at,h2: "after scheduledat".to_string(), public_count: row.public_count, private_count: 0 }]
+    if let Some(row) = ctx.db.test_scheduled_table().get_by_public_count().filter(0..u64::MAX).next(){
+        vec![TestScheduledTable{ scheduled_id: row.scheduled_id,h1: 1, scheduled_at: row.scheduled_at,h2: 1, public_count: row.public_count, private_count: 0 }]
     }else {
         vec![]
     }
@@ -176,10 +180,21 @@ pub fn view_test_public_scheduled_count(ctx: &ViewContext)-> Vec<TestScheduledTa
 
 #[view(name = test_private_scheduled_count, public)]
 pub fn view_test_private_scheduled_count(ctx: &ViewContext)-> Vec<TestScheduledTable>{
-    if let Some(row) = ctx.db.test_scheduled_table().scheduled_id().find(1){
-        vec![TestScheduledTable{ scheduled_id: row.scheduled_id,h1: "before scheduledat".to_string(), scheduled_at: row.scheduled_at,h2: "after scheduledat".to_string(), public_count: row.public_count, private_count: row.private_count }]
+    if let Some(row) = ctx.db.test_scheduled_table().get_by_public_count().filter(0..u64::MAX).next(){
+        vec![TestScheduledTable{ scheduled_id: row.scheduled_id,h1: 1, scheduled_at: row.scheduled_at,h2: 1, public_count: row.public_count, private_count: row.private_count }]
     }else {
         vec![]
     }
     
 }
+
+
+
+
+#[procedure]
+pub fn procedure_test_get_table_datatypes_row(ctx: &mut ProcedureContext, t_u64: u64) -> TestTableDatatypes{
+    ctx.with_tx(|tctx| tctx.db.test_table_datatypes().t_u64().find(t_u64)).unwrap()
+}
+
+
+
