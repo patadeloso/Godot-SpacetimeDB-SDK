@@ -58,6 +58,155 @@
 			]
 		},
 		{
+			"name": "TestTableDatatypes",
+			"struct": [
+				{
+					"name": "t_u64",
+					"type": "U64"
+				},
+				{
+					"name": "t_u8",
+					"type": "U8"
+				},
+				{
+					"name": "t_u16",
+					"type": "U16"
+				},
+				{
+					"name": "t_u32",
+					"type": "U32"
+				},
+				{
+					"name": "t_u128",
+					"type": "U128"
+				},
+				{
+					"name": "t_f32",
+					"type": "F32"
+				},
+				{
+					"name": "t_f64",
+					"type": "F64"
+				},
+				{
+					"name": "t_i8",
+					"type": "I8"
+				},
+				{
+					"name": "t_i16",
+					"type": "I16"
+				},
+				{
+					"name": "t_i32",
+					"type": "I32"
+				},
+				{
+					"name": "t_i64",
+					"type": "I64"
+				},
+				{
+					"name": "t_string",
+					"type": "String"
+				},
+				{
+					"name": "t_vec_string",
+					"nested_type": [
+						"Array"
+					],
+					"is_array": true,
+					"type": "String"
+				},
+				{
+					"name": "t_vec_u64",
+					"nested_type": [
+						"Array"
+					],
+					"is_array": true,
+					"type": "U64"
+				},
+				{
+					"name": "t_opt_string",
+					"nested_type": [
+						"Option"
+					],
+					"is_option": true,
+					"type": "String"
+				},
+				{
+					"name": "t_opt_u64",
+					"nested_type": [
+						"Option"
+					],
+					"is_option": true,
+					"type": "U64"
+				}
+			],
+			"table_names": [
+				"test_table_datatypes",
+				"test_anonymous_all_types",
+				"test_first_type_row",
+				"test_u32_at_30"
+			],
+			"table_name": "test_table_datatypes",
+			"primary_key": 0,
+			"primary_key_name": "t_u64",
+			"is_public": [
+				true,
+				true,
+				true,
+				true
+			]
+		},
+		{
+			"name": "TestScheduledTable",
+			"struct": [
+				{
+					"name": "scheduled_id",
+					"type": "U64"
+				},
+				{
+					"name": "h1",
+					"type": "U16"
+				},
+				{
+					"name": "scheduled_at",
+					"type": "__time_duration_micros__"
+				},
+				{
+					"name": "h2",
+					"type": "U16"
+				},
+				{
+					"name": "public_count",
+					"type": "U64"
+				},
+				{
+					"name": "private_count",
+					"type": "U64"
+				}
+			],
+			"table_names": [
+				"test_scheduled_table",
+				"test_private_scheduled_count",
+				"test_public_scheduled_count"
+			],
+			"table_name": "test_scheduled_table",
+			"primary_key": 0,
+			"primary_key_name": "scheduled_id",
+			"is_public": [
+				true,
+				true,
+				true
+			],
+			"schedule": {
+				"name": {
+					"some": "test_scheduled_table_sched"
+				},
+				"reducer_name": "test_scheduled_reducer",
+				"scheduled_at_column": 2.0
+			}
+		},
+		{
 			"name": "Message",
 			"struct": [
 				{
@@ -109,7 +258,7 @@
 					],
 					"is_option": true,
 					"type": "Damage",
-					"type_idx": 4
+					"type_idx": 6
 				}
 			]
 		},
@@ -152,7 +301,7 @@
 				{
 					"name": "damage",
 					"type": "Damage",
-					"type_idx": 4
+					"type_idx": 6
 				},
 				{
 					"name": "test_option_string",
@@ -171,7 +320,7 @@
 					],
 					"is_option": true,
 					"type": "Message",
-					"type_idx": 3
+					"type_idx": 5
 				}
 			],
 			"table_names": [
@@ -208,7 +357,7 @@
 				{
 					"name": "color",
 					"type": "Color",
-					"type_idx": 7
+					"type_idx": 9
 				},
 				{
 					"name": "test_vec",
@@ -229,7 +378,7 @@
 				{
 					"name": "test_dynamic_arraylike",
 					"type": "Vector4",
-					"type_idx": 8
+					"type_idx": 10
 				},
 				{
 					"name": "last_position",
@@ -315,6 +464,10 @@
 			"params": []
 		},
 		{
+			"name": "clear_integration_tests",
+			"params": []
+		},
+		{
 			"name": "move_user",
 			"params": [
 				{
@@ -341,6 +494,10 @@
 					"type": "U8"
 				}
 			]
+		},
+		{
+			"name": "start_integration_tests",
+			"params": []
 		},
 		{
 			"name": "test_option_single",
@@ -371,12 +528,23 @@
 			]
 		},
 		{
+			"name": "test_scheduled_reducer",
+			"params": [
+				{
+					"name": "row",
+					"type": "TestScheduledTable",
+					"type_idx": 4
+				}
+			],
+			"is_scheduled": true
+		},
+		{
 			"name": "test_struct",
 			"params": [
 				{
 					"name": "message",
 					"type": "Message",
-					"type_idx": 3
+					"type_idx": 5
 				}
 			]
 		}
@@ -397,8 +565,43 @@
 			"is_public": true
 		},
 		{
+			"name": "test_public_scheduled_count",
+			"type_idx": 4,
+			"primary_key": 0,
+			"primary_key_name": "scheduled_id",
+			"unique_indexes": [
+				{
+					"name": "scheduled_id",
+					"type": "U64",
+					"constraint_name": "test_scheduled_table_scheduled_id_key"
+				}
+			],
+			"is_public": true,
+			"schedule": {
+				"name": {
+					"some": "test_scheduled_table_sched"
+				},
+				"reducer_name": "test_scheduled_reducer",
+				"scheduled_at_column": 2.0
+			}
+		},
+		{
+			"name": "test_u32_at_30",
+			"type_idx": 3,
+			"primary_key": 0,
+			"primary_key_name": "t_u64",
+			"unique_indexes": [
+				{
+					"name": "t_u64",
+					"type": "U64",
+					"constraint_name": "test_table_datatypes_t_u64_key"
+				}
+			],
+			"is_public": true
+		},
+		{
 			"name": "user",
-			"type_idx": 5,
+			"type_idx": 7,
 			"primary_key": 0,
 			"primary_key_name": "identity",
 			"unique_indexes": [
@@ -412,7 +615,7 @@
 		},
 		{
 			"name": "user_data",
-			"type_idx": 6,
+			"type_idx": 8,
 			"primary_key": 0,
 			"primary_key_name": "identity",
 			"unique_indexes": [
@@ -426,7 +629,7 @@
 		},
 		{
 			"name": "user_data_hidden",
-			"type_idx": 6,
+			"type_idx": 8,
 			"primary_key": 0,
 			"primary_key_name": "identity",
 			"unique_indexes": [
@@ -440,7 +643,7 @@
 		},
 		{
 			"name": "user_next",
-			"type_idx": 5,
+			"type_idx": 7,
 			"primary_key": 0,
 			"primary_key_name": "identity",
 			"unique_indexes": [
@@ -451,6 +654,90 @@
 				}
 			],
 			"is_public": true
+		},
+		{
+			"name": "test_u32_at_30",
+			"type_idx": 3,
+			"primary_key": 0,
+			"primary_key_name": "t_u64",
+			"unique_indexes": [
+				{
+					"name": "t_u64",
+					"type": "U64",
+					"constraint_name": "test_table_datatypes_t_u64_key"
+				}
+			],
+			"is_public": true
+		},
+		{
+			"name": "test_u32_at_30",
+			"type_idx": 3,
+			"primary_key": 0,
+			"primary_key_name": "t_u64",
+			"unique_indexes": [
+				{
+					"name": "t_u64",
+					"type": "U64",
+					"constraint_name": "test_table_datatypes_t_u64_key"
+				}
+			],
+			"is_public": true
+		},
+		{
+			"name": "test_public_scheduled_count",
+			"type_idx": 4,
+			"primary_key": 0,
+			"primary_key_name": "scheduled_id",
+			"unique_indexes": [
+				{
+					"name": "scheduled_id",
+					"type": "U64",
+					"constraint_name": "test_scheduled_table_scheduled_id_key"
+				}
+			],
+			"is_public": true,
+			"schedule": {
+				"name": {
+					"some": "test_scheduled_table_sched"
+				},
+				"reducer_name": "test_scheduled_reducer",
+				"scheduled_at_column": 2.0
+			}
+		},
+		{
+			"name": "test_public_scheduled_count",
+			"type_idx": 4,
+			"primary_key": 0,
+			"primary_key_name": "scheduled_id",
+			"unique_indexes": [
+				{
+					"name": "scheduled_id",
+					"type": "U64",
+					"constraint_name": "test_scheduled_table_scheduled_id_key"
+				}
+			],
+			"is_public": true,
+			"schedule": {
+				"name": {
+					"some": "test_scheduled_table_sched"
+				},
+				"reducer_name": "test_scheduled_reducer",
+				"scheduled_at_column": 2.0
+			}
+		},
+		{
+			"name": "test_u32_at_30",
+			"type_idx": 3,
+			"primary_key": 0,
+			"primary_key_name": "t_u64",
+			"unique_indexes": [
+				{
+					"name": "t_u64",
+					"type": "U64",
+					"constraint_name": "test_table_datatypes_t_u64_key"
+				}
+			],
+			"is_public": true
 		}
 	],
 	"type_map": {
@@ -458,6 +745,7 @@
 		"__connection_id__": "PackedByteArray",
 		"__timestamp_micros_since_unix_epoch__": "int",
 		"__time_duration_micros__": "int",
+		"U128": "PackedByteArray",
 		"I8": "int",
 		"I16": "int",
 		"I32": "int",
@@ -481,6 +769,8 @@
 		"Color": "Color",
 		"Plane": "Plane",
 		"Lobby": "MainLobby",
+		"TestTableDatatypes": "MainTestTableDatatypes",
+		"TestScheduledTable": "MainTestScheduledTable",
 		"Message": "MainMessage",
 		"Damage": "MainDamage",
 		"User": "MainUser",
@@ -495,6 +785,7 @@
 		"U16": "u16",
 		"U32": "u32",
 		"U64": "u64",
+		"U128": "u128",
 		"F32": "f32",
 		"F64": "f64",
 		"String": "string",
@@ -513,6 +804,8 @@
 		"__timestamp_micros_since_unix_epoch__": "i64",
 		"__time_duration_micros__": "i64",
 		"Lobby": "MainLobby",
+		"TestTableDatatypes": "MainTestTableDatatypes",
+		"TestScheduledTable": "MainTestScheduledTable",
 		"Message": "MainMessage",
 		"Damage": "MainDamage",
 		"User": "MainUser",
@@ -588,6 +881,281 @@
 						},
 						"algebraic_type": {
 							"F32": []
+						}
+					}
+				]
+			}
+		},
+		{
+			"Product": {
+				"elements": [
+					{
+						"name": {
+							"some": "t_u64"
+						},
+						"algebraic_type": {
+							"U64": []
+						}
+					},
+					{
+						"name": {
+							"some": "t_u8"
+						},
+						"algebraic_type": {
+							"U8": []
+						}
+					},
+					{
+						"name": {
+							"some": "t_u16"
+						},
+						"algebraic_type": {
+							"U16": []
+						}
+					},
+					{
+						"name": {
+							"some": "t_u32"
+						},
+						"algebraic_type": {
+							"U32": []
+						}
+					},
+					{
+						"name": {
+							"some": "t_u128"
+						},
+						"algebraic_type": {
+							"U128": []
+						}
+					},
+					{
+						"name": {
+							"some": "t_f32"
+						},
+						"algebraic_type": {
+							"F32": []
+						}
+					},
+					{
+						"name": {
+							"some": "t_f64"
+						},
+						"algebraic_type": {
+							"F64": []
+						}
+					},
+					{
+						"name": {
+							"some": "t_i8"
+						},
+						"algebraic_type": {
+							"I8": []
+						}
+					},
+					{
+						"name": {
+							"some": "t_i16"
+						},
+						"algebraic_type": {
+							"I16": []
+						}
+					},
+					{
+						"name": {
+							"some": "t_i32"
+						},
+						"algebraic_type": {
+							"I32": []
+						}
+					},
+					{
+						"name": {
+							"some": "t_i64"
+						},
+						"algebraic_type": {
+							"I64": []
+						}
+					},
+					{
+						"name": {
+							"some": "t_string"
+						},
+						"algebraic_type": {
+							"String": []
+						}
+					},
+					{
+						"name": {
+							"some": "t_vec_string"
+						},
+						"algebraic_type": {
+							"Array": {
+								"String": []
+							}
+						}
+					},
+					{
+						"name": {
+							"some": "t_vec_u64"
+						},
+						"algebraic_type": {
+							"Array": {
+								"U64": []
+							}
+						}
+					},
+					{
+						"name": {
+							"some": "t_opt_string"
+						},
+						"algebraic_type": {
+							"Sum": {
+								"variants": [
+									{
+										"name": {
+											"some": "some"
+										},
+										"algebraic_type": {
+											"String": []
+										}
+									},
+									{
+										"name": {
+											"some": "none"
+										},
+										"algebraic_type": {
+											"Product": {
+												"elements": []
+											}
+										}
+									}
+								]
+							}
+						}
+					},
+					{
+						"name": {
+							"some": "t_opt_u64"
+						},
+						"algebraic_type": {
+							"Sum": {
+								"variants": [
+									{
+										"name": {
+											"some": "some"
+										},
+										"algebraic_type": {
+											"U64": []
+										}
+									},
+									{
+										"name": {
+											"some": "none"
+										},
+										"algebraic_type": {
+											"Product": {
+												"elements": []
+											}
+										}
+									}
+								]
+							}
+						}
+					}
+				]
+			}
+		},
+		{
+			"Product": {
+				"elements": [
+					{
+						"name": {
+							"some": "scheduled_id"
+						},
+						"algebraic_type": {
+							"U64": []
+						}
+					},
+					{
+						"name": {
+							"some": "h1"
+						},
+						"algebraic_type": {
+							"U16": []
+						}
+					},
+					{
+						"name": {
+							"some": "scheduled_at"
+						},
+						"algebraic_type": {
+							"Sum": {
+								"variants": [
+									{
+										"name": {
+											"some": "Interval"
+										},
+										"algebraic_type": {
+											"Product": {
+												"elements": [
+													{
+														"name": {
+															"some": "__time_duration_micros__"
+														},
+														"algebraic_type": {
+															"I64": []
+														}
+													}
+												]
+											}
+										}
+									},
+									{
+										"name": {
+											"some": "Time"
+										},
+										"algebraic_type": {
+											"Product": {
+												"elements": [
+													{
+														"name": {
+															"some": "__timestamp_micros_since_unix_epoch__"
+														},
+														"algebraic_type": {
+															"I64": []
+														}
+													}
+												]
+											}
+										}
+									}
+								]
+							}
+						}
+					},
+					{
+						"name": {
+							"some": "h2"
+						},
+						"algebraic_type": {
+							"U16": []
+						}
+					},
+					{
+						"name": {
+							"some": "public_count"
+						},
+						"algebraic_type": {
+							"U64": []
+						}
+					},
+					{
+						"name": {
+							"some": "private_count"
+						},
+						"algebraic_type": {
+							"U64": []
 						}
 					}
 				]
@@ -704,7 +1272,7 @@
 											"some": "some"
 										},
 										"algebraic_type": {
-											"Ref": 4.0
+											"Ref": 6.0
 										}
 									},
 									{
@@ -810,7 +1378,7 @@
 							"some": "damage"
 						},
 						"algebraic_type": {
-							"Ref": 4.0
+							"Ref": 6.0
 						}
 					},
 					{
@@ -856,7 +1424,7 @@
 											"some": "some"
 										},
 										"algebraic_type": {
-											"Ref": 3.0
+											"Ref": 5.0
 										}
 									},
 									{
@@ -927,7 +1495,7 @@
 							"some": "color"
 						},
 						"algebraic_type": {
-							"Ref": 7.0
+							"Ref": 9.0
 						}
 					},
 					{
@@ -955,7 +1523,7 @@
 							"some": "test_dynamic_arraylike"
 						},
 						"algebraic_type": {
-							"Ref": 8.0
+							"Ref": 10.0
 						}
 					},
 					{

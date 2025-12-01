@@ -171,9 +171,12 @@ func _on_generate_schema(uri: String, module_names: Array[String]):
 	
 	if not ProjectSettings.has_setting(setting_name):
 		add_autoload_singleton(AUTOLOAD_NAME, AUTOLOAD_PATH)
-	
+	while get_editor_interface().get_resource_filesystem().is_scanning():
+		print_log("waiting for auto scan to finish")
+		continue
 	get_editor_interface().get_resource_filesystem().scan()
 	print_log("Code generation complete!")
+	
 
 func _cleanup_unused_classes(dir_path: String = "res://schema", files: Array[String] = []) -> void:
 	var dir = DirAccess.open(dir_path)

@@ -792,7 +792,11 @@ func _read_table_update_instance(spb: StreamPeerBuffer, resource: TableUpdateDat
 			row_spb.seek(0) # Важно! Сбрасываем позицию на начало
 			#var row_spb := StreamPeerBuffer.new(); row_spb.data_array = raw_row_bytes
 			if _populate_resource_from_bytes(row_resource, row_spb):
-				if row_spb.get_position() < row_spb.get_size(): push_error("Extra %d bytes after parsing delete row for table '%s'" % [row_spb.get_size() - row_spb.get_position(), resource.table_name])
+				if row_spb.get_position() < row_spb.get_size(): 
+					var remainingbytes: Array = []
+					while row_spb.get_position() < row_spb.get_size():
+						remainingbytes.append(row_spb.get_8())
+					push_error("Extra %d bytes after parsing delete row for table '%s'. remaining Bytes %s" % [row_spb.get_size() - row_spb.get_position(), resource.table_name, remainingbytes])
 				all_parsed_deletes.append(row_resource)
 			else: push_error("Stopping update processing for table '%s' due to delete row parsing failure." % resource.table_name); break
 		if has_error(): break
@@ -803,7 +807,11 @@ func _read_table_update_instance(spb: StreamPeerBuffer, resource: TableUpdateDat
 			row_spb.data_array = raw_row_bytes
 			row_spb.seek(0) # Важно! Сбрасываем позицию на начало
 			if _populate_resource_from_bytes(row_resource, row_spb):
-				if row_spb.get_position() < row_spb.get_size(): push_error("Extra %d bytes after parsing insert row for table '%s'" % [row_spb.get_size() - row_spb.get_position(), resource.table_name])
+				if row_spb.get_position() < row_spb.get_size(): 
+					var remainingbytes: Array = []
+					while row_spb.get_position() < row_spb.get_size():
+						remainingbytes.append(row_spb.get_8())
+					push_error("Extra %d bytes after parsing insert row for table '%s'. remaining Bytes %s" % [row_spb.get_size() - row_spb.get_position(), resource.table_name, remainingbytes])
 				all_parsed_inserts.append(row_resource)
 			else: push_error("Stopping update processing for table '%s' due to insert row parsing failure." % resource.table_name); break
 		if has_error(): break

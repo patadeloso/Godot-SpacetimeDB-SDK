@@ -7,5 +7,5 @@ class_name SubscribeMultiAppliedMessage extends Resource
 @export var database_update: DatabaseUpdateData # Nested Resource
 
 func _init():
-    set_meta("bsatn_type_request_id", "u32")
-    set_meta("bsatn_type_total_host_execution_duration_micros", "u64")
+	set_meta("bsatn_type_request_id", "u32")
+	set_meta("bsatn_type_total_host_execution_duration_micros", "u64")

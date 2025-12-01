@@ -6,4 +6,4 @@ class_name SubscribeRowsData extends Resource
 @export var table_rows: TableUpdateData
 
 func _init():
-    set_meta("bsatn_type_table_id", "u32")
+	set_meta("bsatn_type_table_id", "u32")
