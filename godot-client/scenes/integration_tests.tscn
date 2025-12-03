@@ -94,7 +94,6 @@ metadata/_custom_type_script = "uid://bsl5rglshjc06"
 
 [sub_resource type="Resource" id="Resource_wkhtg"]
 script = ExtResource("4_fl47p")
-metadata/_custom_type_script = "uid://bsl5rglshjc06"
 metadata/primary_key = "scheduled_id"
 metadata/bsatn_type_scheduled_id = &"u64"
 metadata/bsatn_type_h1 = &"string"
@@ -102,6 +101,7 @@ metadata/bsatn_type_scheduled_at = &"i64"
 metadata/bsatn_type_h2 = &"string"
 metadata/bsatn_type_public_count = &"u64"
 metadata/bsatn_type_private_count = &"u64"
+metadata/_custom_type_script = "uid://bsl5rglshjc06"
 
 [node name="IntegrationTests" type="Control" unique_id=1412664590]
 layout_mode = 3
