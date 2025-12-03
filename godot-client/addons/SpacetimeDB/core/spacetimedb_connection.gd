@@ -162,6 +162,7 @@ func disconnect_from_server(code: int = 1000, reason: String = "Client initiated
 	if _websocket.get_ready_state() != WebSocketPeer.STATE_CLOSED:
 		_print_log("SpacetimeDBConnection: Closing connection...")
 		_websocket.close(code, reason)
+		_print_log("SpacetimeDBConnection: Connection closed")
 	_is_connected = false
 	_connection_requested = false
 	set_process(false)

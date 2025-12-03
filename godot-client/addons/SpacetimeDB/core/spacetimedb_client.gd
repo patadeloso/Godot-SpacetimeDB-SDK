@@ -69,7 +69,14 @@ func _exit_tree():
 		_packet_semaphore.post()
 		deserializer_worker.wait_to_finish()
 		deserializer_worker = null
-		
+
+func _notification(what: int) -> void:
+	match what:
+		NOTIFICATION_CRASH:
+			disconnect_db()
+		NOTIFICATION_WM_CLOSE_REQUEST:
+			disconnect_db()
+
 func print_log(log_message: String):
 	if debug_mode:
 		print(log_message)
