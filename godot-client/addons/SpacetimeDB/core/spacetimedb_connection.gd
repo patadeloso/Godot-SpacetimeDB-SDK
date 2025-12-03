@@ -1,4 +1,4 @@
-@tool
+#@tool
 class_name SpacetimeDBConnection extends Node
 
 var _websocket := WebSocketPeer.new()
@@ -46,7 +46,7 @@ func _init(options: SpacetimeDBConnectionOptions):
 	_websocket.outbound_buffer_size = options.outbound_buffer_size
 	set_compression_preference(options.compression)
 	self._debug_mode = options.debug_mode
-	set_process(false) # Don't process until connect is called
+	set_physics_process(false) # Don't process until connect is called
 
 func _print_log(log_message:String):
 	if _debug_mode:
@@ -156,15 +156,15 @@ func connect_to_database(base_url: String, database_name: String, connection_id:
 	else:
 		_print_log("SpacetimeDBConnection: Connection initiated.")
 		_connection_requested = true
-		set_process(true)
+		set_physics_process(true)
 
 func disconnect_from_server(code: int = 1000, reason: String = "Client initiated disconnect"):
-	if _websocket.get_ready_state() != WebSocketPeer.STATE_CLOSED:
+	if _websocket.get_ready_state() != WebSocketPeer.STATE_CLOSED and _websocket.get_ready_state() != WebSocketPeer.STATE_CLOSING:
 		_print_log("SpacetimeDBConnection: Closing connection...")
 		_websocket.close(code, reason)
 	_is_connected = false
 	_connection_requested = false
-	set_process(false)
+	
 
 func is_connected_db() -> bool:
 	return _is_connected
@@ -203,6 +203,7 @@ func _physics_process(delta: float) -> void:
 
 		WebSocketPeer.STATE_CLOSING:
 			# Connection is closing
+			_print_log("SpacetimeDBConnection: connection closing")
 			pass
 
 		WebSocketPeer.STATE_CLOSED:
@@ -215,7 +216,27 @@ func _physics_process(delta: float) -> void:
 				else:
 					_print_log("SpacetimeDBConnection: Connection closed (Code: %d, Reason: %s)" % [code, reason])
 					emit_signal("disconnected") # Normal closure signal
-
 			_is_connected = false
 			_connection_requested = false
-			set_process(false) # Stop polling
+			set_physics_process(false) # Stop polling
+
+
+func _handle_game_closing():
+	disconnect_from_server()
+	while _websocket.get_ready_state() == WebSocketPeer.STATE_CLOSING:
+		_print_log("SpacetimeDBConnection: WS closing")
+		await get_tree().physics_frame
+	get_tree().auto_accept_quit = true
+	print("game closed")
+	get_tree().quit()
+	
+func _notification(what: int) -> void:
+	match what:
+		NOTIFICATION_CRASH:
+			if _websocket.get_ready_state() != WebSocketPeer.STATE_CLOSED and _websocket.get_ready_state() != WebSocketPeer.STATE_CLOSING:
+				get_tree().auto_accept_quit = false
+				_handle_game_closing()
+		NOTIFICATION_WM_CLOSE_REQUEST:
+			if _websocket.get_ready_state() != WebSocketPeer.STATE_CLOSED and _websocket.get_ready_state() != WebSocketPeer.STATE_CLOSING:
+				get_tree().auto_accept_quit = false
+				_handle_game_closing()
