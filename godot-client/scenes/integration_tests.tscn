@@ -29,6 +29,7 @@ Label/styles/normal = SubResource("StyleBoxTexture_m5x7f")
 
 [sub_resource type="Resource" id="Resource_p8i4h"]
 script = ExtResource("3_p8i4h")
+metadata/_custom_type_script = "uid://cl2xmqvh8guv0"
 metadata/primary_key = "t_u64"
 metadata/bsatn_type_t_u64 = &"u64"
 metadata/bsatn_type_t_u8 = &"u8"
@@ -46,7 +47,6 @@ metadata/bsatn_type_t_vec_string = &"string"
 metadata/bsatn_type_t_vec_u64 = &"u64"
 metadata/bsatn_type_t_opt_string = &"string"
 metadata/bsatn_type_t_opt_u64 = &"u64"
-metadata/_custom_type_script = "uid://cl2xmqvh8guv0"
 
 [sub_resource type="Resource" id="Resource_m5x7f"]
 script = ExtResource("3_p8i4h")

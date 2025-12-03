@@ -1,4 +1,4 @@
-@tool
+#@tool
 class_name SpacetimeDBClient extends Node
 
 # --- Configuration ---
@@ -69,13 +69,6 @@ func _exit_tree():
 		_packet_semaphore.post()
 		deserializer_worker.wait_to_finish()
 		deserializer_worker = null
-
-func _notification(what: int) -> void:
-	match what:
-		NOTIFICATION_CRASH:
-			disconnect_db()
-		NOTIFICATION_WM_CLOSE_REQUEST:
-			disconnect_db()
 
 func print_log(log_message: String):
 	if debug_mode:
@@ -373,6 +366,7 @@ func disconnect_db():
 	_token = ""
 	if _connection:
 		_connection.disconnect_from_server()
+		
 
 func is_connected_db() -> bool:
 	return _connection and _connection.is_connected_db()
