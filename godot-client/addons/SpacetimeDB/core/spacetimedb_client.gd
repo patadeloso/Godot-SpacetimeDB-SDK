@@ -337,10 +337,10 @@ func connect_db(host_url: String, database_name: String, options: SpacetimeDBCon
 		options = SpacetimeDBConnectionOptions.new()
 	connection_options = options
 	self.base_url = host_url
-	self.database_name = database_name
+	self.database_name = database_name.to_lower()
 	self.compression = options.compression
 	self.one_time_token = options.one_time_token
-	if options.token:
+	if not options.token.is_empty():
 		self._token = options.token
 	self.debug_mode = options.debug_mode
 	self.use_threading = options.threading

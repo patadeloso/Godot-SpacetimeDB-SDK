@@ -296,7 +296,6 @@ static func parse_schema(schema: Dictionary, module_name: String) -> SpacetimePa
 		if return_type.is_empty():
 			SpacetimePlugin.print_err("view return type not found: %s" % [return_type_dict])
 			continue
-		SpacetimePlugin.print_log("view return type changes start")
 		if return_type.get("table_names", []).is_empty():
 			return_type = {
 				"name": return_type["name"],
@@ -311,8 +310,6 @@ static func parse_schema(schema: Dictionary, module_name: String) -> SpacetimePa
 					true
 				]
 			}
-			SpacetimePlugin.print_log("view return type changes rewritten")
-			SpacetimePlugin.print_log(return_type)
 		else:
 			var type_table_list = return_type["table_names"]
 			type_table_list.append(name)
@@ -320,13 +317,10 @@ static func parse_schema(schema: Dictionary, module_name: String) -> SpacetimePa
 			var is_public_list = return_type["is_public"]
 			is_public_list.append(true)
 			return_type["is_public"] = is_public_list
-			SpacetimePlugin.print_log("view return type changes appended")
-			SpacetimePlugin.print_log(return_type)
 		parsed_types_list[type_index] = return_type
 		
 		var tables_of_same_type : Array = parsed_tables_list.filter(func(table:Dictionary): return table.get("type_idx", -1) == type_index)
 		var new_table_dict : Dictionary
-		SpacetimePlugin.print_log("table dict %s" % new_table_dict)
 		if tables_of_same_type.is_empty():
 			new_table_dict = {
 			"name": name,
@@ -337,7 +331,7 @@ static func parse_schema(schema: Dictionary, module_name: String) -> SpacetimePa
 			"is_public": true
 			}
 		else:
-			new_table_dict = tables_of_same_type[0]
+			new_table_dict = tables_of_same_type[0].duplicate()
 			new_table_dict["name"] = name
 			new_table_dict["is_public"] = true
 		parsed_tables_list.append(new_table_dict)
