@@ -163,6 +163,11 @@ func read_connection_id(spb: StreamPeerBuffer) -> PackedByteArray:
 func read_timestamp(spb: StreamPeerBuffer) -> int:
 	return read_i64_le(spb) # Timestamps are i64
 
+func read_scheduled_at(spb: StreamPeerBuffer) -> int:
+	read_i8(spb) # skipping the scheduled_at enum int
+	return read_timestamp(spb)
+	
+
 func read_vec_u8(spb: StreamPeerBuffer) -> PackedByteArray:
 	var start_pos := spb.get_position()
 	var length := read_u32_le(spb)
@@ -453,6 +458,7 @@ func _get_primitive_reader_from_bsatn_type(bsatn_type_str: String) -> Callable:
 		&"identity": return Callable(self, "read_identity")
 		&"connection_id": return Callable(self, "read_connection_id")
 		&"timestamp": return Callable(self, "read_timestamp")
+		&"scheduled_at": return Callable(self, "read_scheduled_at")
 		&"vec_u8": return Callable(self, "read_vec_u8")
 		&"bool": return Callable(self, "read_bool")
 		&"string": return Callable(self, "read_string_with_u32_len")
@@ -794,9 +800,10 @@ func _read_table_update_instance(spb: StreamPeerBuffer, resource: TableUpdateDat
 			if _populate_resource_from_bytes(row_resource, row_spb):
 				if row_spb.get_position() < row_spb.get_size(): 
 					var remainingbytes: Array = []
+					var extra_bytes_count:int = row_spb.get_size() - row_spb.get_position()
 					while row_spb.get_position() < row_spb.get_size():
 						remainingbytes.append(row_spb.get_8())
-					push_error("Extra %d bytes after parsing delete row for table '%s'. remaining Bytes %s" % [row_spb.get_size() - row_spb.get_position(), resource.table_name, remainingbytes])
+					push_error("Extra %d bytes after parsing delete row for table '%s'. remaining Bytes %s" % [extra_bytes_count, resource.table_name, remainingbytes])
 				all_parsed_deletes.append(row_resource)
 			else: push_error("Stopping update processing for table '%s' due to delete row parsing failure." % resource.table_name); break
 		if has_error(): break
@@ -809,9 +816,10 @@ func _read_table_update_instance(spb: StreamPeerBuffer, resource: TableUpdateDat
 			if _populate_resource_from_bytes(row_resource, row_spb):
 				if row_spb.get_position() < row_spb.get_size(): 
 					var remainingbytes: Array = []
+					var extra_bytes_count:int = row_spb.get_size() - row_spb.get_position()
 					while row_spb.get_position() < row_spb.get_size():
 						remainingbytes.append(row_spb.get_8())
-					push_error("Extra %d bytes after parsing insert row for table '%s'. remaining Bytes %s" % [row_spb.get_size() - row_spb.get_position(), resource.table_name, remainingbytes])
+					push_error("Extra %d bytes after parsing insert row for table '%s'. remaining Bytes %s" % [extra_bytes_count, resource.table_name, remainingbytes])
 				all_parsed_inserts.append(row_resource)
 			else: push_error("Stopping update processing for table '%s' due to insert row parsing failure." % resource.table_name); break
 		if has_error(): break
