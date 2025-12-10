@@ -328,7 +328,7 @@ func _generate_struct_gdscript(schema: SpacetimeParsedSchema, type_def: Dictiona
 	content += "\n" + create_func_documentation_comment
 	content += "static func create(%s) -> %s:\n" % \
 	[", ".join(class_fields.map(func(x): return "p_%s: %s" % [x[0], x[1]])), _class_name] + \
-	"\tvar result = %s.new()\n" % [_class_name]
+	"\tvar result: %s = %s.new()\n" % [_class_name, _class_name]
 	for field_data in class_fields:
 		var f_name: String = field_data[0]
 		content += "\tresult.%s = p_%s\n" % [f_name, f_name]
@@ -403,7 +403,7 @@ func _generate_enum_gdscript(schema: SpacetimeParsedSchema, type_def: Dictionary
 	
 	content += "".join(get_funcs)
 	content += "static func create(p_type: int, p_data: Variant = null) -> %s:\n" % _class_name + \
-	"\tvar result = %s.new()\n" % _class_name + \
+	"\tvar result := %s.new()\n" % _class_name + \
 	"\tresult.value = p_type\n" + \
 	"\tresult.data = p_data\n" + \
     "\treturn result\n\n"
@@ -525,9 +525,9 @@ func _generate_reducers_gdscript(schema: SpacetimeParsedSchema) -> String:
 		
 		var params_str: String
 		if params_str_parts.is_empty():
-			params_str = "cb: Callable = func(_t: TransactionUpdateMessage): pass"
+			params_str = "cb: Callable = func(_t: TransactionUpdateMessage) -> void: pass"
 		else:
-			params_str = ", ".join(params_str_parts) + ", cb: Callable = func(_t: TransactionUpdateMessage): pass"
+			params_str = ", ".join(params_str_parts) + ", cb: Callable = func(_t: TransactionUpdateMessage) -> void: pass"
 
 		var param_names_list = reducer.get("params", []).map(func(x): return x.get("name", ""))
 		var param_names_str = ""
@@ -569,7 +569,7 @@ func _generate_reducers_gdscript(schema: SpacetimeParsedSchema) -> String:
 		"\tvar __handle__ := _client.call_reducer('%s', [%s], [%s])\n" % \
 		[reducer_name, param_names_str, param_bsatn_types_str] + \
 		"\tif __handle__.error: return __handle__.error\n" + \
-		"\tvar __result__ = await __handle__.wait_for_response()\n" + \
+		"\tvar __result__: TransactionUpdateMessage= await __handle__.wait_for_response()\n" + \
 		"\tcb.call(__result__)\n" + \
         "\treturn OK\n\n"
 	
