@@ -103,7 +103,6 @@ static func parse_schema(schema: Dictionary, module_name: String) -> SpacetimePa
 		var current_type_definition = typespace[ty_idx]
 		var struct_def: Dictionary = current_type_definition.get("Product", {}) 
 		var sum_type_def: Dictionary = current_type_definition.get("Sum", {}) 
-
 		if struct_def:
 			var struct_elements: Array[Dictionary] = []
 			for el in struct_def.get("elements", []):
@@ -131,7 +130,7 @@ static func parse_schema(schema: Dictionary, module_name: String) -> SpacetimePa
 				var type = _parse_sum_type(v.get("algebraic_type", {}), variant_data, schema_types_raw)
 				if not type.is_empty():
 					variant_data["type"] = type
-				parsed_variants.append(variant_data)			
+				parsed_variants.append(variant_data)
 			type_data["enum"] = parsed_variants
 			parsed_types_list.append(type_data)
 
@@ -289,6 +288,10 @@ static func parse_schema(schema: Dictionary, module_name: String) -> SpacetimePa
 		var name :String = view["name"]
 		var return_type_dict = view["return_type"]
 		if return_type_dict.get("Array", {}).is_empty():
+			if _is_sum_option(return_type_dict):
+				SpacetimePlugin.print_log("view type is a sum option")
+			else:
+				SpacetimePlugin.print_log("view type is not a sum option")
 			SpacetimePlugin.print_err("view return type not yet supported in the parser: %s" % [return_type_dict])
 			continue
 		var type_index := int(return_type_dict["Array"]["Ref"])
