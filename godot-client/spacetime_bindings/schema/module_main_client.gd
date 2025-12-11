@@ -7,6 +7,8 @@ const Types = preload('res://spacetime_bindings/schema/module_main_types.gd')
 
 const Lobby = Types.Lobby
 const TestTableDatatypes = Types.TestTableDatatypes
+const TestEnum = Types.TestEnum
+const TestType = Types.TestType
 const TestScheduledTable = Types.TestScheduledTable
 const Message = Types.Message
 const Damage = Types.Damage

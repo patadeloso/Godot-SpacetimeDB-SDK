@@ -20,6 +20,13 @@ const table_names: Array[String] = ['user_data']
 @export var last_update: int 
 
 func _init() -> void:
+	_reset_metadata()
+
+func _reset_metadata() -> void:
+	# Clear old metadata
+	for key in get_meta_list():
+		set_meta(key, null)
+
 	set_meta('primary_key', 'identity')
 	set_meta('bsatn_type_identity', &'identity')
 	set_meta('bsatn_type_online', &'bool')
@@ -47,7 +54,7 @@ func _init() -> void:
 ## 10. player_speed: float[br]
 ## 11. last_update: int[br]
 static func create(p_identity: PackedByteArray, p_online: bool, p_name: String, p_lobby_id: int, p_color: Color, p_test_vec: Array[String], p_test_bytes_array: Array[int], p_test_dynamic_arraylike: Vector4, p_last_position: Vector3, p_direction: Vector2, p_player_speed: float, p_last_update: int) -> MainUserData:
-	var result = MainUserData.new()
+	var result: MainUserData = MainUserData.new()
 	result.identity = p_identity
 	result.online = p_online
 	result.name = p_name

@@ -8,6 +8,13 @@ class_name MainDamage extends Resource
 @export var int_vec: Array[int] 
 
 func _init() -> void:
+	_reset_metadata()
+
+func _reset_metadata() -> void:
+	# Clear old metadata
+	for key in get_meta_list():
+		set_meta(key, null)
+
 	set_meta('bsatn_type_amount', &'u32')
 	set_meta('bsatn_type_source', &'identity')
 	set_meta('bsatn_type_int_vec', &'u8')
@@ -16,7 +23,7 @@ func _init() -> void:
 ## 1. source: PackedByteArray[br]
 ## 2. int_vec: Array of int[br]
 static func create(p_amount: int, p_source: PackedByteArray, p_int_vec: Array[int]) -> MainDamage:
-	var result = MainDamage.new()
+	var result: MainDamage = MainDamage.new()
 	result.amount = p_amount
 	result.source = p_source
 	result.int_vec = p_int_vec

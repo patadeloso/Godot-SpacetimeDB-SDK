@@ -12,6 +12,13 @@ class_name MainMessage extends Resource
 @export var test_inner: Option ## Option of MainDamage
 
 func _init() -> void:
+	_reset_metadata()
+
+func _reset_metadata() -> void:
+	# Clear old metadata
+	for key in get_meta_list():
+		set_meta(key, null)
+
 	set_meta('bsatn_type_int_value', &'u8')
 	set_meta('bsatn_type_string_value', &'string')
 	set_meta('bsatn_type_int_vec', &'u8')
@@ -28,7 +35,7 @@ func _init() -> void:
 ## 5. test_option_vec: Option of Array of String[br]
 ## 6. test_inner: Option of MainDamage[br]
 static func create(p_int_value: int, p_string_value: String, p_int_vec: Array[int], p_string_vec: Array[String], p_test_option: Option, p_test_option_vec: Option, p_test_inner: Option) -> MainMessage:
-	var result = MainMessage.new()
+	var result: MainMessage = MainMessage.new()
 	result.int_value = p_int_value
 	result.string_value = p_string_value
 	result.int_vec = p_int_vec
