@@ -14,6 +14,13 @@ const table_names: Array[String] = ['user', 'user_next']
 @export var test_option_message: Option ## Option of MainMessage
 
 func _init() -> void:
+	_reset_metadata()
+
+func _reset_metadata() -> void:
+	# Clear old metadata
+	for key in get_meta_list():
+		set_meta(key, null)
+
 	set_meta('primary_key', 'identity')
 	set_meta('bsatn_type_identity', &'identity')
 	set_meta('bsatn_type_online', &'bool')
@@ -29,7 +36,7 @@ func _init() -> void:
 ## 4. test_option_string: Option of Array of String[br]
 ## 5. test_option_message: Option of MainMessage[br]
 static func create(p_identity: PackedByteArray, p_online: bool, p_lobby_id: int, p_damage: MainDamage, p_test_option_string: Option, p_test_option_message: Option) -> MainUser:
-	var result = MainUser.new()
+	var result: MainUser = MainUser.new()
 	result.identity = p_identity
 	result.online = p_online
 	result.lobby_id = p_lobby_id

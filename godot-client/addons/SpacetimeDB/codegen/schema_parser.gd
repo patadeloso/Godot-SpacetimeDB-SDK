@@ -287,15 +287,23 @@ static func parse_schema(schema: Dictionary, module_name: String) -> SpacetimePa
 			continue
 		var name :String = view["name"]
 		var return_type_dict = view["return_type"]
+		var type_index:int
+		var return_type:Dictionary
+		SpacetimePlugin.print_log("parsing return type for view: %s"% name)
 		if return_type_dict.get("Array", {}).is_empty():
-			if _is_sum_option(return_type_dict):
-				SpacetimePlugin.print_log("view type is a sum option")
+			if not return_type_dict.get("Sum",{}).is_empty():
+				if return_type_dict.get("Sum").get("variants").size() == 2:
+					var option = return_type_dict.get("Sum").get("variants")
+					if not option[0].get("name",{}).is_empty():
+						if option[0].get("name").get("some") == "some":
+							type_index = int(option[0].get("algebraic_type").get("Ref"))
+							return_type = parsed_types_list[type_index]
 			else:
-				SpacetimePlugin.print_log("view type is not a sum option")
-			SpacetimePlugin.print_err("view return type not yet supported in the parser: %s" % [return_type_dict])
-			continue
-		var type_index := int(return_type_dict["Array"]["Ref"])
-		var return_type = parsed_types_list[type_index]
+				SpacetimePlugin.print_err("view return type not yet supported in the parser: %s" % [return_type_dict])
+				continue
+		else:
+			type_index = int(return_type_dict["Array"]["Ref"])
+			return_type = parsed_types_list[type_index]
 		if return_type.is_empty():
 			SpacetimePlugin.print_err("view return type not found: %s" % [return_type_dict])
 			continue

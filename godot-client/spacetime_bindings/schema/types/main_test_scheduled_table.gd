@@ -4,7 +4,7 @@
 class_name MainTestScheduledTable extends _ModuleTableType
 
 const module_name := "Main"
-const table_names: Array[String] = ['test_scheduled_table', 'test_private_scheduled_count', 'test_public_scheduled_count']
+const table_names: Array[String] = ['test_scheduled_table', 'test_option', 'test_private_scheduled_count', 'test_public_scheduled_count', 'test_query']
 
 @export var scheduled_id: int 
 @export var h1: int 
@@ -14,10 +14,17 @@ const table_names: Array[String] = ['test_scheduled_table', 'test_private_schedu
 @export var private_count: int 
 
 func _init() -> void:
+	_reset_metadata()
+
+func _reset_metadata() -> void:
+	# Clear old metadata
+	for key in get_meta_list():
+		set_meta(key, null)
+
 	set_meta('primary_key', 'scheduled_id')
 	set_meta('bsatn_type_scheduled_id', &'u64')
 	set_meta('bsatn_type_h1', &'u16')
-	set_meta('bsatn_type_scheduled_at', &'i64')
+	set_meta('bsatn_type_scheduled_at', &'scheduled_at')
 	set_meta('bsatn_type_h2', &'u16')
 	set_meta('bsatn_type_public_count', &'u64')
 	set_meta('bsatn_type_private_count', &'u64')
@@ -29,7 +36,7 @@ func _init() -> void:
 ## 4. public_count: int[br]
 ## 5. private_count: int[br]
 static func create(p_scheduled_id: int, p_h1: int, p_scheduled_at: int, p_h2: int, p_public_count: int, p_private_count: int) -> MainTestScheduledTable:
-	var result = MainTestScheduledTable.new()
+	var result: MainTestScheduledTable = MainTestScheduledTable.new()
 	result.scheduled_id = p_scheduled_id
 	result.h1 = p_h1
 	result.scheduled_at = p_scheduled_at

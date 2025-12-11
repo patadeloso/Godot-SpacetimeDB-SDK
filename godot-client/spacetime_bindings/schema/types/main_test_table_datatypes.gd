@@ -22,8 +22,21 @@ const table_names: Array[String] = ['test_table_datatypes', 'test_anonymous_all_
 @export var t_vec_u64: Array[int] 
 @export var t_opt_string: Option ## Option of String
 @export var t_opt_u64: Option ## Option of int
+@export var t_test_enum: MainModuleClient.Types.TestEnum 
+@export var t_test_enum_vec: Array[MainModuleClient.Types.TestEnum] 
+@export var t_test_enum_option: Option ## Option of MainModuleClient.Types.TestEnum
+@export var t_test_type: MainTestType 
+@export var t_test_type_vec: Array[MainTestType] 
+@export var t_test_type_option: Option ## Option of MainTestType
 
 func _init() -> void:
+	_reset_metadata()
+
+func _reset_metadata() -> void:
+	# Clear old metadata
+	for key in get_meta_list():
+		set_meta(key, null)
+
 	set_meta('primary_key', 't_u64')
 	set_meta('bsatn_type_t_u64', &'u64')
 	set_meta('bsatn_type_t_u8', &'u8')
@@ -41,6 +54,12 @@ func _init() -> void:
 	set_meta('bsatn_type_t_vec_u64', &'u64')
 	set_meta('bsatn_type_t_opt_string', &'string')
 	set_meta('bsatn_type_t_opt_u64', &'u64')
+	set_meta('bsatn_type_t_test_enum', &'u8')
+	set_meta('bsatn_type_t_test_enum_vec', &'u8')
+	set_meta('bsatn_type_t_test_enum_option', &'u8')
+	set_meta('bsatn_type_t_test_type', &'MainTestType')
+	set_meta('bsatn_type_t_test_type_vec', &'MainTestType')
+	set_meta('bsatn_type_t_test_type_option', &'MainTestType')
 
 ## 0. t_u64: int[br]
 ## 1. t_u8: int[br]
@@ -58,8 +77,14 @@ func _init() -> void:
 ## 13. t_vec_u64: Array of int[br]
 ## 14. t_opt_string: Option of String[br]
 ## 15. t_opt_u64: Option of int[br]
-static func create(p_t_u64: int, p_t_u8: int, p_t_u16: int, p_t_u32: int, p_t_u128: PackedByteArray, p_t_f32: float, p_t_f64: float, p_t_i8: int, p_t_i16: int, p_t_i32: int, p_t_i64: int, p_t_string: String, p_t_vec_string: Array[String], p_t_vec_u64: Array[int], p_t_opt_string: Option, p_t_opt_u64: Option) -> MainTestTableDatatypes:
-	var result = MainTestTableDatatypes.new()
+## 16. t_test_enum: MainModuleClient.Types.TestEnum[br]
+## 17. t_test_enum_vec: Array of MainModuleClient.Types.TestEnum[br]
+## 18. t_test_enum_option: Option of MainModuleClient.Types.TestEnum[br]
+## 19. t_test_type: MainTestType[br]
+## 20. t_test_type_vec: Array of MainTestType[br]
+## 21. t_test_type_option: Option of MainTestType[br]
+static func create(p_t_u64: int, p_t_u8: int, p_t_u16: int, p_t_u32: int, p_t_u128: PackedByteArray, p_t_f32: float, p_t_f64: float, p_t_i8: int, p_t_i16: int, p_t_i32: int, p_t_i64: int, p_t_string: String, p_t_vec_string: Array[String], p_t_vec_u64: Array[int], p_t_opt_string: Option, p_t_opt_u64: Option, p_t_test_enum: MainModuleClient.Types.TestEnum, p_t_test_enum_vec: Array[MainModuleClient.Types.TestEnum], p_t_test_enum_option: Option, p_t_test_type: MainTestType, p_t_test_type_vec: Array[MainTestType], p_t_test_type_option: Option) -> MainTestTableDatatypes:
+	var result: MainTestTableDatatypes = MainTestTableDatatypes.new()
 	result.t_u64 = p_t_u64
 	result.t_u8 = p_t_u8
 	result.t_u16 = p_t_u16
@@ -76,4 +101,10 @@ static func create(p_t_u64: int, p_t_u8: int, p_t_u16: int, p_t_u32: int, p_t_u1
 	result.t_vec_u64 = p_t_vec_u64
 	result.t_opt_string = p_t_opt_string
 	result.t_opt_u64 = p_t_opt_u64
+	result.t_test_enum = p_t_test_enum
+	result.t_test_enum_vec = p_t_test_enum_vec
+	result.t_test_enum_option = p_t_test_enum_option
+	result.t_test_type = p_t_test_type
+	result.t_test_type_vec = p_t_test_type_vec
+	result.t_test_type_option = p_t_test_type_option
 	return result

@@ -10,6 +10,13 @@ const table_names: Array[String] = ['lobby']
 @export var player_count: int 
 
 func _init() -> void:
+	_reset_metadata()
+
+func _reset_metadata() -> void:
+	# Clear old metadata
+	for key in get_meta_list():
+		set_meta(key, null)
+
 	set_meta('primary_key', 'id')
 	set_meta('bsatn_type_id', &'u64')
 	set_meta('bsatn_type_player_count', &'u32')
@@ -17,7 +24,7 @@ func _init() -> void:
 ## 0. id: int[br]
 ## 1. player_count: int[br]
 static func create(p_id: int, p_player_count: int) -> MainLobby:
-	var result = MainLobby.new()
+	var result: MainLobby = MainLobby.new()
 	result.id = p_id
 	result.player_count = p_player_count
 	return result

@@ -1,10 +1,11 @@
-[gd_scene load_steps=15 format=3 uid="uid://bss34g8jsh6b8"]
+[gd_scene load_steps=17 format=3 uid="uid://bss34g8jsh6b8"]
 
 [ext_resource type="Script" uid="uid://bg5ywsrsomvr7" path="res://example_code/integration_tests.gd" id="1_11tcf"]
 [ext_resource type="Script" uid="uid://jvk6ou7i2d4s" path="res://addons/SpacetimeDB/nodes/row_receiver/row_receiver.gd" id="2_3ljp4"]
 [ext_resource type="PackedScene" uid="uid://unjs4buic6sv" path="res://scenes/table_tab_ui.tscn" id="2_p8i4h"]
 [ext_resource type="Script" uid="uid://cl2xmqvh8guv0" path="res://spacetime_bindings/schema/types/main_test_table_datatypes.gd" id="3_p8i4h"]
 [ext_resource type="Script" uid="uid://bsl5rglshjc06" path="res://spacetime_bindings/schema/types/main_test_scheduled_table.gd" id="4_fl47p"]
+[ext_resource type="Script" uid="uid://c4u1u1um4vdnh" path="res://spacetime_bindings/schema/types/main_test_type.gd" id="5_fl47p"]
 
 [sub_resource type="Gradient" id="Gradient_p8i4h"]
 offsets = PackedFloat32Array(0.7097792, 1)
@@ -29,7 +30,6 @@ Label/styles/normal = SubResource("StyleBoxTexture_m5x7f")
 
 [sub_resource type="Resource" id="Resource_p8i4h"]
 script = ExtResource("3_p8i4h")
-metadata/_custom_type_script = "uid://cl2xmqvh8guv0"
 metadata/primary_key = "t_u64"
 metadata/bsatn_type_t_u64 = &"u64"
 metadata/bsatn_type_t_u8 = &"u8"
@@ -47,6 +47,13 @@ metadata/bsatn_type_t_vec_string = &"string"
 metadata/bsatn_type_t_vec_u64 = &"u64"
 metadata/bsatn_type_t_opt_string = &"string"
 metadata/bsatn_type_t_opt_u64 = &"u64"
+metadata/bsatn_type_t_test_enum = &"u8"
+metadata/bsatn_type_t_test_enum_vec = &"u8"
+metadata/bsatn_type_t_test_enum_option = &"u8"
+metadata/bsatn_type_t_test_type = &"u8"
+metadata/bsatn_type_t_test_type_vec = &"u8"
+metadata/bsatn_type_t_test_type_option = &"u8"
+metadata/_custom_type_script = "uid://cl2xmqvh8guv0"
 
 [sub_resource type="Resource" id="Resource_m5x7f"]
 script = ExtResource("3_p8i4h")
@@ -67,6 +74,12 @@ metadata/bsatn_type_t_vec_string = &"string"
 metadata/bsatn_type_t_vec_u64 = &"u64"
 metadata/bsatn_type_t_opt_string = &"string"
 metadata/bsatn_type_t_opt_u64 = &"u64"
+metadata/bsatn_type_t_test_enum = &"u8"
+metadata/bsatn_type_t_test_enum_vec = &"u8"
+metadata/bsatn_type_t_test_enum_option = &"u8"
+metadata/bsatn_type_t_test_type = &"u8"
+metadata/bsatn_type_t_test_type_vec = &"u8"
+metadata/bsatn_type_t_test_type_option = &"u8"
 metadata/bsatn_type_t_i128 = &"I128"
 metadata/_custom_type_script = "uid://cl2xmqvh8guv0"
 
@@ -102,6 +115,32 @@ metadata/bsatn_type_h2 = &"string"
 metadata/bsatn_type_public_count = &"u64"
 metadata/bsatn_type_private_count = &"u64"
 metadata/_custom_type_script = "uid://bsl5rglshjc06"
+
+[sub_resource type="Resource" id="Resource_ruhfi"]
+script = ExtResource("3_p8i4h")
+metadata/primary_key = "t_u64"
+metadata/bsatn_type_t_u64 = &"u64"
+metadata/bsatn_type_t_u8 = &"u8"
+metadata/bsatn_type_t_u16 = &"u16"
+metadata/bsatn_type_t_u32 = &"u32"
+metadata/bsatn_type_t_u128 = &"u128"
+metadata/bsatn_type_t_f32 = &"f32"
+metadata/bsatn_type_t_f64 = &"f64"
+metadata/bsatn_type_t_i8 = &"i8"
+metadata/bsatn_type_t_i16 = &"i16"
+metadata/bsatn_type_t_i32 = &"i32"
+metadata/bsatn_type_t_i64 = &"i64"
+metadata/bsatn_type_t_string = &"string"
+metadata/bsatn_type_t_vec_string = &"string"
+metadata/bsatn_type_t_vec_u64 = &"u64"
+metadata/bsatn_type_t_opt_string = &"string"
+metadata/bsatn_type_t_opt_u64 = &"u64"
+metadata/bsatn_type_t_test_enum = &"u8"
+metadata/bsatn_type_t_test_enum_vec = &"u8"
+metadata/bsatn_type_t_test_enum_option = &"u8"
+metadata/bsatn_type_t_test_type = &"MainTestType"
+metadata/bsatn_type_t_test_type_vec = &"MainTestType"
+metadata/bsatn_type_t_test_type_option = &"MainTestType"
 
 [node name="IntegrationTests" type="Control" unique_id=1412664590]
 layout_mode = 3
@@ -208,6 +247,30 @@ metadata/_tab_index = 6
 script = ExtResource("2_3ljp4")
 table_to_receive = SubResource("Resource_wkhtg")
 selected_table_name = "test_private_scheduled_count"
+metadata/_custom_type_script = "uid://jvk6ou7i2d4s"
+
+[node name="ViewTestOption" parent="VBoxContainer/TabContainer" unique_id=792409064 node_paths=PackedStringArray("row_receiver") instance=ExtResource("2_p8i4h")]
+visible = false
+layout_mode = 2
+row_receiver = NodePath("Receiver [MainTestScheduledTable]")
+metadata/_tab_index = 7
+
+[node name="Receiver [MainTestScheduledTable]" type="Node" parent="VBoxContainer/TabContainer/ViewTestOption" unique_id=1304192585]
+script = ExtResource("2_3ljp4")
+table_to_receive = SubResource("Resource_wkhtg")
+selected_table_name = "test_option"
+metadata/_custom_type_script = "uid://jvk6ou7i2d4s"
+
+[node name="ViewTestQuery" parent="VBoxContainer/TabContainer" unique_id=1270783554 node_paths=PackedStringArray("row_receiver") instance=ExtResource("2_p8i4h")]
+visible = false
+layout_mode = 2
+row_receiver = NodePath("Receiver [MainTestTableDatatypes]")
+metadata/_tab_index = 8
+
+[node name="Receiver [MainTestTableDatatypes]" type="Node" parent="VBoxContainer/TabContainer/ViewTestQuery" unique_id=1860002987]
+script = ExtResource("2_3ljp4")
+table_to_receive = SubResource("Resource_ruhfi")
+selected_table_name = "test_query"
 metadata/_custom_type_script = "uid://jvk6ou7i2d4s"
 
 [node name="HBoxContainer" type="HBoxContainer" parent="VBoxContainer" unique_id=1146252556]

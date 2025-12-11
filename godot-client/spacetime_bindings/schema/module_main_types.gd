@@ -3,6 +3,11 @@
 
 const Lobby = preload('res://spacetime_bindings/schema/types/main_lobby.gd')
 const TestTableDatatypes = preload('res://spacetime_bindings/schema/types/main_test_table_datatypes.gd')
+enum TestEnum {
+	A,
+	B
+}
+const TestType = preload('res://spacetime_bindings/schema/types/main_test_type.gd')
 const TestScheduledTable = preload('res://spacetime_bindings/schema/types/main_test_scheduled_table.gd')
 const Message = preload('res://spacetime_bindings/schema/types/main_message.gd')
 const Damage = preload('res://spacetime_bindings/schema/types/main_damage.gd')
