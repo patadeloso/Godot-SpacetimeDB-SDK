@@ -20,7 +20,7 @@ This SDK provides the necessary tools to integrate your Godot Engine project wit
 -   **Error Handling:** Can be improved, especially for reducer call failures beyond basic connection errors.
 -   **Configuration:** More options could be added (timeouts, reconnection).
 -   **Compression:** Brotli - not supported.
--   **View return Option<T>**: not supported
+-   **View return of type without Primary_key**: not supported (the local db can't handle rows without primary key)
 -   **Procedures**: not supported
 
 ## Contributing
