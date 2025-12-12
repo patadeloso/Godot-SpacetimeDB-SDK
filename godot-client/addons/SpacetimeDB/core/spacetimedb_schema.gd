@@ -63,23 +63,21 @@ func _load_types(raw_path: String, prefix: String = "") -> void:
 				var fallback_table_names: Array[String] = [file_name.get_basename().get_file()]
 				
 				var constants := script.get_script_constant_map()
-				var table_names: Array[String]
-				var is_table := false
-				if constants.has('table_names'):
-					is_table = true
-					table_names = constants['table_names'] as Array[String]
-				else:
-					table_names = fallback_table_names
-
-				for table_name in table_names:
-					var lower_table_name := table_name.to_lower().replace("_", "")
-					if types.has(lower_table_name) and debug_mode:
-						push_warning("SpacetimeDBSchema: Overwriting schema for table '%s' (from %s)" % [table_name, script_path])
-						
-					if is_table:
-						tables[lower_table_name] = script
-					types[lower_table_name] = script
+				
+				var add_table_names = func(table_names: Array[String], is_table: bool) -> void:
+					for table_name in table_names:
+						var lower_table_name := table_name.to_lower().replace("_", "")
+						if types.has(lower_table_name) and debug_mode:
+							push_warning("SpacetimeDBSchema: Overwriting schema for table '%s' (from %s)" % [table_name, script_path])
+							
+						if is_table:
+							tables[lower_table_name] = script
+						types[lower_table_name] = script
 			
+				if constants.has('table_names'):
+					add_table_names.call(constants['table_names'] as Array[String], true)
+				add_table_names.call(fallback_table_names, false)
+
 	dir.list_dir_end()
 
 func get_type(type_name: String) -> GDScript:
