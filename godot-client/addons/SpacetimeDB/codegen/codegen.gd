@@ -572,6 +572,8 @@ func _generate_reducers_gdscript(schema: SpacetimeParsedSchema) -> String:
 		"\tvar __result__: TransactionUpdateMessage = await __handle__.wait_for_response()\n" + \
 		"\tif cb.is_valid():\n" + \
 		"\t\tcb.call(__result__)\n" + \
+		"\telse:\n" + \
+		"\t\treturn ERR_METHOD_NOT_FOUND\n" + \
         "\treturn OK\n\n"
 	
 	# Clean up trailing newlines

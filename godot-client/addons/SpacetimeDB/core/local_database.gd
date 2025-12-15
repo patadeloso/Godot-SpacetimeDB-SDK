@@ -178,6 +178,7 @@ func apply_table_update(table_update: TableUpdateData):
 		for listener: Callable in _insert_listeners_by_table[insert[0]]:
 			if not listener.is_valid():
 				_insert_listeners_by_table.erase(listener)
+				push_error("LocalDB: insert callback is not valid: skipped")
 				continue
 			listener.call(insert[1])
 		row_inserted.emit(insert[0], insert[1])
@@ -186,6 +187,7 @@ func apply_table_update(table_update: TableUpdateData):
 		for listener: Callable in _update_listeners_by_table[update[0]]:
 			if not listener.is_valid():
 				_update_listeners_by_table.erase(listener)
+				push_error("LocalDB: insert callback is not valid: skipped")
 				continue
 			listener.call(update[1], update[2]) 
 		row_updated.emit(update[0], update[1], update[2])
@@ -194,6 +196,7 @@ func apply_table_update(table_update: TableUpdateData):
 		for listener: Callable in _delete_listeners_by_table[delete[0]]:
 			if not listener.is_valid():
 				_delete_listeners_by_table.erase(listener)
+				push_error("LocalDB: delete callback is not valid: skipped")
 				continue
 			listener.call(delete[1])
 		row_deleted.emit(delete[0], delete[1])
@@ -202,6 +205,7 @@ func apply_table_update(table_update: TableUpdateData):
 		for listener: Callable in _transactions_completed_listeners_by_table[table_name_original]:
 			if not listener.is_valid():
 				_transactions_completed_listeners_by_table.erase(listener)
+				push_error("LocalDB: Transaction complete callback is not valid: skipped")
 				continue
 			listener.call()
 		row_transactions_completed.emit(table_name_original)
