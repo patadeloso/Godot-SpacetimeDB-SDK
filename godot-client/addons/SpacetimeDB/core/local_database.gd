@@ -176,21 +176,33 @@ func apply_table_update(table_update: TableUpdateData):
 	
 	for insert:Array in inserts_to_emit:
 		for listener: Callable in _insert_listeners_by_table[insert[0]]:
+			if not listener.is_valid():
+				_insert_listeners_by_table.erase(listener)
+				continue
 			listener.call(insert[1])
 		row_inserted.emit(insert[0], insert[1])
 	
 	for update:Array in updates_to_emit:
 		for listener: Callable in _update_listeners_by_table[update[0]]:
+			if not listener.is_valid():
+				_update_listeners_by_table.erase(listener)
+				continue
 			listener.call(update[1], update[2]) 
 		row_updated.emit(update[0], update[1], update[2])
 	
 	for delete:Array in deletes_to_emit:
 		for listener: Callable in _delete_listeners_by_table[delete[0]]:
+			if not listener.is_valid():
+				_delete_listeners_by_table.erase(listener)
+				continue
 			listener.call(delete[1])
 		row_deleted.emit(delete[0], delete[1])
 	
 	if _transactions_completed_listeners_by_table.has(table_name_original):
 		for listener: Callable in _transactions_completed_listeners_by_table[table_name_original]:
+			if not listener.is_valid():
+				_transactions_completed_listeners_by_table.erase(listener)
+				continue
 			listener.call()
 		row_transactions_completed.emit(table_name_original)
 			
