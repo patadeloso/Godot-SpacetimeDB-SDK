@@ -2,3 +2,4 @@
 .godot/
 /android/
 spacetime_bindings/codegen_debug
+desktop.ini

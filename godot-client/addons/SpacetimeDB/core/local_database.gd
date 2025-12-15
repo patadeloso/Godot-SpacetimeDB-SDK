@@ -141,29 +141,28 @@ func apply_table_update(table_update: TableUpdateData):
 	var table_dict := _tables[table_name_lower]
 	
 	var inserted_pks_set: Dictionary = {} # { pk_value: true }
-	
+	var inserts_to_emit:Array
+	var updates_to_emit:Array
+	var deletes_to_emit:Array
 	for inserted_row: _ModuleTableType in table_update.inserts:
 		var pk_value = inserted_row.get(pk_field)
 		if pk_value == null:
 			push_error("LocalDatabase: Inserted row for table '", table_name_original, "' has null PK value for field '", pk_field, "'. Skipping.")
 			continue
-
+	
 		inserted_pks_set[pk_value] = true
-
+	
 		var prev_row_resource: _ModuleTableType = table_dict.get(pk_value, null)
 		
 		table_dict[pk_value] = inserted_row
 		if prev_row_resource != null:
 			if _update_listeners_by_table.has(table_name_original):
-				for listener: Callable in _update_listeners_by_table[table_name_original]:
-					listener.call(prev_row_resource, inserted_row) 
-				row_updated.emit(table_name_original, prev_row_resource, inserted_row)
+				updates_to_emit.append([table_name_original,prev_row_resource,inserted_row])
+	
 		else:
 			if _insert_listeners_by_table.has(table_name_original):
-				for listener: Callable in _insert_listeners_by_table[table_name_original]:
-					listener.call(inserted_row)
-				row_inserted.emit(table_name_original, inserted_row)
-				
+				inserts_to_emit.append([table_name_original,inserted_row])
+	
 	for deleted_row: _ModuleTableType in table_update.deletes:
 		var pk_value = deleted_row.get(pk_field)
 		if pk_value == null:
@@ -173,10 +172,23 @@ func apply_table_update(table_update: TableUpdateData):
 		if not inserted_pks_set.has(pk_value):
 			if table_dict.erase(pk_value):
 				if _delete_listeners_by_table.has(table_name_original):
-					for listener: Callable in _delete_listeners_by_table[table_name_original]:
-						listener.call(deleted_row)
-					row_deleted.emit(table_name_original, deleted_row)
-
+					deletes_to_emit.append([table_name_original,deleted_row])
+	
+	for insert:Array in inserts_to_emit:
+		for listener: Callable in _insert_listeners_by_table[insert[0]]:
+			listener.call(insert[1])
+		row_inserted.emit(insert[0], insert[1])
+	
+	for update:Array in updates_to_emit:
+		for listener: Callable in _update_listeners_by_table[update[0]]:
+			listener.call(update[1], update[2]) 
+		row_updated.emit(update[0], update[1], update[2])
+	
+	for delete:Array in deletes_to_emit:
+		for listener: Callable in _delete_listeners_by_table[delete[0]]:
+			listener.call(delete[1])
+		row_deleted.emit(delete[0], delete[1])
+	
 	if _transactions_completed_listeners_by_table.has(table_name_original):
 		for listener: Callable in _transactions_completed_listeners_by_table[table_name_original]:
 			listener.call()
