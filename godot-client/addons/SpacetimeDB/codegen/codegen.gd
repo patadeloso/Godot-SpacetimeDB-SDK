@@ -290,6 +290,12 @@ func _generate_struct_gdscript(schema: SpacetimeParsedSchema, type_def: Dictiona
 			gd_field_type = "Array[%s]" % element_gd_type
 			var inner_meta = schema.meta_type_map.get(original_type_name, original_type_name)
 			bsatn_meta_type_string = "%s" % inner_meta
+			if field_type and field_type.has("gd_arraylike"):
+				var inner_meta_bsatn_types: Array[String] = []
+				for el in field_type.struct:
+					var inner_bsatn_type = schema.meta_type_map.get(el.type, "f32")
+					inner_meta_bsatn_types.append(inner_bsatn_type)
+				bsatn_meta_type_string += "[%s]" % ",".join(inner_meta_bsatn_types)
 			add_meta_for_field = true
 		elif field_type and field_type.has("gd_arraylike"):
 			create_func_documentation_comment += format_cfdc.call(i, field_name, nested_type)
