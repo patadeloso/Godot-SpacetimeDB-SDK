@@ -49,7 +49,8 @@ func unwrap_or_else(fn: Callable):
 	if is_some():
 		return _internal_data[0]
 	else:
-		return fn.call()
+		if fn.is_valid():
+			return fn.call()
 
 func expect(type: Variant.Type, err_msg: String = ""):
 	if is_some():

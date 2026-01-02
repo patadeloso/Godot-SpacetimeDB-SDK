@@ -65,8 +65,8 @@ func _load_types(raw_path: String, prefix: String = "") -> void:
 				var constants := script.get_script_constant_map()
 							
 				if constants.has('table_names'):
-					_add_table_names.call(constants['table_names'] as Array[String], true, script, script_path)
-				_add_table_names.call(fallback_table_names, false, script, script_path)
+					_add_table_names(constants['table_names'] as Array[String], true, script, script_path)
+				_add_table_names(fallback_table_names, false, script, script_path)
 
 	dir.list_dir_end()
 
