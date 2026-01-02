@@ -281,11 +281,13 @@ func _generate_struct_gdscript(schema: SpacetimeParsedSchema, type_def: Dictiona
 			else:
 				bsatn_meta_type_string = schema.meta_type_map.get(original_type_name, original_type_name)
 			add_meta_for_field = true
+			meta_data.append("set_meta('underlying_type_%s', &'%s')" % [field_name, nested_type[1]])
 		elif field.has("is_array"):
 			var element_gd_type = schema.type_map.get(original_type_name, "Variant")
 			if field.has("is_option_inside_array"):
 				element_gd_type = OPTION_CLASS_NAME
 				documentation_comment = "## %s" % [" of ".join(nested_type)]
+				meta_data.append("set_meta('underlying_type_%s', &'%s')" % [field_name, nested_type[1]])
 			create_func_documentation_comment += format_cfdc.call(i, field_name, nested_type)
 			gd_field_type = "Array[%s]" % element_gd_type
 			var inner_meta = schema.meta_type_map.get(original_type_name, original_type_name)
