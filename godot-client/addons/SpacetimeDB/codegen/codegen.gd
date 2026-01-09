@@ -320,7 +320,9 @@ func _generate_struct_gdscript(schema: SpacetimeParsedSchema, type_def: Dictiona
 		if add_meta_for_field and not bsatn_meta_type_string.is_empty():
 			meta_data.append("set_meta('bsatn_type_%s', &'%s')" % [field_name, bsatn_meta_type_string])
 
-		content += "@export var %s: %s %s\n" % [field_name, gd_field_type, documentation_comment]
+		var field_line = "@export var %s: %s %s\n" % [field_name, gd_field_type, documentation_comment]
+		var trimmed_field_line = field_line.rstrip(" \n") + "\n"
+		content += trimmed_field_line
 		class_fields.append([field_name, gd_field_type])
 
 	content += "\nfunc _init() -> void:\n\t_reset_metadata()\n"
