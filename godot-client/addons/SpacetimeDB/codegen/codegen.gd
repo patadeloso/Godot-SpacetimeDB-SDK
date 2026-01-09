@@ -580,9 +580,6 @@ func _generate_reducers_gdscript(schema: SpacetimeParsedSchema) -> String:
 		"\t\treturn ERR_METHOD_NOT_FOUND\n" + \
         "\treturn OK\n\n"
 
-	# Clean up trailing newlines
-	while content.ends_with("\n"):
-		content = content.left(-1)
 	return content
 
 func _generate_autoload_gdscript(modules: Array[String]) -> String:
