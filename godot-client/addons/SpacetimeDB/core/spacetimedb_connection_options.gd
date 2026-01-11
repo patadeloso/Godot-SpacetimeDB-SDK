@@ -7,6 +7,7 @@ var threading: bool = true
 var one_time_token: bool = true
 var token: String = ""
 var debug_mode: bool = false
+var monitor_mode: bool = false
 var inbound_buffer_size: int = 1024 * 1024 * 2 # 2MB
 var outbound_buffer_size: int = 1024 * 1024 * 2 # 2MB
 
