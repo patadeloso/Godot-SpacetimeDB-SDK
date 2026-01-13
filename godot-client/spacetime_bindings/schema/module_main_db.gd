@@ -2,7 +2,7 @@
 # FILE WILL NOT BE SAVED. MODIFY TABLES IN YOUR MODULE SOURCE CODE INSTEAD.
 class_name MainModuleDb extends RefCounted
 
-const table_names := ["lobby", "test_scheduled_table", "test_table_datatypes", "user", "user_data", "user_next", "test_anonymous_all_types", "test_first_type_row", "test_option", "test_private_scheduled_count", "test_public_scheduled_count", "test_query", "test_u32_at_30"]
+const table_names : Array[String] = ["lobby", "test_scheduled_table", "test_table_datatypes", "user", "user_data", "user_next", "test_anonymous_all_types", "test_first_type_row", "test_no_pk_option", "test_no_pk_query", "test_no_pk_vec", "test_option", "test_private_scheduled_count", "test_public_scheduled_count", "test_query", "test_u32_at_30"]
 
 var lobby: MainLobbyTable
 var test_scheduled_table: MainTestScheduledTableTable
@@ -12,6 +12,9 @@ var user_data: MainUserDataTable
 var user_next: MainUserNextTable
 var test_anonymous_all_types: MainTestAnonymousAllTypesTable
 var test_first_type_row: MainTestFirstTypeRowTable
+var test_no_pk_option: MainTestNoPkOptionTable
+var test_no_pk_query: MainTestNoPkQueryTable
+var test_no_pk_vec: MainTestNoPkVecTable
 var test_option: MainTestOptionTable
 var test_private_scheduled_count: MainTestPrivateScheduledCountTable
 var test_public_scheduled_count: MainTestPublicScheduledCountTable
@@ -27,6 +30,9 @@ func _init(p_local_db: LocalDatabase) -> void:
 	user_next = preload('res://spacetime_bindings/schema/tables/main_user_next_table.gd').new(p_local_db)
 	test_anonymous_all_types = preload('res://spacetime_bindings/schema/tables/main_test_anonymous_all_types_table.gd').new(p_local_db)
 	test_first_type_row = preload('res://spacetime_bindings/schema/tables/main_test_first_type_row_table.gd').new(p_local_db)
+	test_no_pk_option = preload('res://spacetime_bindings/schema/tables/main_test_no_pk_option_table.gd').new(p_local_db)
+	test_no_pk_query = preload('res://spacetime_bindings/schema/tables/main_test_no_pk_query_table.gd').new(p_local_db)
+	test_no_pk_vec = preload('res://spacetime_bindings/schema/tables/main_test_no_pk_vec_table.gd').new(p_local_db)
 	test_option = preload('res://spacetime_bindings/schema/tables/main_test_option_table.gd').new(p_local_db)
 	test_private_scheduled_count = preload('res://spacetime_bindings/schema/tables/main_test_private_scheduled_count_table.gd').new(p_local_db)
 	test_public_scheduled_count = preload('res://spacetime_bindings/schema/tables/main_test_public_scheduled_count_table.gd').new(p_local_db)

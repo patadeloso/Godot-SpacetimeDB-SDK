@@ -3,22 +3,22 @@
 @tool
 class_name MainTestScheduledTable extends _ModuleTableType
 
-const module_name := "Main"
+const module_name : String = "Main"
 const table_names: Array[String] = ['test_scheduled_table', 'test_option', 'test_private_scheduled_count', 'test_public_scheduled_count', 'test_query']
 
-@export var scheduled_id: int 
-@export var h1: int 
-@export var scheduled_at: int 
-@export var h2: int 
-@export var public_count: int 
-@export var private_count: int 
+@export var scheduled_id: int
+@export var h1: int
+@export var scheduled_at: int
+@export var h2: int
+@export var public_count: int
+@export var private_count: int
 
 func _init() -> void:
 	_reset_metadata()
 
 func _reset_metadata() -> void:
 	# Clear old metadata
-	for key in get_meta_list():
+	for key : StringName in get_meta_list():
 		set_meta(key, null)
 
 	set_meta('primary_key', 'scheduled_id')

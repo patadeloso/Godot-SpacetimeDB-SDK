@@ -3,7 +3,7 @@ extends Control
 
 # Called when the node enters the scene tree for the first time.
 func _ready() -> void:
-	var options = SpacetimeDBConnectionOptions.new()
+	var options :SpacetimeDBConnectionOptions = SpacetimeDBConnectionOptions.new()
 
 	options.one_time_token = true # <--- anonymous-like. set to false to persist
 	options.debug_mode = true # <--- enables lots of additional debug prints and warnings
@@ -26,23 +26,23 @@ func _ready() -> void:
 	SpacetimeDB.Main.connection_error.connect(_on_spacetimedb_connection_error)
 	SpacetimeDB.Main.database_initialized.connect(_on_spacetimedb_database_init)
 
-func _on_spacetimedb_connected(identity: PackedByteArray, token: String):
+func _on_spacetimedb_connected(identity: PackedByteArray, _token: String) -> void:
 	print("Game: Connected to SpacetimeDB!")
 	print("Game: My Identity: 0x%s" % [identity.hex_encode()])
 
-func _on_spacetimedb_disconnected():
+func _on_spacetimedb_disconnected() -> void:
 	print("Game: Disconnected from SpacetimeDB.")
 
-func _on_spacetimedb_connection_error(code: int, reason: String):
+func _on_spacetimedb_connection_error(code: int, reason: String) -> void:
 	printerr("Game: SpacetimeDB Connection Error: ", reason, " Code: ", code)
 
-func _on_spacetimedb_database_init():
+func _on_spacetimedb_database_init() -> void:
 	print("Game: Database initialised")
 
 
 func _on_button_pressed() -> void:
 	SpacetimeDB.Main.reducers.start_integration_tests()
-	
+
 
 
 func _on_button_2_pressed() -> void:

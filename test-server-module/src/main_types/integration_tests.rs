@@ -90,6 +90,7 @@ pub struct TestScheduledTable {
 pub fn test_scheduled_reducer(ctx: &ReducerContext, mut row: TestScheduledTable) {
     row.private_count += 1;
     row.public_count += 1;
+    ctx.db.test_no_pk_table().insert(ViewType{ row: row.public_count, name: "Hello World".to_string() });
     ctx.db.test_scheduled_table().scheduled_id().update(row);
     if ctx.db.test_table_datatypes().count() < 10 {
         ctx.db.test_table_datatypes().insert(TestTableDatatypes::default());
@@ -144,6 +145,7 @@ pub fn start_integration_tests(ctx: &ReducerContext) {
         public_count: 0,
         private_count: 0,
     });
+    ctx.db.test_no_pk_table().insert(ViewType{ row: 1, name: "Hello World".to_string() });
     // ctx.db.test_table_datatypes().insert(TestTableDatatypes {
     //     t_u64: 0,
     //     t_u8: u8::MAX,
@@ -175,6 +177,9 @@ pub fn clear_integration_tests(ctx: &ReducerContext) {
     }
     for row in ctx.db.test_table_datatypes().iter() {
         ctx.db.test_table_datatypes().delete(row);
+    }
+    for row in ctx.db.test_no_pk_table().iter(){
+        ctx.db.test_no_pk_table().delete(row);
     }
 }
 
@@ -254,6 +259,29 @@ pub fn view_test_private_scheduled_count(ctx: &ViewContext) -> Vec<TestScheduled
         vec![]
     }
 }
+
+#[table(name = test_no_pk_table)]
+pub struct ViewType{
+    #[index(btree)]
+    pub row: u64,
+    pub name: String,
+}
+
+#[view(name = test_no_pk_option, public)]
+pub fn view_test_no_pk_option(ctx: &AnonymousViewContext) -> Option<ViewType>{
+    ctx.db.test_no_pk_table().row().filter(0..u64::MAX).next()
+}
+
+#[view(name = test_no_pk_query, public)]
+pub fn view_test_no_pk_query(ctx: &AnonymousViewContext) -> Query<ViewType>{
+    ctx.from.test_no_pk_table().r#where(|row| row.row.gt(0)).build()
+}
+
+#[view(name = test_no_pk_vec, public)]
+pub fn view_test_no_pk_vec(ctx: &AnonymousViewContext) -> Vec<ViewType>{
+    ctx.db.test_no_pk_table().row().filter(0..u64::MAX).collect::<Vec<ViewType>>()
+}
+
 
 #[view(name = test_option, public)]
 pub fn view_test_option(ctx:&ViewContext)-> Option<TestScheduledTable>{

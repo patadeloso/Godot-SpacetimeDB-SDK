@@ -8,65 +8,90 @@ func _init(p_client: SpacetimeDBClient) -> void:
 	_client = p_client
 
 func change_color_random(cb: Callable = func(_t: TransactionUpdateMessage) -> void: pass) -> Error:
-	var __handle__ := _client.call_reducer('change_color_random', [], [])
+	var __handle__ : SpacetimeDBReducerCall = _client.call_reducer('change_color_random', [], [])
 	if __handle__.error: return __handle__.error
-	var __result__: TransactionUpdateMessage= await __handle__.wait_for_response()
-	cb.call(__result__)
+	var __result__: TransactionUpdateMessage = await __handle__.wait_for_response()
+	if cb.is_valid():
+		cb.call(__result__)
+	else:
+		return ERR_METHOD_NOT_FOUND
 	return OK
 
 
 func clear_integration_tests(cb: Callable = func(_t: TransactionUpdateMessage) -> void: pass) -> Error:
-	var __handle__ := _client.call_reducer('clear_integration_tests', [], [])
+	var __handle__ : SpacetimeDBReducerCall = _client.call_reducer('clear_integration_tests', [], [])
 	if __handle__.error: return __handle__.error
-	var __result__: TransactionUpdateMessage= await __handle__.wait_for_response()
-	cb.call(__result__)
+	var __result__: TransactionUpdateMessage = await __handle__.wait_for_response()
+	if cb.is_valid():
+		cb.call(__result__)
+	else:
+		return ERR_METHOD_NOT_FOUND
 	return OK
 
 ## 0. new_input: Vector2 [br]
 ## 1. global_position: Vector3 [br]
 func move_user(new_input: Vector2, global_position: Vector3, cb: Callable = func(_t: TransactionUpdateMessage) -> void: pass) -> Error:
-	var __handle__ := _client.call_reducer('move_user', [new_input, global_position], [&'vector2[f32,f32]', &'vector3[f32,f32,f32]'])
+	var __handle__ : SpacetimeDBReducerCall = _client.call_reducer('move_user', [new_input, global_position], [&'vector2[f32,f32]', &'vector3[f32,f32,f32]'])
 	if __handle__.error: return __handle__.error
-	var __result__: TransactionUpdateMessage= await __handle__.wait_for_response()
-	cb.call(__result__)
+	var __result__: TransactionUpdateMessage = await __handle__.wait_for_response()
+	if cb.is_valid():
+		cb.call(__result__)
+	else:
+		return ERR_METHOD_NOT_FOUND
 	return OK
 
 ## 0. bytes: Array of int [br]
 func save_my_bytes(bytes: Array[int], cb: Callable = func(_t: TransactionUpdateMessage) -> void: pass) -> Error:
-	var __handle__ := _client.call_reducer('save_my_bytes', [bytes], [&'u8'])
+	var __handle__ : SpacetimeDBReducerCall = _client.call_reducer('save_my_bytes', [bytes], [&'u8'])
 	if __handle__.error: return __handle__.error
-	var __result__: TransactionUpdateMessage= await __handle__.wait_for_response()
-	cb.call(__result__)
+	var __result__: TransactionUpdateMessage = await __handle__.wait_for_response()
+	if cb.is_valid():
+		cb.call(__result__)
+	else:
+		return ERR_METHOD_NOT_FOUND
 	return OK
 
 
 func start_integration_tests(cb: Callable = func(_t: TransactionUpdateMessage) -> void: pass) -> Error:
-	var __handle__ := _client.call_reducer('start_integration_tests', [], [])
+	var __handle__ : SpacetimeDBReducerCall = _client.call_reducer('start_integration_tests', [], [])
 	if __handle__.error: return __handle__.error
-	var __result__: TransactionUpdateMessage= await __handle__.wait_for_response()
-	cb.call(__result__)
+	var __result__: TransactionUpdateMessage = await __handle__.wait_for_response()
+	if cb.is_valid():
+		cb.call(__result__)
+	else:
+		return ERR_METHOD_NOT_FOUND
 	return OK
 
 ## 0. option: Option of String [br]
 func test_option_single(option: Option, cb: Callable = func(_t: TransactionUpdateMessage) -> void: pass) -> Error:
-	var __handle__ := _client.call_reducer('test_option_single', [option], [&'string'])
+	var __handle__ : SpacetimeDBReducerCall = _client.call_reducer('test_option_single', [option], [&'string'])
 	if __handle__.error: return __handle__.error
-	var __result__: TransactionUpdateMessage= await __handle__.wait_for_response()
-	cb.call(__result__)
+	var __result__: TransactionUpdateMessage = await __handle__.wait_for_response()
+	if cb.is_valid():
+		cb.call(__result__)
+	else:
+		return ERR_METHOD_NOT_FOUND
 	return OK
 
 ## 0. option: Option of Array of String [br]
 func test_option_vec(option: Option, cb: Callable = func(_t: TransactionUpdateMessage) -> void: pass) -> Error:
-	var __handle__ := _client.call_reducer('test_option_vec', [option], [&'vec_string'])
+	var __handle__ : SpacetimeDBReducerCall = _client.call_reducer('test_option_vec', [option], [&'vec_string'])
 	if __handle__.error: return __handle__.error
-	var __result__: TransactionUpdateMessage= await __handle__.wait_for_response()
-	cb.call(__result__)
+	var __result__: TransactionUpdateMessage = await __handle__.wait_for_response()
+	if cb.is_valid():
+		cb.call(__result__)
+	else:
+		return ERR_METHOD_NOT_FOUND
 	return OK
 
 ## 0. message: MainMessage [br]
 func test_struct(message: MainMessage, cb: Callable = func(_t: TransactionUpdateMessage) -> void: pass) -> Error:
-	var __handle__ := _client.call_reducer('test_struct', [message], [&'MainMessage'])
+	var __handle__ : SpacetimeDBReducerCall = _client.call_reducer('test_struct', [message], [&'MainMessage'])
 	if __handle__.error: return __handle__.error
-	var __result__: TransactionUpdateMessage= await __handle__.wait_for_response()
-	cb.call(__result__)
+	var __result__: TransactionUpdateMessage = await __handle__.wait_for_response()
+	if cb.is_valid():
+		cb.call(__result__)
+	else:
+		return ERR_METHOD_NOT_FOUND
 	return OK
+

@@ -3,30 +3,30 @@
 @tool
 class_name MainTestTableDatatypes extends _ModuleTableType
 
-const module_name := "Main"
+const module_name : String = "Main"
 const table_names: Array[String] = ['test_table_datatypes', 'test_anonymous_all_types', 'test_first_type_row', 'test_u32_at_30']
 
-@export var t_u64: int 
-@export var t_u8: int 
-@export var t_u16: int 
-@export var t_u32: int 
-@export var t_u128: PackedByteArray 
-@export var t_f32: float 
-@export var t_f64: float 
-@export var t_i8: int 
-@export var t_i16: int 
-@export var t_i32: int 
-@export var t_i64: int 
-@export var t_string: String 
-@export var t_vec_string: Array[String] 
-@export var t_vec_u64: Array[int] 
+@export var t_u64: int
+@export var t_u8: int
+@export var t_u16: int
+@export var t_u32: int
+@export var t_u128: PackedByteArray
+@export var t_f32: float
+@export var t_f64: float
+@export var t_i8: int
+@export var t_i16: int
+@export var t_i32: int
+@export var t_i64: int
+@export var t_string: String
+@export var t_vec_string: Array[String]
+@export var t_vec_u64: Array[int]
 @export var t_opt_string: Option ## Option of String
 @export var t_opt_u64: Option ## Option of int
-@export var t_test_enum: MainModuleClient.Types.TestEnum 
-@export var t_test_enum_vec: Array[MainModuleClient.Types.TestEnum] 
+@export var t_test_enum: MainModuleClient.Types.TestEnum
+@export var t_test_enum_vec: Array[MainModuleClient.Types.TestEnum]
 @export var t_test_enum_option: Option ## Option of MainModuleClient.Types.TestEnum
-@export var t_test_type: MainTestType 
-@export var t_test_type_vec: Array[MainTestType] 
+@export var t_test_type: MainTestType
+@export var t_test_type_vec: Array[MainTestType]
 @export var t_test_type_option: Option ## Option of MainTestType
 
 func _init() -> void:
@@ -34,7 +34,7 @@ func _init() -> void:
 
 func _reset_metadata() -> void:
 	# Clear old metadata
-	for key in get_meta_list():
+	for key : StringName in get_meta_list():
 		set_meta(key, null)
 
 	set_meta('primary_key', 't_u64')
@@ -52,13 +52,17 @@ func _reset_metadata() -> void:
 	set_meta('bsatn_type_t_string', &'string')
 	set_meta('bsatn_type_t_vec_string', &'string')
 	set_meta('bsatn_type_t_vec_u64', &'u64')
+	set_meta('underlying_type_t_opt_string', &'String')
 	set_meta('bsatn_type_t_opt_string', &'string')
+	set_meta('underlying_type_t_opt_u64', &'int')
 	set_meta('bsatn_type_t_opt_u64', &'u64')
 	set_meta('bsatn_type_t_test_enum', &'u8')
 	set_meta('bsatn_type_t_test_enum_vec', &'u8')
+	set_meta('underlying_type_t_test_enum_option', &'MainModuleClient.Types.TestEnum')
 	set_meta('bsatn_type_t_test_enum_option', &'u8')
 	set_meta('bsatn_type_t_test_type', &'MainTestType')
 	set_meta('bsatn_type_t_test_type_vec', &'MainTestType')
+	set_meta('underlying_type_t_test_type_option', &'MainTestType')
 	set_meta('bsatn_type_t_test_type_option', &'MainTestType')
 
 ## 0. t_u64: int[br]
