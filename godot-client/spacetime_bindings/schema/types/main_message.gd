@@ -3,10 +3,13 @@
 @tool
 class_name MainMessage extends Resource
 
-@export var int_value: int 
-@export var string_value: String 
-@export var int_vec: Array[int] 
-@export var string_vec: Array[String] 
+const module_name : String = "Main"
+const table_names: Array[String] = []
+
+@export var int_value: int
+@export var string_value: String
+@export var int_vec: Array[int]
+@export var string_vec: Array[String]
 @export var test_option: Option ## Option of String
 @export var test_option_vec: Option ## Option of Array of String
 @export var test_inner: Option ## Option of MainDamage
@@ -16,15 +19,18 @@ func _init() -> void:
 
 func _reset_metadata() -> void:
 	# Clear old metadata
-	for key in get_meta_list():
+	for key : StringName in get_meta_list():
 		set_meta(key, null)
 
 	set_meta('bsatn_type_int_value', &'u8')
 	set_meta('bsatn_type_string_value', &'string')
 	set_meta('bsatn_type_int_vec', &'u8')
 	set_meta('bsatn_type_string_vec', &'string')
+	set_meta('underlying_type_test_option', &'String')
 	set_meta('bsatn_type_test_option', &'string')
+	set_meta('underlying_type_test_option_vec', &'Array')
 	set_meta('bsatn_type_test_option_vec', &'vec_string')
+	set_meta('underlying_type_test_inner', &'MainDamage')
 	set_meta('bsatn_type_test_inner', &'MainDamage')
 
 ## 0. int_value: int[br]

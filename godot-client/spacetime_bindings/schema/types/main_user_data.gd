@@ -3,28 +3,28 @@
 @tool
 class_name MainUserData extends _ModuleTableType
 
-const module_name := "Main"
+const module_name : String = "Main"
 const table_names: Array[String] = ['user_data']
 
-@export var identity: PackedByteArray 
-@export var online: bool 
-@export var name: String 
-@export var lobby_id: int 
-@export var color: Color 
-@export var test_vec: Array[String] 
-@export var test_bytes_array: Array[int] 
-@export var test_dynamic_arraylike: Vector4 
-@export var last_position: Vector3 
-@export var direction: Vector2 
-@export var player_speed: float 
-@export var last_update: int 
+@export var identity: PackedByteArray
+@export var online: bool
+@export var name: String
+@export var lobby_id: int
+@export var color: Color
+@export var test_vec: Array[String]
+@export var test_bytes_array: Array[int]
+@export var test_dynamic_arraylike: Vector4
+@export var last_position: Vector3
+@export var direction: Vector2
+@export var player_speed: float
+@export var last_update: int
 
 func _init() -> void:
 	_reset_metadata()
 
 func _reset_metadata() -> void:
 	# Clear old metadata
-	for key in get_meta_list():
+	for key : StringName in get_meta_list():
 		set_meta(key, null)
 
 	set_meta('primary_key', 'identity')

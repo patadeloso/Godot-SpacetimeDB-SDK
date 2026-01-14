@@ -4,17 +4,17 @@ var _tables: Dictionary[String, Dictionary] = {}
 var _primary_key_cache: Dictionary = {}
 var _schema: SpacetimeDBSchema
 
-var _cached_normalized_table_names: Dictionary = {} 
+var _cached_normalized_table_names: Dictionary = {}
 var _cached_pk_fields: Dictionary = {}
 var _insert_listeners_by_table: Dictionary = {}
 var _update_listeners_by_table: Dictionary = {}
-var _delete_listeners_by_table: Dictionary = {} 
-var _delete_key_listeners_by_table: Dictionary = {} 
+var _delete_listeners_by_table: Dictionary = {}
+var _delete_key_listeners_by_table: Dictionary = {}
 var _transactions_completed_listeners_by_table: Dictionary = {}
 
 signal row_inserted(table_name: String, row: _ModuleTableType)
 signal row_updated(table_name: String, old_row: _ModuleTableType, new_row: _ModuleTableType)
-signal row_deleted(table_name: String, row: _ModuleTableType) 
+signal row_deleted(table_name: String, row: _ModuleTableType)
 signal row_transactions_completed(table_name: String)
 
 func _init(p_schema: SpacetimeDBSchema):
@@ -28,6 +28,7 @@ func subscribe_to_inserts(table_name: StringName, callable: Callable):
 		_insert_listeners_by_table[table_name] = []
 	if not _insert_listeners_by_table[table_name].has(callable):
 		_insert_listeners_by_table[table_name].append(callable)
+
 
 func unsubscribe_from_inserts(table_name: StringName, callable: Callable):
 	if _insert_listeners_by_table.has(table_name):
@@ -86,7 +87,7 @@ func _get_primary_key_field(table_name_lower: String) -> StringName:
 
 	# 1. Check metadata (preferred)
 	if instance and instance.has_meta("primary_key"):
-		var pk_field : StringName = instance.get_meta("primary_key")
+		var pk_field: StringName = instance.get_meta("primary_key")
 		_primary_key_cache[table_name_lower] = pk_field
 		return pk_field
 
@@ -102,7 +103,8 @@ func _get_primary_key_field(table_name_lower: String) -> StringName:
 			# _primary_key_cache[table_name_lower] = prop.name
 			# return prop.name
 
-	printerr("LocalDatabase: Could not determine primary key for table '", table_name_lower, "'. Add metadata or use convention.")
+	#printerr("LocalDatabase: Could not determine primary key for table '", table_name_lower, "'. Add metadata or use convention.")
+	print_debug("LocalDatabase: table %s has no primary_key" % table_name_lower)
 	_primary_key_cache[table_name_lower] = &"" # Cache failure
 	return &""
 
@@ -115,7 +117,7 @@ func apply_database_update(db_update: DatabaseUpdateData):
 		apply_table_update(table_update)
 
 func apply_table_update(table_update: TableUpdateData):
-	var table_name_original := StringName(table_update.table_name)
+	var table_name_original: StringName = StringName(table_update.table_name)
 	var table_name_lower: String
 
 	if _cached_normalized_table_names.has(table_name_original):
@@ -127,54 +129,55 @@ func apply_table_update(table_update: TableUpdateData):
 	if not _tables.has(table_name_lower):
 		printerr("LocalDatabase: Received update for unknown table '", table_name_original, "' (normalized: '", table_name_lower, "')")
 		return
-		
+
 	var pk_field: StringName
 	if _cached_pk_fields.has(table_name_lower):
 		pk_field = _cached_pk_fields[table_name_lower]
 	else:
 		pk_field = _get_primary_key_field(table_name_lower)
 		if pk_field == &"":
-			printerr("LocalDatabase: Cannot apply update for table '", table_name_original, "' without primary key.")
+			apply_table_without_pk(table_update)
+			#printerr("LocalDatabase: Cannot apply update for table '", table_name_original, "' without primary key.")
 			return
 		_cached_pk_fields[table_name_lower] = pk_field
 
-	var table_dict := _tables[table_name_lower]
-	
+	var table_dict: Dictionary = _tables[table_name_lower]
+
 	var inserted_pks_set: Dictionary = {} # { pk_value: true }
-	var inserts_to_emit:Array
-	var updates_to_emit:Array
-	var deletes_to_emit:Array
+	var inserts_to_emit: Array
+	var updates_to_emit: Array
+	var deletes_to_emit: Array
 	for inserted_row: _ModuleTableType in table_update.inserts:
 		var pk_value = inserted_row.get(pk_field)
 		if pk_value == null:
 			push_error("LocalDatabase: Inserted row for table '", table_name_original, "' has null PK value for field '", pk_field, "'. Skipping.")
 			continue
-	
+
 		inserted_pks_set[pk_value] = true
-	
+
 		var prev_row_resource: _ModuleTableType = table_dict.get(pk_value, null)
-		
+
 		table_dict[pk_value] = inserted_row
 		if prev_row_resource != null:
 			if _update_listeners_by_table.has(table_name_original):
 				updates_to_emit.append([table_name_original,prev_row_resource,inserted_row])
-	
+
 		else:
 			if _insert_listeners_by_table.has(table_name_original):
 				inserts_to_emit.append([table_name_original,inserted_row])
-	
+
 	for deleted_row: _ModuleTableType in table_update.deletes:
 		var pk_value = deleted_row.get(pk_field)
 		if pk_value == null:
 			push_warning("LocalDatabase: Deleted row for table '", table_name_original, "' has null PK value for field '", pk_field, "'. Skipping.")
 			continue
-			
+
 		if not inserted_pks_set.has(pk_value):
 			if table_dict.erase(pk_value):
 				if _delete_listeners_by_table.has(table_name_original):
 					deletes_to_emit.append([table_name_original,deleted_row])
-	
-	for insert:Array in inserts_to_emit:
+
+	for insert: Array in inserts_to_emit:
 		for listener: Callable in _insert_listeners_by_table[insert[0]]:
 			if not listener.is_valid():
 				_insert_listeners_by_table.erase(listener)
@@ -182,17 +185,17 @@ func apply_table_update(table_update: TableUpdateData):
 				continue
 			listener.call(insert[1])
 		row_inserted.emit(insert[0], insert[1])
-	
-	for update:Array in updates_to_emit:
+
+	for update: Array in updates_to_emit:
 		for listener: Callable in _update_listeners_by_table[update[0]]:
 			if not listener.is_valid():
 				_update_listeners_by_table.erase(listener)
 				push_error("LocalDB: insert callback is not valid: skipped")
 				continue
-			listener.call(update[1], update[2]) 
+			listener.call(update[1], update[2])
 		row_updated.emit(update[0], update[1], update[2])
-	
-	for delete:Array in deletes_to_emit:
+
+	for delete: Array in deletes_to_emit:
 		for listener: Callable in _delete_listeners_by_table[delete[0]]:
 			if not listener.is_valid():
 				_delete_listeners_by_table.erase(listener)
@@ -200,7 +203,7 @@ func apply_table_update(table_update: TableUpdateData):
 				continue
 			listener.call(delete[1])
 		row_deleted.emit(delete[0], delete[1])
-	
+
 	if _transactions_completed_listeners_by_table.has(table_name_original):
 		for listener: Callable in _transactions_completed_listeners_by_table[table_name_original]:
 			if not listener.is_valid():
@@ -209,29 +212,51 @@ func apply_table_update(table_update: TableUpdateData):
 				continue
 			listener.call()
 		row_transactions_completed.emit(table_name_original)
-			
+
+func apply_table_without_pk(table_update: TableUpdateData):
+	var table_name: String = table_update.table_name
+	if _insert_listeners_by_table.has(table_name):
+		for insert: Resource in table_update.inserts:
+			for listener: Callable in _insert_listeners_by_table[table_name]:
+				if not listener.is_valid():
+					_insert_listeners_by_table.erase(listener)
+					push_error("LocalDB: insert callback is not valid: skipped")
+					continue
+				listener.call(insert)
+			row_inserted.emit(table_name, insert)
+	if _delete_listeners_by_table.has(table_name):
+		for delete: Resource in table_update.deletes:
+			for listener: Callable in _delete_listeners_by_table[table_name]:
+				if not listener.is_valid():
+					_delete_listeners_by_table.erase(listener)
+					push_error("LocalDB: insert callback is not valid: skipped")
+					continue
+				listener.call(delete)
+			row_inserted.emit(table_name, delete)
+
+
 # --- Access Methods ---
 func get_row_by_pk(table_name: String, primary_key_value) -> _ModuleTableType:
-	var table_name_lower := table_name.to_lower().replace("_","")
+	var table_name_lower: String = table_name.to_lower().replace("_","")
 	if _tables.has(table_name_lower):
-		return _tables[table_name_lower].get(primary_key_value) 
+		return _tables[table_name_lower].get(primary_key_value)
 	return null
-	
+
 func get_all_rows(table_name: String) -> Array[_ModuleTableType]:
-	var rows = _get_all_rows_untyped(table_name)
+	var rows: Array = _get_all_rows_untyped(table_name)
 	var typed_result_array: Array[_ModuleTableType] = []
 	typed_result_array.assign(rows)
-	
+
 	return typed_result_array
 
 func count_all_rows(table_name: String) -> int:
-	var rows = _get_all_rows_untyped(table_name)
+	var rows: Array = _get_all_rows_untyped(table_name)
 	return rows.size()
-		
+
 func _get_all_rows_untyped(table_name: String) -> Array:
-	var table_name_lower := table_name.to_lower().replace("_","")
+	var table_name_lower: String = table_name.to_lower().replace("_","")
 	if _tables.has(table_name_lower):
-		var table_dict := _tables[table_name_lower]
+		var table_dict: Dictionary = _tables[table_name_lower]
 		return table_dict.values()
-	
+
 	return []

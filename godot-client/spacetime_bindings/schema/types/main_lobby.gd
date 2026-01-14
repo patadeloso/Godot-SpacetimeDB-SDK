@@ -3,18 +3,18 @@
 @tool
 class_name MainLobby extends _ModuleTableType
 
-const module_name := "Main"
+const module_name : String = "Main"
 const table_names: Array[String] = ['lobby']
 
-@export var id: int 
-@export var player_count: int 
+@export var id: int
+@export var player_count: int
 
 func _init() -> void:
 	_reset_metadata()
 
 func _reset_metadata() -> void:
 	# Clear old metadata
-	for key in get_meta_list():
+	for key : StringName in get_meta_list():
 		set_meta(key, null)
 
 	set_meta('primary_key', 'id')

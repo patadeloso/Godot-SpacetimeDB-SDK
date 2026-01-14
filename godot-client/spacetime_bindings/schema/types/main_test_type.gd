@@ -3,15 +3,18 @@
 @tool
 class_name MainTestType extends Resource
 
-@export var test_name: String 
-@export var test_int: int 
+const module_name : String = "Main"
+const table_names: Array[String] = []
+
+@export var test_name: String
+@export var test_int: int
 
 func _init() -> void:
 	_reset_metadata()
 
 func _reset_metadata() -> void:
 	# Clear old metadata
-	for key in get_meta_list():
+	for key : StringName in get_meta_list():
 		set_meta(key, null)
 
 	set_meta('bsatn_type_test_name', &'string')

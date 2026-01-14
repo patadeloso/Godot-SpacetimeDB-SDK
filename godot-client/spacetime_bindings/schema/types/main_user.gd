@@ -3,13 +3,13 @@
 @tool
 class_name MainUser extends _ModuleTableType
 
-const module_name := "Main"
+const module_name : String = "Main"
 const table_names: Array[String] = ['user', 'user_next']
 
-@export var identity: PackedByteArray 
-@export var online: bool 
-@export var lobby_id: int 
-@export var damage: MainDamage 
+@export var identity: PackedByteArray
+@export var online: bool
+@export var lobby_id: int
+@export var damage: MainDamage
 @export var test_option_string: Option ## Option of Array of String
 @export var test_option_message: Option ## Option of MainMessage
 
@@ -18,7 +18,7 @@ func _init() -> void:
 
 func _reset_metadata() -> void:
 	# Clear old metadata
-	for key in get_meta_list():
+	for key : StringName in get_meta_list():
 		set_meta(key, null)
 
 	set_meta('primary_key', 'identity')
@@ -26,7 +26,9 @@ func _reset_metadata() -> void:
 	set_meta('bsatn_type_online', &'bool')
 	set_meta('bsatn_type_lobby_id', &'u64')
 	set_meta('bsatn_type_damage', &'MainDamage')
+	set_meta('underlying_type_test_option_string', &'Array')
 	set_meta('bsatn_type_test_option_string', &'vec_string')
+	set_meta('underlying_type_test_option_message', &'MainMessage')
 	set_meta('bsatn_type_test_option_message', &'MainMessage')
 
 ## 0. identity: PackedByteArray[br]
