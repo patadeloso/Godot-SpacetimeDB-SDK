@@ -23,5 +23,5 @@ static func fail(error: Error) -> SpacetimeDBReducerCall:
 func wait_for_response(timeout_sec: float = 10) -> TransactionUpdateMessage:
 	if error:
 		return null
-	
+
 	return await _client.wait_for_reducer_response(request_id, timeout_sec)

@@ -4,7 +4,7 @@
 
 ## SpacetimeDB Godot SDK
 
-> Tested with: `Godot 4.4.1-stable` to `Godot 4.6.dev3` and `SpacetimeDB 1.8.0` to `SpacetimeDB 1.10.0`
+> Tested with: `Godot 4.4.1-stable` to `Godot 4.6.beta3` and `SpacetimeDB 1.8.0` to `SpacetimeDB 1.11.2`
 
 This SDK provides the necessary tools to integrate your Godot Engine project with a SpacetimeDB backend, enabling real-time data synchronization and server interaction directly from your Godot client.
 
@@ -20,7 +20,7 @@ This SDK provides the necessary tools to integrate your Godot Engine project wit
 -   **Error Handling:** Can be improved, especially for reducer call failures beyond basic connection errors.
 -   **Configuration:** More options could be added (timeouts, reconnection).
 -   **Compression:** Brotli - not supported.
--   **View return of type without Primary_key**: not supported (the local db can't handle rows without primary key)
+-   **Tables and Views without Primary_key:** only the Insert and Delete callbacks get called. Data will not be saved inside the local DB.
 -   **Procedures**: not supported
 
 ## Contributing

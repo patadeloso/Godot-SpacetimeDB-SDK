@@ -28,7 +28,7 @@ func _on_spacetimedb_connected(identity: PackedByteArray, _token: String) -> voi
 	print("Game: Connected to SpacetimeDB!")
 	print("Game: My Identity: 0x%s" % [identity.hex_encode()])
 	subscribe_self_updates()
-	
+
 func subscribe_self_updates() -> void:
 	var id := SpacetimeDB.Main.get_local_identity()
 	var query_string := [
@@ -38,10 +38,10 @@ func subscribe_self_updates() -> void:
 	if sub.error:
 		printerr("Game: Failed to send subscription request.")
 		return
-	
+
 	sub.applied.connect(_on_self_loaded)
 	print("Game: Subscription request sent (Query ID: %d)." % sub.query_id)
-	
+
 func _on_self_loaded() -> void:
 	var id := SpacetimeDB.Main.get_local_identity()
 	var user := SpacetimeDB.Main.db.user.identity.find(id)

@@ -41,7 +41,7 @@ var debug_mode := false # Controls verbose debug printing
 func _init(p_schema: SpacetimeDBSchema, p_debug_mode: bool = false) -> void:
 	debug_mode = p_debug_mode
 	_schema = p_schema
-	
+
 	_native_arraylike_regex.compile("^(?<struct>.+)\\[(?<components>.*)\\]$")
 
 # --- Error Handling ---
@@ -100,7 +100,7 @@ func read_u64_le(spb: StreamPeerBuffer) -> int:
 	if not _check_read(spb, 8): return 0
 	spb.big_endian = false
 	return spb.get_u64()
-	
+
 func read_u128(spb: StreamPeerBuffer) -> PackedByteArray:
 	var num := read_bytes(spb, U128_SIZE)
 	num.reverse() # We receive the bytes in reverse
@@ -115,7 +115,7 @@ func read_f64_le(spb: StreamPeerBuffer) -> float:
 	if not _check_read(spb, 8): return 0.0
 	spb.big_endian = false
 	return spb.get_double()
-	
+
 func read_bool(spb: StreamPeerBuffer) -> bool:
 	var byte := read_u8(spb)
 	if has_error(): return false
@@ -166,7 +166,7 @@ func read_timestamp(spb: StreamPeerBuffer) -> int:
 func read_scheduled_at(spb: StreamPeerBuffer) -> int:
 	read_i8(spb) # skipping the scheduled_at enum int
 	return read_timestamp(spb)
-	
+
 
 func read_vec_u8(spb: StreamPeerBuffer) -> PackedByteArray:
 	var start_pos := spb.get_position()
@@ -188,7 +188,7 @@ func _read_option(spb: StreamPeerBuffer, parent_resource_containing_option: Reso
 	# Wire format: u8 tag (0 for Some, 1 for None)
 	# If Some (0): followed by T value
 	var tag_pos := spb.get_position()
-	var is_present_tag := read_u8(spb) 
+	var is_present_tag := read_u8(spb)
 	if has_error(): return null # Error reading tag
 	if is_present_tag == 1: # It's None
 		option_instance.set_none()
@@ -225,7 +225,7 @@ func _read_option(spb: StreamPeerBuffer, parent_resource_containing_option: Reso
 	else:
 		_set_error("Invalid tag %d for Option property '%s' (expected 0 for Some, 1 for None)." % [is_present_tag, option_prop_name], tag_pos)
 		return null
-	
+
 ## Reads an array property.
 func _read_array(spb: StreamPeerBuffer, resource: Resource, prop: Dictionary) -> Array:
 	var prop_name: StringName = prop.name
@@ -247,8 +247,8 @@ func _read_array(spb: StreamPeerBuffer, resource: Resource, prop: Dictionary) ->
 
 	if hint == PROPERTY_HINT_TYPE_STRING and ":" in hint_string: # Godot 3 style: "Type:TypeName"
 		var hint_parts = hint_string.split(":", true, 1)
-		if hint_parts.size() == 2: 
-			element_type_code = int(hint_parts[0]); 
+		if hint_parts.size() == 2:
+			element_type_code = int(hint_parts[0]);
 			element_class_name = hint_parts[1]
 		else:
 			_set_error("Array property '%s': Bad hint_string format '%s'." % [prop_name, hint_string], start_pos)
@@ -261,7 +261,7 @@ func _read_array(spb: StreamPeerBuffer, resource: Resource, prop: Dictionary) ->
 		_set_error("Array property '%s' needs a typed hint. Hint: %d, HintString: '%s'" % [prop_name, hint, hint_string], start_pos)
 		return []
 	if element_type_code == TYPE_MAX: _set_error("Could not determine element type for array '%s'." % prop_name, start_pos); return []
-	
+
 	# 3. Create a temporary "prototype" dictionary for the element
 	var element_prop_sim = { "name": prop_name + "[element]", "type": element_type_code, "class_name": element_class_name, "usage": PROPERTY_USAGE_STORAGE, "hint": 0, "hint_string": "" }
 
@@ -289,10 +289,10 @@ func _read_array(spb: StreamPeerBuffer, resource: Resource, prop: Dictionary) ->
 				element_reader_callable = Callable(self, "_read_nested_resource")
 			if not element_reader_callable.is_valid() and debug_mode:
 				push_warning("Array '%s' has 'bsatn_type' metadata ('%s'), but it doesn't map to a primitive reader. Falling back to element type hint." % [prop_name, bsatn_element_type_str])
-		
+
 		if not element_reader_callable.is_valid(): # Fallback to element's Variant.Type if no valid primitive reader from metadata
 			element_reader_callable = _get_reader_callable_for_property(resource, element_prop_sim) # Use element prototype here
-	
+
 	if not element_reader_callable.is_valid():
 		_set_error("Cannot determine reader for elements of array '%s' (element type code %d, class '%s')." % [prop_name, element_type_code, element_class_name], start_pos)
 		return []
@@ -304,13 +304,13 @@ func _read_array(spb: StreamPeerBuffer, resource: Resource, prop: Dictionary) ->
 		if has_error(): return [] # Stop on error
 		var element_start_pos = spb.get_position()
 		var element_value = null
-		
+
 		if element_reader_callable.get_object() == self:
 			element_value = _call_reader_callable(element_reader_callable, spb, resource, element_prop_sim, inner_type_for_option_elements)
-		else: 
+		else:
 			_set_error("Internal error: Invalid element reader callable for array '%s'." % prop_name, element_start_pos)
 			return []
-		
+
 		if has_error():
 			if not _last_error.contains("element %d" % i) and not _last_error.contains(str(prop_name)): # Avoid redundant context
 				var existing_error = get_last_error()
@@ -323,14 +323,14 @@ func _read_native_arraylike(spb: StreamPeerBuffer, resource: Resource, prop: Dic
 	var prop_name: StringName = prop.name
 	var start_pos := spb.get_position()
 	var meta_key := "bsatn_type_" + prop_name
-	
+
 	var bsatn_types_for_components: String = ""
 	if resource.has_meta(meta_key):
 		var bsatn_type = str(resource.get_meta(meta_key)).to_lower()
 		if bsatn_type.is_empty():
 			_set_error("Property '%s' has empty 'bsatn_type' metadata. Inner types for components of '%s' cannot be determined." % [prop_name, type_string(prop.type)], start_pos)
 			return null
-		
+
 		var result = _native_arraylike_regex.search(bsatn_type)
 		bsatn_types_for_components = result.get_string("components")
 		if bsatn_types_for_components.is_empty():
@@ -340,12 +340,12 @@ func _read_native_arraylike(spb: StreamPeerBuffer, resource: Resource, prop: Dic
 		# This metadata is essential for array-like
 		_set_error("Property '%s' is missing 'bsatn_type' metadata. This metadata should specify the BSATN types of its components (e.g., 'f32,f32' for Vector2[f32, f32])." % prop_name, start_pos)
 		return null
-	
+
 	var components := []
 	for bsatn_component_type_str in bsatn_types_for_components.split(","):
 		var component_value = _read_value_from_bsatn_type(spb, bsatn_component_type_str, prop_name)
 		components.append(component_value)
-	
+
 	match prop.type:
 		TYPE_VECTOR2: return Vector2.ZERO if has_error() else Vector2(components[0], components[1])
 		TYPE_VECTOR2I: return Vector2i.ZERO if has_error() else Vector2i(components[0], components[1])
@@ -355,7 +355,7 @@ func _read_native_arraylike(spb: StreamPeerBuffer, resource: Resource, prop: Dic
 		TYPE_VECTOR4I: return Vector4i.ZERO if has_error() else Vector4i(components[0], components[1], components[2], components[3])
 		TYPE_QUATERNION: return Quaternion.IDENTITY if has_error() else Quaternion(components[0], components[1], components[2], components[3])
 		TYPE_COLOR: return Color.BLACK if has_error() else Color(components[0], components[1], components[2], components[3])
-	
+
 	_set_error("Cannot determine native gd type for property '%s'" % prop_name, start_pos)
 	return null
 
@@ -508,7 +508,7 @@ func _get_reader_callable_for_property(resource: Resource, prop: Dictionary) -> 
 				TYPE_FLOAT: reader_callable = Callable(self, "read_f32_le") # Default float is f32
 				TYPE_STRING: reader_callable = Callable(self, "read_string_with_u32_len")
 				TYPE_PACKED_BYTE_ARRAY: reader_callable = Callable(self, "read_vec_u8") # Default PBA is Vec<u8>
-				TYPE_OBJECT: 
+				TYPE_OBJECT:
 					reader_callable = Callable(self, "_read_nested_resource") # Handles nested Resources
 				# TYPE_ARRAY, and native array-like types (TYPE_VECTOR2, TYPE_QUATERNION, etc.) are handled above
 				_:
@@ -555,14 +555,14 @@ func _read_value_from_bsatn_type(spb: StreamPeerBuffer, bsatn_type_str: String, 
 	# Assumes bsatn_type_str is already lowercase
 	if bsatn_type_str.begins_with("vec_"):
 		var element_bsatn_type_str = bsatn_type_str.right(-4) # This will also be lowercase
-		
+
 		var array_length := read_u32_le(spb)
 		if has_error(): return null
 		if array_length == 0: return []
 		if array_length > MAX_VEC_LEN:
 			_set_error("Array length %d (for BSATN type '%s') exceeds limit %d for context '%s'" % [array_length, bsatn_type_str, MAX_VEC_LEN, context_prop_name_for_error], spb.get_position() - 4) # -4 for u32 length
 			return null
-			
+
 		var temp_array := []
 		# temp_array.resize(array_length) # Not strictly necessary if appending
 		for i in range(array_length):
@@ -595,13 +595,13 @@ func _read_value_from_bsatn_type(spb: StreamPeerBuffer, bsatn_type_str: String, 
 		else:
 			_set_error("Cannot instantiate schema for BSATN type '%s' (schema key '%s', context: '%s'). Script valid: %s, Can instantiate: %s" % [bsatn_type_str, schema_key, context_prop_name_for_error, script != null, script.can_instantiate() if script else "N/A"], start_pos_val_read)
 			return null
-			
+
 	_set_error("Unsupported BSATN type '%s' for deserialization (context: '%s'). No primitive, vec, or custom schema found." % [bsatn_type_str, context_prop_name_for_error], start_pos_val_read)
 	return null
 
 func _create_deserialization_plan(script, resource: Resource) -> Array:
 	if debug_mode: print("DEBUG: Creating deserialization plan for script: %s" % script.resource_path)
-	
+
 	var plan = []
 	var properties: Array = script.get_script_property_list()
 	for prop in properties:
@@ -610,19 +610,19 @@ func _create_deserialization_plan(script, resource: Resource) -> Array:
 
 		var prop_name: StringName = prop.name
 		var reader_callable: Callable = _get_reader_callable_for_property(resource, prop)
-		
+
 		if not reader_callable.is_valid():
 			_set_error("Unsupported property or missing reader for '%s' in script '%s'" % [prop_name, script.resource_path], -1)
 			_deserialization_plan_cache[script] = []
 			return []
-			
+
 		plan.append({
 			"name": prop_name,
 			"type": prop.type,
 			"reader": reader_callable,
 			"prop_dict": prop
 		})
-	
+
 	_deserialization_plan_cache[script] = plan
 	return plan
 
@@ -640,13 +640,13 @@ func _populate_resource_from_bytes(resource: Resource, spb: StreamPeerBuffer) ->
 	if plan == null:
 		plan = _create_deserialization_plan(script, resource)
 		if has_error(): return false
-		
+
 	for instruction in plan:
 		var value_start_pos = spb.get_position()
 		var value
 		if instruction.reader.get_object() == self:
 			value = _call_reader_callable(instruction.reader, spb, resource, instruction.prop_dict)
-		else: 
+		else:
 			_set_error("Internal error: Invalid reader callable for property '%s' in '%s'." % [instruction.name, resource.get_script().get_global_name() if resource else "Unknown"], value_start_pos)
 			return false
 
@@ -755,13 +755,13 @@ func _read_table_update_instance(spb: StreamPeerBuffer, resource: TableUpdateDat
 
 	var table_name_lower := resource.table_name.to_lower().replace("_","")
 	var row_schema_script := _schema.get_type(table_name_lower)
-	
+
 	var row_spb := StreamPeerBuffer.new()
-	
+
 	if not row_schema_script and updates_count > 0:
 		if debug_mode: push_warning("No row schema found for table '%s', cannot deserialize rows. Skipping row data." % resource.table_name)
 		# Consume the data even if we can't parse it
-		
+
 		for i in range(updates_count):
 			if has_error(): break
 			var update_start_pos := spb.get_position()
@@ -798,7 +798,7 @@ func _read_table_update_instance(spb: StreamPeerBuffer, resource: TableUpdateDat
 			row_spb.seek(0) # Важно! Сбрасываем позицию на начало
 			#var row_spb := StreamPeerBuffer.new(); row_spb.data_array = raw_row_bytes
 			if _populate_resource_from_bytes(row_resource, row_spb):
-				if row_spb.get_position() < row_spb.get_size(): 
+				if row_spb.get_position() < row_spb.get_size():
 					var remainingbytes: Array = []
 					var extra_bytes_count:int = row_spb.get_size() - row_spb.get_position()
 					while row_spb.get_position() < row_spb.get_size():
@@ -814,7 +814,7 @@ func _read_table_update_instance(spb: StreamPeerBuffer, resource: TableUpdateDat
 			row_spb.data_array = raw_row_bytes
 			row_spb.seek(0) # Важно! Сбрасываем позицию на начало
 			if _populate_resource_from_bytes(row_resource, row_spb):
-				if row_spb.get_position() < row_spb.get_size(): 
+				if row_spb.get_position() < row_spb.get_size():
 					var remainingbytes: Array = []
 					var extra_bytes_count:int = row_spb.get_size() - row_spb.get_position()
 					while row_spb.get_position() < row_spb.get_size():
@@ -843,7 +843,7 @@ func _get_query_update_stream(spb: StreamPeerBuffer, table_name_for_error: Strin
 			var compressed_len := read_u32_le(spb)
 			if has_error(): return null
 			if compressed_len == 0:return StreamPeerBuffer.new()
-			
+
 			var compressed_data := read_bytes(spb, compressed_len)
 			var decompressed_data := DataDecompressor.decompress_packet(compressed_data)
 			var temp_spb := StreamPeerBuffer.new()
@@ -908,11 +908,11 @@ func process_bytes_and_extract_messages(new_data: PackedByteArray) -> Array[Reso
 				printerr("BSATNDeserializer: Unrecoverable parsing error: %s. Clearing buffer to prevent infinite loop." % get_last_error())
 				_pending_data.clear()
 				break
-				
+
 		if message_resource:
 			parsed_messages.append(message_resource)
 			var bytes_consumed = spb.get_position()
-			
+
 			if bytes_consumed == 0:
 				printerr("BSATNDeserializer: Parser consumed 0 bytes. Clearing buffer to prevent infinite loop.")
 				_pending_data.clear()
@@ -920,25 +920,25 @@ func process_bytes_and_extract_messages(new_data: PackedByteArray) -> Array[Reso
 			_pending_data = _pending_data.slice(bytes_consumed)
 		else:
 			break
-			
+
 	return parsed_messages
-	
+
 # --- Top-Level Message Parsing ---
 # Entry point: Parses the entire byte buffer into a top-level message Resource.
 func parse_packet(buffer: PackedByteArray) -> Resource:
 	push_warning("BSATNDeserializer.parse_packet is deprecated. Use process_bytes_and_extract_messages instead.")
 	var results = process_bytes_and_extract_messages(buffer)
 	return results[0] if not results.is_empty() else null
-	
+
 
 func _parse_message_from_stream(spb: StreamPeerBuffer) -> Resource:
 	clear_error()
 	#if spb.get_available_bytes().is_empty(): _set_error("Input buffer is empty", 0); return null
-	
+
 	var start_pos = spb.get_position()
 	if not _check_read(spb, 1):
 		return null
-		
+
 	var msg_type := read_u8(spb)
 	if has_error(): return null
 
@@ -949,7 +949,7 @@ func _parse_message_from_stream(spb: StreamPeerBuffer) -> Resource:
 	if resource_script_path == "":
 		_set_error("Unknown server message type: 0x%02X" % msg_type, 1)
 		return null
-	
+
 	# --- Special handling for types requiring manual parsing ---
 	if msg_type == SpacetimeDBServerMessage.SUBSCRIPTION_ERROR:
 		# Use the manual reader due to Option<T> complexity
@@ -972,7 +972,7 @@ func _parse_message_from_stream(spb: StreamPeerBuffer) -> Resource:
 		if not script or not script.can_instantiate():
 			_set_error("Failed to load or instantiate script for message type 0x%02X: %s" % [msg_type, resource_script_path], 1)
 			return null
-		
+
 		result_resource = script.new()
 		if not _populate_resource_from_bytes(result_resource, spb):
 			# Error already set by _populate_resource_from_bytes or its callees
