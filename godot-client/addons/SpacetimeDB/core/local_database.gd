@@ -87,7 +87,7 @@ func _get_primary_key_field(table_name_lower: String) -> StringName:
 
 	# 1. Check metadata (preferred)
 	if instance and instance.has_meta("primary_key"):
-		var pk_field : StringName = instance.get_meta("primary_key")
+		var pk_field: StringName = instance.get_meta("primary_key")
 		_primary_key_cache[table_name_lower] = pk_field
 		return pk_field
 
@@ -117,7 +117,7 @@ func apply_database_update(db_update: DatabaseUpdateData):
 		apply_table_update(table_update)
 
 func apply_table_update(table_update: TableUpdateData):
-	var table_name_original := StringName(table_update.table_name)
+	var table_name_original: StringName = StringName(table_update.table_name)
 	var table_name_lower: String
 
 	if _cached_normalized_table_names.has(table_name_original):
@@ -141,12 +141,12 @@ func apply_table_update(table_update: TableUpdateData):
 			return
 		_cached_pk_fields[table_name_lower] = pk_field
 
-	var table_dict := _tables[table_name_lower]
+	var table_dict: Dictionary = _tables[table_name_lower]
 
 	var inserted_pks_set: Dictionary = {} # { pk_value: true }
-	var inserts_to_emit:Array
-	var updates_to_emit:Array
-	var deletes_to_emit:Array
+	var inserts_to_emit: Array
+	var updates_to_emit: Array
+	var deletes_to_emit: Array
 	for inserted_row: _ModuleTableType in table_update.inserts:
 		var pk_value = inserted_row.get(pk_field)
 		if pk_value == null:
@@ -177,7 +177,7 @@ func apply_table_update(table_update: TableUpdateData):
 				if _delete_listeners_by_table.has(table_name_original):
 					deletes_to_emit.append([table_name_original,deleted_row])
 
-	for insert:Array in inserts_to_emit:
+	for insert: Array in inserts_to_emit:
 		for listener: Callable in _insert_listeners_by_table[insert[0]]:
 			if not listener.is_valid():
 				_insert_listeners_by_table.erase(listener)
@@ -186,7 +186,7 @@ func apply_table_update(table_update: TableUpdateData):
 			listener.call(insert[1])
 		row_inserted.emit(insert[0], insert[1])
 
-	for update:Array in updates_to_emit:
+	for update: Array in updates_to_emit:
 		for listener: Callable in _update_listeners_by_table[update[0]]:
 			if not listener.is_valid():
 				_update_listeners_by_table.erase(listener)
@@ -195,7 +195,7 @@ func apply_table_update(table_update: TableUpdateData):
 			listener.call(update[1], update[2])
 		row_updated.emit(update[0], update[1], update[2])
 
-	for delete:Array in deletes_to_emit:
+	for delete: Array in deletes_to_emit:
 		for listener: Callable in _delete_listeners_by_table[delete[0]]:
 			if not listener.is_valid():
 				_delete_listeners_by_table.erase(listener)
@@ -214,9 +214,9 @@ func apply_table_update(table_update: TableUpdateData):
 		row_transactions_completed.emit(table_name_original)
 
 func apply_table_without_pk(table_update: TableUpdateData):
-	var table_name :String = table_update.table_name
+	var table_name: String = table_update.table_name
 	if _insert_listeners_by_table.has(table_name):
-		for insert:Resource in table_update.inserts:
+		for insert: Resource in table_update.inserts:
 			for listener: Callable in _insert_listeners_by_table[table_name]:
 				if not listener.is_valid():
 					_insert_listeners_by_table.erase(listener)
@@ -225,7 +225,7 @@ func apply_table_without_pk(table_update: TableUpdateData):
 				listener.call(insert)
 			row_inserted.emit(table_name, insert)
 	if _delete_listeners_by_table.has(table_name):
-		for delete:Resource in table_update.deletes:
+		for delete: Resource in table_update.deletes:
 			for listener: Callable in _delete_listeners_by_table[table_name]:
 				if not listener.is_valid():
 					_delete_listeners_by_table.erase(listener)
@@ -237,26 +237,26 @@ func apply_table_without_pk(table_update: TableUpdateData):
 
 # --- Access Methods ---
 func get_row_by_pk(table_name: String, primary_key_value) -> _ModuleTableType:
-	var table_name_lower := table_name.to_lower().replace("_","")
+	var table_name_lower: String = table_name.to_lower().replace("_","")
 	if _tables.has(table_name_lower):
 		return _tables[table_name_lower].get(primary_key_value)
 	return null
 
 func get_all_rows(table_name: String) -> Array[_ModuleTableType]:
-	var rows = _get_all_rows_untyped(table_name)
+	var rows: Array = _get_all_rows_untyped(table_name)
 	var typed_result_array: Array[_ModuleTableType] = []
 	typed_result_array.assign(rows)
 
 	return typed_result_array
 
 func count_all_rows(table_name: String) -> int:
-	var rows = _get_all_rows_untyped(table_name)
+	var rows: Array = _get_all_rows_untyped(table_name)
 	return rows.size()
 
 func _get_all_rows_untyped(table_name: String) -> Array:
-	var table_name_lower := table_name.to_lower().replace("_","")
+	var table_name_lower: String = table_name.to_lower().replace("_","")
 	if _tables.has(table_name_lower):
-		var table_dict := _tables[table_name_lower]
+		var table_dict: Dictionary = _tables[table_name_lower]
 		return table_dict.values()
 
 	return []
