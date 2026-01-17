@@ -263,7 +263,7 @@ func _read_array(spb: StreamPeerBuffer, resource: Resource, prop: Dictionary) ->
 	if element_type_code == TYPE_MAX: _set_error("Could not determine element type for array '%s'." % prop_name, start_pos); return []
 
 	# 3. Create a temporary "prototype" dictionary for the element
-	var element_prop_sim = { "name": prop_name + "[element]", "type": element_type_code, "class_name": element_class_name, "usage": PROPERTY_USAGE_STORAGE, "hint": 0, "hint_string": "" }
+	var element_prop_sim = { "name": prop_name, "type": element_type_code, "class_name": element_class_name, "usage": PROPERTY_USAGE_STORAGE, "hint": 0, "hint_string": "" }
 
 	# 4. Determine the reader function for the ELEMENTS
 	var element_reader_callable : Callable
@@ -328,17 +328,18 @@ func _read_native_arraylike(spb: StreamPeerBuffer, resource: Resource, prop: Dic
 	if resource.has_meta(meta_key):
 		var bsatn_type = str(resource.get_meta(meta_key)).to_lower()
 		if bsatn_type.is_empty():
-			_set_error("Property '%s' has empty 'bsatn_type' metadata. Inner types for components of '%s' cannot be determined." % [prop_name, type_string(prop.type)], start_pos)
+			_set_error("Property '%s' for type '%s' has empty 'bsatn_type' metadata. Inner types for components of '%s' cannot be determined." % [prop_name, resource.get_script().get_global_name(), type_string(prop.type)], start_pos)
 			return null
 
 		var result = _native_arraylike_regex.search(bsatn_type)
 		bsatn_types_for_components = result.get_string("components")
 		if bsatn_types_for_components.is_empty():
-			_set_error("Property '%s' is missing component types in its 'bsatn_type' metadata. Inner types for components of '%s' cannot be determined." % [prop_name, type_string(prop.type)], start_pos)
+			_set_error("Property '%s' for type '%s' is missing component types in its 'bsatn_type' metadata. Inner types for components of '%s' cannot be determined." % [prop_name, resource.get_script().get_global_name(), type_string(prop.type)], start_pos)
 			return null
 	else:
 		# This metadata is essential for array-like
-		_set_error("Property '%s' is missing 'bsatn_type' metadata. This metadata should specify the BSATN types of its components (e.g., 'f32,f32' for Vector2[f32, f32])." % prop_name, start_pos)
+		_set_error("Property '%s' for type '%s' is missing 'bsatn_type' metadata. This metadata should specify the BSATN types of its components (e.g., 'f32,f32' for Vector2[f32, f32])." % [prop_name, resource.get_script().get_global_name()], start_pos)
+		prints(meta_key, prop)
 		return null
 
 	var components := []
