@@ -90,7 +90,7 @@ pub struct TestScheduledTable {
 pub fn test_scheduled_reducer(ctx: &ReducerContext, mut row: TestScheduledTable) {
     row.private_count += 1;
     row.public_count += 1;
-    ctx.db.test_no_pk_table().insert(ViewType{ row: row.public_count, name: "Hello World".to_string() });
+    // ctx.db.test_no_pk_table().insert(ViewType{ row: row.public_count, name: "Hello World".to_string() });
     ctx.db.test_scheduled_table().scheduled_id().update(row);
     if ctx.db.test_table_datatypes().count() < 10 {
         ctx.db.test_table_datatypes().insert(TestTableDatatypes::default());
@@ -113,8 +113,8 @@ pub fn test_scheduled_reducer(ctx: &ReducerContext, mut row: TestScheduledTable)
                 t_i64: row.t_i64 - 1,
                 //t_i128: row.t_i128 - 1,
                 t_string: row.t_u8.to_string(),
-                t_vec_string: vec![row.t_u8.to_string()],
-                t_vec_u64: vec![row.t_u64],
+                t_vec_string: vec![row.t_u8.to_string(), row.t_i16.to_string()],
+                t_vec_u64: vec![row.t_u64, row.t_u64],
                 t_opt_string: if row.t_opt_string.is_some() {
                     None
                 } else {
@@ -127,9 +127,9 @@ pub fn test_scheduled_reducer(ctx: &ReducerContext, mut row: TestScheduledTable)
                 },
                 t_test_enum: TestEnum::A,
                 t_test_enum_option: Some(TestEnum::A),
-                t_test_enum_vec: vec![TestEnum::A],
+                t_test_enum_vec: vec![TestEnum::A, TestEnum::B],
                 t_test_type: TestType{ test_name: "test_name".to_string(), test_int: 1 },
-                t_test_type_vec: vec![TestType{ test_name: "test_name".to_string(), test_int: 1 }],
+                t_test_type_vec: vec![TestType{ test_name: "test_name".to_string(), test_int: 1 }, TestType{ test_name: "test_name".to_string(), test_int: 1 }],
                 t_test_type_option: Some(TestType{ test_name: "test_name".to_string(), test_int: 1 }),
             });
     }
