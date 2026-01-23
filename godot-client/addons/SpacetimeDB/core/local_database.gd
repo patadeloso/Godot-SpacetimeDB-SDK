@@ -110,13 +110,54 @@ func _get_primary_key_field(table_name_lower: String) -> StringName:
 
 
 # --- Applying Updates ---
-
 func apply_database_update(db_update: DatabaseUpdateData):
 	if not db_update: return
+	var changes:Array[Dictionary] = []
 	for table_update: TableUpdateData in db_update.tables:
-		apply_table_update(table_update)
+		var updates = apply_table_update(table_update)
+		changes.append(updates)
 
-func apply_table_update(table_update: TableUpdateData):
+	for change in changes:
+		var table_name = change.get("table_name", ["__null__"])[0]
+		if table_name == "__null__":
+			continue
+		for insert: Array in change.get("inserts", []):
+			for listener: Callable in _insert_listeners_by_table.get(table_name, []):
+				if not listener.is_valid():
+					_insert_listeners_by_table.erase(listener)
+					push_error("LocalDB: insert callback is not valid: skipped")
+					continue
+				listener.call(insert[0])
+			row_inserted.emit(table_name, insert[0])
+
+		for update: Array in change.get("updates", []):
+			for listener: Callable in _update_listeners_by_table.get(table_name, []):
+				if not listener.is_valid():
+					_update_listeners_by_table.erase(listener)
+					push_error("LocalDB: insert callback is not valid: skipped")
+					continue
+				listener.call(update[0], update[1])
+			row_updated.emit(table_name, update[0], update[1])
+
+		for delete: Array in change.get("deletes", []):
+			for listener: Callable in _delete_listeners_by_table.get(table_name, []):
+				if not listener.is_valid():
+					_delete_listeners_by_table.erase(listener)
+					push_error("LocalDB: delete callback is not valid: skipped")
+					continue
+				listener.call(delete[0])
+			row_deleted.emit(table_name, delete[0])
+
+		if _transactions_completed_listeners_by_table.has(table_name):
+			for listener: Callable in _transactions_completed_listeners_by_table.get(table_name, []):
+				if not listener.is_valid():
+					_transactions_completed_listeners_by_table.erase(listener)
+					push_error("LocalDB: Transaction complete callback is not valid: skipped")
+					continue
+				listener.call()
+			row_transactions_completed.emit(table_name)
+
+func apply_table_update(table_update: TableUpdateData) -> Dictionary[String,Array]:
 	var table_name_original: StringName = StringName(table_update.table_name)
 	var table_name_lower: String
 
@@ -128,7 +169,10 @@ func apply_table_update(table_update: TableUpdateData):
 
 	if not _tables.has(table_name_lower):
 		printerr("LocalDatabase: Received update for unknown table '", table_name_original, "' (normalized: '", table_name_lower, "')")
-		return
+		return {"table_name": [table_name_original],
+				"inserts": [],
+				"updates": [],
+				"deletes": []}
 
 	var pk_field: StringName
 	if _cached_pk_fields.has(table_name_lower):
@@ -136,9 +180,11 @@ func apply_table_update(table_update: TableUpdateData):
 	else:
 		pk_field = _get_primary_key_field(table_name_lower)
 		if pk_field == &"":
-			apply_table_without_pk(table_update)
-			#printerr("LocalDatabase: Cannot apply update for table '", table_name_original, "' without primary key.")
-			return
+			var changes :Dictionary[String, Array] = {"table_name": [table_name_original],
+				"inserts": [table_update.inserts] if table_update.inserts.size() >=1 else [],
+				"updates": [],
+				"deletes": [table_update.deletes] if table_update.deletes.size() >=1 else []}
+			return changes
 		_cached_pk_fields[table_name_lower] = pk_field
 
 	var table_dict: Dictionary = _tables[table_name_lower]
@@ -152,87 +198,32 @@ func apply_table_update(table_update: TableUpdateData):
 		if pk_value == null:
 			push_error("LocalDatabase: Inserted row for table '", table_name_original, "' has null PK value for field '", pk_field, "'. Skipping.")
 			continue
-
 		inserted_pks_set[pk_value] = true
-
 		var prev_row_resource: _ModuleTableType = table_dict.get(pk_value, null)
-
 		table_dict[pk_value] = inserted_row
 		if prev_row_resource != null:
 			if _update_listeners_by_table.has(table_name_original):
-				updates_to_emit.append([table_name_original,prev_row_resource,inserted_row])
-
+				updates_to_emit.append([prev_row_resource,inserted_row])
 		else:
 			if _insert_listeners_by_table.has(table_name_original):
-				inserts_to_emit.append([table_name_original,inserted_row])
+				inserts_to_emit.append([inserted_row])
 
 	for deleted_row: _ModuleTableType in table_update.deletes:
 		var pk_value = deleted_row.get(pk_field)
 		if pk_value == null:
 			push_warning("LocalDatabase: Deleted row for table '", table_name_original, "' has null PK value for field '", pk_field, "'. Skipping.")
 			continue
-
 		if not inserted_pks_set.has(pk_value):
 			if table_dict.erase(pk_value):
 				if _delete_listeners_by_table.has(table_name_original):
-					deletes_to_emit.append([table_name_original,deleted_row])
+					deletes_to_emit.append([deleted_row])
 
-	for insert: Array in inserts_to_emit:
-		for listener: Callable in _insert_listeners_by_table[insert[0]]:
-			if not listener.is_valid():
-				_insert_listeners_by_table.erase(listener)
-				push_error("LocalDB: insert callback is not valid: skipped")
-				continue
-			listener.call(insert[1])
-		row_inserted.emit(insert[0], insert[1])
+	var changes :Dictionary[String, Array]= {"table_name": [table_name_original],
+				"inserts": inserts_to_emit,
+				"updates": updates_to_emit,
+				"deletes": deletes_to_emit}
+	return changes
 
-	for update: Array in updates_to_emit:
-		for listener: Callable in _update_listeners_by_table[update[0]]:
-			if not listener.is_valid():
-				_update_listeners_by_table.erase(listener)
-				push_error("LocalDB: insert callback is not valid: skipped")
-				continue
-			listener.call(update[1], update[2])
-		row_updated.emit(update[0], update[1], update[2])
-
-	for delete: Array in deletes_to_emit:
-		for listener: Callable in _delete_listeners_by_table[delete[0]]:
-			if not listener.is_valid():
-				_delete_listeners_by_table.erase(listener)
-				push_error("LocalDB: delete callback is not valid: skipped")
-				continue
-			listener.call(delete[1])
-		row_deleted.emit(delete[0], delete[1])
-
-	if _transactions_completed_listeners_by_table.has(table_name_original):
-		for listener: Callable in _transactions_completed_listeners_by_table[table_name_original]:
-			if not listener.is_valid():
-				_transactions_completed_listeners_by_table.erase(listener)
-				push_error("LocalDB: Transaction complete callback is not valid: skipped")
-				continue
-			listener.call()
-		row_transactions_completed.emit(table_name_original)
-
-func apply_table_without_pk(table_update: TableUpdateData):
-	var table_name: String = table_update.table_name
-	if _insert_listeners_by_table.has(table_name):
-		for insert: Resource in table_update.inserts:
-			for listener: Callable in _insert_listeners_by_table[table_name]:
-				if not listener.is_valid():
-					_insert_listeners_by_table.erase(listener)
-					push_error("LocalDB: insert callback is not valid: skipped")
-					continue
-				listener.call(insert)
-			row_inserted.emit(table_name, insert)
-	if _delete_listeners_by_table.has(table_name):
-		for delete: Resource in table_update.deletes:
-			for listener: Callable in _delete_listeners_by_table[table_name]:
-				if not listener.is_valid():
-					_delete_listeners_by_table.erase(listener)
-					push_error("LocalDB: insert callback is not valid: skipped")
-					continue
-				listener.call(delete)
-			row_inserted.emit(table_name, delete)
 
 
 # --- Access Methods ---
