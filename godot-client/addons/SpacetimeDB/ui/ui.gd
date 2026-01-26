@@ -3,35 +3,40 @@ class_name SpacetimePluginUI extends Control
 
 const ERROR_LOG_ICON := "res://addons/SpacetimeDB/ui/icons/Error.svg"
 
-signal module_added(name: String)
-signal module_updated(index: int, name: String)
-signal module_removed(index: int)
-signal check_uri(uri: String)
-signal generate_schema(uri: String, modules: Array[String])
+signal plugin_config_changed()
+signal check_uri()
+signal generate_schema()
 
 var _uri_input: LineEdit
 var _modules_container: VBoxContainer
 var _logs_label: RichTextLabel
 var _add_module_hint_label: RichTextLabel
 var _new_module_name_input: LineEdit
+var _new_module_alias_input: LineEdit
+var _new_module_reducer_checkbox: CheckBox
+var _new_module_table_checkbox: CheckBox
 var _new_module_button: Button
 var _check_uri_button: Button
 var _generate_button: Button
 var _clear_logs_button: Button
 var _copy_logs_button: Button
+var _plugin_config: SpacetimeDBPluginConfig
 
 func _enter_tree() -> void:
 	_uri_input = $"Main/BottomBar/ServerUri/UriInput"
 	_modules_container = $"Main/Content/Sidebar/Modules/ModulesList/VBox"
 	_logs_label = $"Main/Content/Logs"
 	_add_module_hint_label = $"Main/Content/Sidebar/Modules/AddModuleHint"
-	_new_module_name_input = $"Main/Content/Sidebar/NewModule/ModuleNameInput"
-	_new_module_button = $"Main/Content/Sidebar/NewModule/AddButton"
+	_new_module_name_input = $Main/Content/Sidebar/PanelContainer2/VBoxContainer/NewModule/VBoxContainer/ModuleNameInput
+	_new_module_alias_input = $Main/Content/Sidebar/PanelContainer2/VBoxContainer/NewModule/VBoxContainer/ModuleAliasInput
+	_new_module_reducer_checkbox = $Main/Content/Sidebar/PanelContainer2/VBoxContainer/ReducerCheckbox
+	_new_module_table_checkbox = $Main/Content/Sidebar/PanelContainer2/VBoxContainer/TablesCheckbox
+	_new_module_button = $Main/Content/Sidebar/PanelContainer2/VBoxContainer/NewModule/AddButton
 	_check_uri_button = $"Main/BottomBar/CheckUri"
 	_generate_button = $"Main/Content/Sidebar/GenerateButton"
 	_clear_logs_button = $"Main/BottomBar/LogsControls/ClearLogsButton"
 	_copy_logs_button = $"Main/BottomBar/LogsControls/CopyLogsButton"
-	
+
 	_check_uri_button.pressed.connect(_on_check_uri)
 	_generate_button.pressed.connect(_on_generate_code)
 	_new_module_button.pressed.connect(_on_new_module)
@@ -41,7 +46,7 @@ func _enter_tree() -> void:
 func _input(event: InputEvent) -> void:
 	if not visible:
 		return
-	
+
 	if event is InputEventKey:
 		if event.pressed and event.keycode == KEY_C and event.ctrl_pressed:
 			copy_selected_logs()
@@ -51,32 +56,38 @@ func _input(event: InputEvent) -> void:
 func set_uri(uri: String) -> void:
 	_uri_input.text = uri
 
-func add_module(name: String) -> void:
-	var new_module: Control = $"Prefabs/ModulePrefab".duplicate() as Control
-	var name_input: LineEdit = new_module.get_node("ModuleNameInput") as LineEdit
-	name_input.text = name
-	_modules_container.add_child(new_module)
+func update_module_ui():
+	add_log("updating ui")
+	for child in _modules_container.get_children():
+		add_log("remove module ui child")
+		_modules_container.remove_child(child)
+		child.free()
 
-	name_input.focus_exited.connect(func():
-		var index = new_module.get_index()
-		module_updated.emit(index, name_input.text)
-	)
+	for module_config: SpacetimeDBModuleConfig in _plugin_config.module_configs.values():
+		var new_module: Control = $"Prefabs/ModulePrefab".duplicate() as Control
+		var name_input: LineEdit = new_module.get_node("VBoxContainer/HBoxContainer/VBoxContainer/ModuleNameInput") as LineEdit
+		var alias_input: LineEdit = new_module.get_node("VBoxContainer/HBoxContainer/VBoxContainer/ModuleAliasInput") as LineEdit
+		var reducer_config_box: CheckBox = new_module.get_node("VBoxContainer/ReducerCheckbox") as CheckBox
+		var table_config_box: CheckBox = new_module.get_node("VBoxContainer/TableCheckbox") as CheckBox
+		name_input.text = module_config.name
+		alias_input.text = module_config.alias
+		reducer_config_box.button_pressed = module_config.hide_scheduled_reducers
+		table_config_box.button_pressed = module_config.hide_private_tables
+		_modules_container.add_child(new_module)
 
-	var remove_button: Button = new_module.get_node("RemoveButton") as Button
-	remove_button.button_down.connect(func():
-		var index = new_module.get_index()
-		module_removed.emit(index)
-		_modules_container.remove_child(new_module)
-		new_module.queue_free()
-		
-		if _modules_container.get_child_count() == 0:
-			_add_module_hint_label.show()
-			_generate_button.disabled = true
-	)
-	
-	new_module.show()
-	_add_module_hint_label.hide()
-	_generate_button.disabled = false
+		var remove_button: Button = new_module.get_node("VBoxContainer/HBoxContainer/RemoveButton") as Button
+		remove_button.button_down.connect(func():
+			_plugin_config.module_configs.erase(module_config.alias)
+			_modules_container.remove_child(new_module)
+			new_module.queue_free()
+			if _modules_container.get_child_count() == 0:
+				_add_module_hint_label.show()
+				_generate_button.disabled = true
+		)
+		new_module.show()
+		add_log("added module ui %s" % module_config.name)
+		_add_module_hint_label.hide()
+		_generate_button.disabled = false
 
 func clear_logs():
 	_logs_label.text = ""
@@ -118,6 +129,7 @@ func destroy() -> void:
 	_logs_label = null
 	_add_module_hint_label = null
 	_new_module_name_input = null
+	_new_module_alias_input = null
 	_new_module_button = null
 	_check_uri_button = null
 	_generate_button = null
@@ -125,21 +137,30 @@ func destroy() -> void:
 	_copy_logs_button = null
 
 func _on_check_uri() -> void:
-	check_uri.emit(_uri_input.text)
-	
+	_plugin_config.uri = _uri_input.text
+	check_uri.emit()
+
 func _on_generate_code() -> void:
-	var modules: Array[String] = []
-	for child in _modules_container.get_children():
-		var module_name := (child.get_node("ModuleNameInput") as LineEdit).text
-		modules.append(module_name)
-		
-	generate_schema.emit(_uri_input.text, modules)
-	
+	generate_schema.emit()
+
 func _on_new_module() -> void:
 	var name := _new_module_name_input.text
-	add_module(name)
-	module_added.emit(name)
+	var alias := _new_module_alias_input.text
+	var table_config = _new_module_table_checkbox.button_pressed
+	var reducer_config = _new_module_reducer_checkbox.button_pressed
+	if alias.is_empty():
+		alias = name
+	var module_config: SpacetimeDBModuleConfig = _plugin_config.module_configs.get(alias, SpacetimeDBModuleConfig.new())
+	module_config.name = name
+	module_config.alias = alias
+	module_config.hide_private_tables = table_config
+	module_config.hide_scheduled_reducers = reducer_config
+	_plugin_config.module_configs.set(alias, module_config)
 	_new_module_name_input.text = ""
+	_new_module_alias_input.text = ""
+	plugin_config_changed.emit()
+	update_module_ui()
+
 
 func _on_clear_logs() -> void:
 	clear_logs()
