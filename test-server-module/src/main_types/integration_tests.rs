@@ -34,7 +34,7 @@ pub struct TestTableDatatypes {
     // pub t_i128: i128, // client BSATNDeserializer doesn't support it
     pub t_string: String,
     pub t_vec_string: Vec<String>,
-    pub t_vec_u64: Vec<u64>,
+    pub t_vec_u8: Vec<u8>,
     pub t_opt_string: Option<String>,
     pub t_opt_u64: Option<u64>,
     pub t_test_enum: TestEnum,
@@ -61,7 +61,7 @@ impl Default for TestTableDatatypes {
             t_i64: 0,
             t_string: "".to_string(),
             t_vec_string: vec!["".to_string()],
-            t_vec_u64: vec![0],
+            t_vec_u8: vec![0],
             t_opt_string: Some("".to_string()),
             t_opt_u64: Some(0),
             t_test_enum: TestEnum::default(),
@@ -114,7 +114,7 @@ pub fn test_scheduled_reducer(ctx: &ReducerContext, mut row: TestScheduledTable)
                 //t_i128: row.t_i128 - 1,
                 t_string: row.t_u8.to_string(),
                 t_vec_string: vec![row.t_u8.to_string(), row.t_i16.to_string()],
-                t_vec_u64: vec![row.t_u64, row.t_u64],
+                t_vec_u8: vec![row.t_u8, row.t_u8],
                 t_opt_string: if row.t_opt_string.is_some() {
                     None
                 } else {

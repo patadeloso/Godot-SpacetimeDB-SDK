@@ -30,7 +30,7 @@ func _init(p_debug_mode: bool = false) -> void:
 	debug_mode = p_debug_mode
 	_spb = StreamPeerBuffer.new()
 	_spb.big_endian = false # Use Little-Endian
-	
+
 	_native_arraylike_regex.compile("^(?<struct>.+)\\[(?<components>.*)\\]$")
 
 # --- Error Handling ---
@@ -192,7 +192,7 @@ func write_rust_enum(rust_enum: RustEnum) -> void:
 func write_option(option_value: Option, bsatn_type: String, prop: Dictionary) -> bool:
 	#print("write_option(%s)" % option_value)
 	var prop_name: StringName = prop.name
-	
+
 	if not option_value is Option:
 		_set_error("Value provided to write_option is not an Option instance (type: %s) for property '%s'." % [typeof(option_value), prop_name])
 		return false
@@ -221,18 +221,18 @@ func write_option(option_value: Option, bsatn_type: String, prop: Dictionary) ->
 func write_array(v: Array, bsatn_type: String, prop: Dictionary) -> void:
 	#print("write_array(%s)" % str(v))
 	var prop_name: StringName = prop.name
-	
+
 	# 1. Write array length (u32)
 	write_u32_le(v.size())
 	if has_error(): return
 	if v.size() == 0: return
-	
+
 	# 2. Determine element prototype info (Variant.Type, class_name)
 	var hint: int = prop.hint
 	var hint_string: String = prop.hint_string
 	var element_type_code: Variant.Type = TYPE_MAX
 	var element_class_name: StringName = &""
-	
+
 	if hint == PROPERTY_HINT_TYPE_STRING and ":" in hint_string: # Godot 3: "Type:TypeName"
 		var hint_parts = hint_string.split(":", true, 1)
 		if hint_parts.size() == 2:
@@ -247,17 +247,17 @@ func write_array(v: Array, bsatn_type: String, prop: Dictionary) -> void:
 			element_class_name = parts[1]
 		else:
 			element_type_code = int(main_type_str)
-	
+
 	if element_type_code == TYPE_MAX and not v.is_empty():
 		var first_element = v[0]
 		element_type_code = typeof(first_element)
 		if element_type_code == TYPE_OBJECT:
 			element_class_name = _get_value_class_name(first_element)
-	
+
 	if element_type_code == TYPE_MAX and bsatn_type.is_empty():
 		_set_error("Array '%s' needs a typed hint or must not be empty for serialization. Hint: %d, HintString: '%s'" % [prop_name, hint, hint_string])
 		return
-	
+
 	# 3. Create a temporary "prototype" dictionary for the element
 	var element_prop_sim = {
 		"name": prop_name + "[element]",
@@ -267,7 +267,7 @@ func write_array(v: Array, bsatn_type: String, prop: Dictionary) -> void:
 		"hint": 0,
 		"hint_string": ""
 	}
-	
+
 	# 4. Determine the writer function for the ELEMENTS
 	var element_writer_callable : Callable
 	if element_class_name == &"Option":
@@ -280,23 +280,23 @@ func write_array(v: Array, bsatn_type: String, prop: Dictionary) -> void:
 			element_writer_callable = _get_primitive_writer_from_bsatn_type(bsatn_type)
 			if not element_writer_callable.is_valid() and debug_mode:
 				push_warning("Array '%s' has 'bsatn_type' metadata ('%s'), but it doesn't map to a primitive reader. Falling back to element type hint." % [prop_name, bsatn_type])
-				
+
 		element_writer_callable = _get_writer_callable_for_property(element_prop_sim, bsatn_type)
-	
+
 	if not element_writer_callable.is_valid():
 		_set_error("Cannot determine writer for elements of array '%s' (element type code %d, class '%s')." % [prop_name, element_type_code, element_class_name])
 		return
-		
+
 	for i in range(v.size()):
 		if has_error(): return # Stop on error
 		var element_value = v[i]
-		
+
 		if element_writer_callable.get_object() == self:
 			_call_writer_callable(element_writer_callable, element_value, bsatn_type, element_prop_sim)
-		else: 
+		else:
 			_set_error("Internal error: Invalid element writer callable for array '%s'." % prop_name)
 			return
-		
+
 		if has_error():
 			if not _last_error.contains("element %d" % i) and not _last_error.contains(str(prop_name)): # Avoid redundant context
 				var existing_error = get_last_error()
@@ -307,20 +307,20 @@ func write_array(v: Array, bsatn_type: String, prop: Dictionary) -> void:
 func write_native_arraylike(v: Variant, bsatn_type: String, prop: Dictionary) -> void:
 	#print("write_native_arraylike(%s)" % v)
 	var prop_name: StringName = prop.name
-	
+
 	if bsatn_type.is_empty():
 		_set_error("Array-like gd type '%' has empty 'bsatn_type' metadata. Inner component types cannot be determined." % prop_name)
 		return
-	
+
 	var result = _native_arraylike_regex.search(bsatn_type)
 	var bsatn_struct_type := result.get_string("struct")
 	if bsatn_struct_type.is_empty():
 		_set_error("Cannot determine struct type for array-like gd type '%s' from 'bsatn_type' metadata ('%s')" % [prop_name, bsatn_type])
 		return
-		
+
 	if v == null: v = _generate_default_type(bsatn_struct_type)
 	var value_type := typeof(v)
-	
+
 	var components: Array
 	match value_type:
 		TYPE_VECTOR2: components = [v.x, v.y]
@@ -334,18 +334,18 @@ func write_native_arraylike(v: Variant, bsatn_type: String, prop: Dictionary) ->
 		_:
 			_set_error("Unsupported array-like gd type '%s' ('%s'). Could not assign components array." % [prop_name, type_string(value_type)])
 			return
-	
+
 	var bsatn_types_for_components := result.get_string("components")
 	if bsatn_types_for_components.is_empty():
 		_set_error("Cannot determine inner component types for array-like gd type '%s' from 'bsatn_type' metadata ('%s')" % [prop_name, bsatn_type])
 		return
-	
+
 	var bsatn_component_types := bsatn_types_for_components.split(",")
 	if bsatn_component_types.size() != components.size():
 		_set_error("Array-like gd type '%s' expected 'bsatn_type' to have %d component types but has %d" % \
 			[prop_name, components.size(), bsatn_component_types.size()])
 		return
-	
+
 	for i in range(components.size()):
 		var value = components[i]
 		var bsatn_component_type = bsatn_component_types[i]
@@ -356,10 +356,10 @@ func write_nested_resource(resource: Resource, bsatn_type: String, prop: Diction
 	if resource is not Resource:
 		_set_error("Cannot serialize non-Resource Object argument.")
 		return
-	
+
 	var prop_name: StringName = prop.name
 	var nested_class_name: StringName = prop.class_name
-	
+
 	# Serialize resource fields directly inline (recursive)
 	if not _serialize_resource_fields(resource):
 		if not has_error(): _set_error("Failed to serialize nested resource '%s' of '%s'." % [prop_name, nested_class_name])
@@ -370,7 +370,7 @@ func _get_value_class_name(value: Variant) -> String:
 	if value is Resource:
 		var script = value.get_script()
 		return script.get_global_name() if script and script.get_global_name() else value.resource_path
-	
+
 	if typeof(value) == TYPE_OBJECT: return value.get_class()
 	return type_string(typeof(value))
 
@@ -400,16 +400,16 @@ func _get_primitive_writer_from_bsatn_type(bsatn_type_str: String) -> Callable:
 func _get_writer_callable_for_property(prop: Dictionary, bsatn_type_str: String) -> Callable:
 	var prop_name: StringName = prop.name
 	var prop_type: Variant.Type = prop.type
-	
+
 	var writer_callable := Callable() # Initialize with invalid Callable
-	
+
 	# --- Special Cases First ---
 	# Add other special cases here if needed (e.g., Option<T> fields if handled generically later)
 	if prop.class_name == &"Option":
 		writer_callable = Callable(self, "write_option")
 	elif prop.class_name == &"RustEnum":
 		writer_callable = Callable(self, "write_rust_enum")
-	
+
 	# --- Generic Type Handling (if not a special case) ---
 	elif prop_type == TYPE_ARRAY:
 		# Handle arrays
@@ -431,7 +431,7 @@ func _get_writer_callable_for_property(prop: Dictionary, bsatn_type_str: String)
 			match prop_type:
 				TYPE_NIL: _set_error("Cannot serialize null argument.")
 				TYPE_BOOL: writer_callable = Callable(self, "write_bool")
-				TYPE_INT: 
+				TYPE_INT:
 					match bsatn_type_str:
 						&"u8": writer_callable = Callable(self, "write_u8")
 						&"u16": writer_callable = Callable(self, "write_u16_le")
@@ -441,7 +441,7 @@ func _get_writer_callable_for_property(prop: Dictionary, bsatn_type_str: String)
 						&"i16": writer_callable = Callable(self, "write_i16_le")
 						&"i32": writer_callable = Callable(self, "write_i32_le")
 						_: writer_callable = Callable(self, "write_i64_le") #Default i64
-				TYPE_FLOAT: 
+				TYPE_FLOAT:
 					match bsatn_type_str:
 						&"f64": writer_callable = Callable(self, "write_f64_le")
 						_: writer_callable = Callable(self, "write_f32_le") # Default f32
@@ -453,13 +453,13 @@ func _get_writer_callable_for_property(prop: Dictionary, bsatn_type_str: String)
 				_:
 					# Writer remains invalid for unsupported types
 					pass
-	
+
 	# --- Debug Print (Optional) ---
 	if debug_mode:
 		var type_name = prop.class_name if prop.class_name != &"" else (type_string(prop.type) if prop.type != TYPE_MAX else "Unknown")
 		print("DEBUG: _get_writer_callable: For '%s' of type '%s', returning: %s" % [prop.name, type_name, writer_callable.get_method() if writer_callable.is_valid() else "INVALID"])
 	# --- End Debug ---
-	
+
 	return writer_callable
 
 func _call_writer_callable(writer_callable: Callable, value: Variant, bsatn_type: String, prop: Dictionary) -> void:
@@ -497,7 +497,7 @@ func _generate_default_type(bsatn_type_name: String) -> Variant:
 ## Assumes bsatn_type_str is already to_lower() if it's from metadata.
 func _write_value_from_bsatn_type(value: Variant, bsatn_type_str: String, context_prop_name_for_prototype: StringName) -> bool:
 	var value_type = typeof(value)
-	
+
 	# 1. Try primitive writer (expects lowercase bsatn_type_str) if not an array
 	if value_type != TYPE_ARRAY:
 		var primitive_writer := _get_primitive_writer_from_bsatn_type(bsatn_type_str)
@@ -505,7 +505,7 @@ func _write_value_from_bsatn_type(value: Variant, bsatn_type_str: String, contex
 			primitive_writer.call(value)
 			if has_error(): return false
 			return true
-	
+
 	# 2. Create a temporary "prototype" dictionary for the value
 	var value_class_name = _get_value_class_name(value)
 	var prop_sim = {
@@ -516,27 +516,27 @@ func _write_value_from_bsatn_type(value: Variant, bsatn_type_str: String, contex
 		"hint": 0,
 		"hint_string": ""
 	}
-	
+
 	# 3. Determine from value type and bsatn type string
 	var writer_callable := _get_writer_callable_for_property(prop_sim, bsatn_type_str)
-	
+
 	if not writer_callable.is_valid() and not has_error():
 		_set_error("Unsupported BSATN type '%s' or missing writer for value '%s'" % [bsatn_type_str, prop_sim.class_name])
-	
+
 	if has_error(): return false
-	
+
 	# Call the determined writer function.
 	if writer_callable.get_object() == self:
 		_call_writer_callable(writer_callable, value, bsatn_type_str, prop_sim)
 	else:
 		# Should not happen with Callables created above, but handle defensively
 		_set_error("Internal error: Invalid writer callable.")
-	
+
 	return not has_error()
 
 func _create_serialization_plan(script: Script, resource: Resource) -> Array:
 	if debug_mode: print("DEBUG: Creating serialization plan for script: %s" % script.resource_path)
-	
+
 	var plan = []
 	var properties: Array = script.get_script_property_list()
 	for prop in properties:
@@ -549,14 +549,14 @@ func _create_serialization_plan(script: Script, resource: Resource) -> Array:
 		if resource.has_meta(meta_key):
 			# This metadata applies to the field itself, or to the *elements* if it's an array.
 			bsatn_type_str = str(resource.get_meta(meta_key)).to_lower()
-		
+
 		var writer_callable: Callable = _get_writer_callable_for_property(prop, bsatn_type_str)
-		
+
 		if not writer_callable.is_valid():
 			_set_error("Unsupported property or missing writer for '%s' in script '%s'" % [prop_name, script.resource_path])
 			_serialization_plan_cache[script] = []
 			return []
-			
+
 		plan.append({
 			"name": prop_name,
 			"type": prop.type,
@@ -564,7 +564,7 @@ func _create_serialization_plan(script: Script, resource: Resource) -> Array:
 			"bsatn_type": bsatn_type_str,
 			"prop_dict": prop
 		})
-	
+
 	_serialization_plan_cache[script] = plan
 	return plan
 
@@ -573,31 +573,31 @@ func _serialize_resource_fields(resource: Resource) -> bool:
 	var script := resource.get_script()
 	if not resource or not script:
 		_set_error("Cannot serialize fields of null or scriptless resource"); return false
-	
+
 	if resource is RustEnum:
 		write_rust_enum(resource)
 		return true
-	
+
 	var plan = _serialization_plan_cache.get(script)
 	if plan == null:
 		plan = _create_serialization_plan(script, resource)
 		if has_error(): return false
-	
+
 	for instruction in plan:
 		var value = resource.get(instruction.name) # Get the actual value from the resource instance
-		
+
 		if instruction.writer.get_object() == self:
 			_call_writer_callable(instruction.writer, value, instruction.bsatn_type, instruction.prop_dict)
-		else: 
+		else:
 			_set_error("Internal error: Invalid writer callable for property '%s' in '%s'." % [instruction.name, resource.get_script().get_global_name() if resource else "Unknown"])
 			return false
-		
+
 		if has_error():
 			if not _last_error.contains(str(instruction.name)):
 				var existing_error = get_last_error()
 				_set_error("Failed writing value for property '%s' in '%s'. Cause: %s" % [instruction.name, resource.get_script().get_global_name() if resource else "Unknown", existing_error])
 			return false
-	
+
 	return true # All fields serialized successfully
 
 # --- Argument Serialization Helpers ---
@@ -606,17 +606,17 @@ func _serialize_resource_fields(resource: Resource) -> bool:
 func _serialize_arguments(args_array: Array, bsatn_types: Array) -> PackedByteArray:
 	var args_spb := StreamPeerBuffer.new(); args_spb.big_endian = false
 	var original_main_spb := _spb; _spb = args_spb # Temporarily redirect writes
-	
+
 	for i in range(args_array.size()):
 		var arg_value = args_array[i]
 		var bsatn_type = ""
 		if i < bsatn_types.size():
 			bsatn_type = bsatn_types[i]
-			
+
 		if debug_mode:
 			var arg_type_name: String = _get_value_class_name(arg_value)
 			print("DEBUG: _serialize_arguments: Serializing argument at %d from '%s' to bsatn type '%s'" % [i, arg_type_name, bsatn_type])
-		
+
 		if not _write_argument_value(arg_value, bsatn_type, "arg[%s]" % i): # Use dedicated argument writer
 			# Error should be set by _write_argument_value
 			push_error("Failed to serialize argument %d." % i) # Add context
@@ -639,21 +639,21 @@ func _write_argument_value(value, bsatn_type: String = "", context_prop_name_for
 		"hint": 0,
 		"hint_string": ""
 	}
-	
+
 	var writer_callable := _get_writer_callable_for_property(prop_sim, bsatn_type)
-	
+
 	if not writer_callable.is_valid() and not has_error():
 		_set_error("Unsupported argument type '%s' or missing writer for '%s' with 'bsatn_type' metadata ('%s')" % [prop_sim.class_name, prop_sim.name, bsatn_type])
-	
+
 	if has_error(): return false
-	
+
 	# Call the determined writer function.
 	if writer_callable.get_object() == self:
 		_call_writer_callable(writer_callable, value, bsatn_type, prop_sim)
 	else:
 		# Should not happen with Callables created above, but handle defensively
 		_set_error("Internal error: Invalid writer callable for '%s'" % prop_sim.name)
-	
+
 	return not has_error()
 
 # --- Public API ---

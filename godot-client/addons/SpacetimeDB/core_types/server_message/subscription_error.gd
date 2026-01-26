@@ -12,7 +12,7 @@ func _init():
 	query_id = -1
 	table_id_resource = null # Default to None
 	set_meta("bsatn_type_total_host_execution_duration_micros", "u64")
-	
+
 func has_request_id() -> bool: return request_id != -1
 func has_query_id() -> bool: return query_id != -1
 func has_table_id() -> bool: return table_id_resource != null

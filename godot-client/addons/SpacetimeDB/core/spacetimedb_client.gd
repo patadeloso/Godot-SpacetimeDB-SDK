@@ -162,8 +162,7 @@ func _generate_connection_id() -> String:
 func _on_token_received(received_token: String):
 	print_log("SpacetimeDBClient: Token acquired.")
 	self._token = received_token
-	if not one_time_token:
-		_save_token(received_token)
+	_save_token(received_token)
 	var conn_id = _generate_connection_id()
 	# Pass token to components that need it
 	_connection.set_token(self._token)
