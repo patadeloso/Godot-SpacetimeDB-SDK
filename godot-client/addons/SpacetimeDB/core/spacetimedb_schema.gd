@@ -7,7 +7,7 @@ var debug_mode: bool = false # Controls verbose debug printing
 
 func _init(p_module_name: String, p_schema_path: String = "res://spacetime_bindings/schema", p_debug_mode: bool = false) -> void:
 	debug_mode = p_debug_mode
-	
+
 	# Load table row schemas and spacetime types
 	_load_types("%s/types" % p_schema_path, p_module_name.to_snake_case())
 	# Load core types if they are defined as Resources with scripts
@@ -17,7 +17,7 @@ func _load_types(raw_path: String, prefix: String = "") -> void:
 	var path := raw_path
 	if path.ends_with("/**"):
 		path = path.left(-3)
-	
+
 	var dir := DirAccess.open(path)
 	if not DirAccess.dir_exists_absolute(path):
 		printerr("SpacetimeDBSchema: Schema directory does not exist: ", path)
@@ -28,7 +28,7 @@ func _load_types(raw_path: String, prefix: String = "") -> void:
 		var file_name_raw := dir.get_next()
 		if file_name_raw == "":
 			break
-		
+
 		if dir.current_is_dir():
 			var dir_name := file_name_raw
 			if dir_name != "." and dir_name != ".." and raw_path.ends_with("/**"):
@@ -46,7 +46,7 @@ func _load_types(raw_path: String, prefix: String = "") -> void:
 
 		if not file_name.ends_with(".gd"):
 			continue
-			
+
 		if prefix != "" and not file_name.begins_with(prefix):
 			continue
 
@@ -61,9 +61,9 @@ func _load_types(raw_path: String, prefix: String = "") -> void:
 			var instance = script.new()
 			if instance is Resource: # Ensure it's a resource to get metadata
 				var fallback_table_names: Array[String] = [file_name.get_basename().get_file()]
-				
+
 				var constants := script.get_script_constant_map()
-							
+
 				if constants.has('table_names'):
 					_add_table_names(constants['table_names'] as Array[String], true, script, script_path)
 				_add_table_names(fallback_table_names, false, script, script_path)
@@ -78,7 +78,7 @@ func _add_table_names(table_names: Array[String], is_table: bool, script: GDScri
 		var lower_table_name := table_name.to_lower().replace("_", "")
 		if types.has(lower_table_name) and debug_mode:
 			push_warning("SpacetimeDBSchema: Overwriting schema for table '%s' (from %s)" % [table_name, script_path])
-			
+
 		if is_table:
 			tables[lower_table_name] = script
 		types[lower_table_name] = script

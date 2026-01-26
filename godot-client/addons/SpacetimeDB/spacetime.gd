@@ -50,6 +50,16 @@ func _enter_tree():
 	var author: String = config_file.get_value("plugin", "author", "??")
 
 	print_log("SpacetimeDB SDK v%s (c) 2025-present %s & Contributors" % [version, author])
+	print_log("""new module:
+[ul]
+name: required
+alias: optional
+hide scheduled reducer: hides the scheduled reducer from the client
+hide private tables: hides private tables from the client
+[/ul]
+
+after generating the files. please restart godot.
+""")
 	load_codegen_data()
 
 
@@ -97,7 +107,6 @@ func _on_generate_schema():
 
 	print_log("Starting code generation...")
 	print_log("Fetching module schemas...")
-	var module_schemas: Dictionary[String, String] = {}
 	var failed = false
 	for module_alias: String in plugin_config.module_configs:
 		var module_config: SpacetimeDBModuleConfig = plugin_config.module_configs[module_alias]
@@ -105,9 +114,9 @@ func _on_generate_schema():
 		http_request.request(schema_uri)
 		var result = await http_request.request_completed
 		if result[1] == 200:
-			var json = PackedByteArray(result[3]).get_string_from_utf8()
+			var json: String= PackedByteArray(result[3]).get_string_from_utf8()
 			var snake_module_name = module_config.alias.replace("-", "_")
-			module_schemas[snake_module_name] = json
+			module_config.unparsed_module_schema = json
 			print_log("Fetched schema for module: %s with alias: %s" % [module_config.name, module_config.alias])
 			continue
 
@@ -124,7 +133,8 @@ func _on_generate_schema():
 		return
 
 	var codegen := SpacetimeCodegen.new(BINDINGS_SCHEMA_PATH)
-	var generated_files := codegen.generate_bindings(module_schemas)
+	codegen._plugin_config = plugin_config
+	var generated_files := codegen.generate_bindings()
 
 	_cleanup_unused_classes(BINDINGS_SCHEMA_PATH, generated_files)
 

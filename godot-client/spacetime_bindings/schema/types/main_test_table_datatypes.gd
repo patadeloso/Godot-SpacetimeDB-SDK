@@ -19,7 +19,7 @@ const table_names: Array[String] = ['test_table_datatypes', 'test_anonymous_all_
 @export var t_i64: int
 @export var t_string: String
 @export var t_vec_string: Array[String]
-@export var t_vec_u64: Array[int]
+@export var t_vec_u8: Array[int]
 @export var t_opt_string: Option ## Option of String
 @export var t_opt_u64: Option ## Option of int
 @export var t_test_enum: MainModuleClient.Types.TestEnum
@@ -51,7 +51,7 @@ func _reset_metadata() -> void:
 	set_meta('bsatn_type_t_i64', &'i64')
 	set_meta('bsatn_type_t_string', &'string')
 	set_meta('bsatn_type_t_vec_string', &'string')
-	set_meta('bsatn_type_t_vec_u64', &'u64')
+	set_meta('bsatn_type_t_vec_u8', &'u8')
 	set_meta('underlying_type_t_opt_string', &'String')
 	set_meta('bsatn_type_t_opt_string', &'string')
 	set_meta('underlying_type_t_opt_u64', &'int')
@@ -78,7 +78,7 @@ func _reset_metadata() -> void:
 ## 10. t_i64: int[br]
 ## 11. t_string: String[br]
 ## 12. t_vec_string: Array of String[br]
-## 13. t_vec_u64: Array of int[br]
+## 13. t_vec_u8: Array of int[br]
 ## 14. t_opt_string: Option of String[br]
 ## 15. t_opt_u64: Option of int[br]
 ## 16. t_test_enum: MainModuleClient.Types.TestEnum[br]
@@ -87,7 +87,7 @@ func _reset_metadata() -> void:
 ## 19. t_test_type: MainTestType[br]
 ## 20. t_test_type_vec: Array of MainTestType[br]
 ## 21. t_test_type_option: Option of MainTestType[br]
-static func create(p_t_u64: int, p_t_u8: int, p_t_u16: int, p_t_u32: int, p_t_u128: PackedByteArray, p_t_f32: float, p_t_f64: float, p_t_i8: int, p_t_i16: int, p_t_i32: int, p_t_i64: int, p_t_string: String, p_t_vec_string: Array[String], p_t_vec_u64: Array[int], p_t_opt_string: Option, p_t_opt_u64: Option, p_t_test_enum: MainModuleClient.Types.TestEnum, p_t_test_enum_vec: Array[MainModuleClient.Types.TestEnum], p_t_test_enum_option: Option, p_t_test_type: MainTestType, p_t_test_type_vec: Array[MainTestType], p_t_test_type_option: Option) -> MainTestTableDatatypes:
+static func create(p_t_u64: int, p_t_u8: int, p_t_u16: int, p_t_u32: int, p_t_u128: PackedByteArray, p_t_f32: float, p_t_f64: float, p_t_i8: int, p_t_i16: int, p_t_i32: int, p_t_i64: int, p_t_string: String, p_t_vec_string: Array[String], p_t_vec_u8: Array[int], p_t_opt_string: Option, p_t_opt_u64: Option, p_t_test_enum: MainModuleClient.Types.TestEnum, p_t_test_enum_vec: Array[MainModuleClient.Types.TestEnum], p_t_test_enum_option: Option, p_t_test_type: MainTestType, p_t_test_type_vec: Array[MainTestType], p_t_test_type_option: Option) -> MainTestTableDatatypes:
 	var result: MainTestTableDatatypes = MainTestTableDatatypes.new()
 	result.t_u64 = p_t_u64
 	result.t_u8 = p_t_u8
@@ -102,7 +102,7 @@ static func create(p_t_u64: int, p_t_u8: int, p_t_u16: int, p_t_u32: int, p_t_u1
 	result.t_i64 = p_t_i64
 	result.t_string = p_t_string
 	result.t_vec_string = p_t_vec_string
-	result.t_vec_u64 = p_t_vec_u64
+	result.t_vec_u8 = p_t_vec_u8
 	result.t_opt_string = p_t_opt_string
 	result.t_opt_u64 = p_t_opt_u64
 	result.t_test_enum = p_t_test_enum

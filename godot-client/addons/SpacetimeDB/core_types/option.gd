@@ -38,7 +38,7 @@ func unwrap():
 	else:
 		push_error("Attempted to unwrap a None Optional value!")
 		return null
-		
+
 func unwrap_or(default_value):
 	if is_some():
 		return _internal_data[0]
@@ -63,10 +63,10 @@ func expect(type: Variant.Type, err_msg: String = ""):
 		err_msg = "Expected type %s, got None" % type if err_msg.is_empty() else err_msg
 		push_error(err_msg)
 		return null
-		
+
 func set_some(value):
 	self.data = [value]
-	
+
 func set_none():
 	self.data = []
 

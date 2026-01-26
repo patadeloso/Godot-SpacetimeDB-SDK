@@ -59,7 +59,7 @@ func set_uri(uri: String) -> void:
 func update_module_ui():
 	for child in _modules_container.get_children():
 		_modules_container.remove_child(child)
-		child.free()
+		child.queue_free()
 
 	for module_config: SpacetimeDBModuleConfig in _plugin_config.module_configs.values():
 		var new_module: Control = $"Prefabs/ModulePrefab".duplicate() as Control
