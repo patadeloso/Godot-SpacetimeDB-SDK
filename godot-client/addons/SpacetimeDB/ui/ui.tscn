@@ -131,7 +131,7 @@ text = "Hide scheduled reducer"
 [node name="TableCheckbox" type="CheckBox" parent="Prefabs/ModulePrefab/VBoxContainer" unique_id=1106248549]
 layout_mode = 2
 button_pressed = true
-text = "Hide private Tables"
+text = "Hide private tables"
 
 [node name="Main" type="VBoxContainer" parent="." unique_id=1927142397]
 layout_mode = 1
@@ -148,6 +148,7 @@ size_flags_vertical = 3
 theme_override_constants/separation = 4
 
 [node name="Logs" type="RichTextLabel" parent="Main/Content" unique_id=776566878]
+unique_name_in_owner = true
 custom_minimum_size = Vector2(0, 9)
 layout_mode = 2
 size_flags_horizontal = 3
@@ -172,74 +173,77 @@ custom_minimum_size = Vector2(250, 0)
 layout_mode = 2
 theme_override_constants/separation = 4
 
-[node name="ModulesLabel" type="Label" parent="Main/Content/Sidebar" unique_id=1554960587]
-layout_mode = 2
-text = "Modules"
-horizontal_alignment = 1
-
-[node name="Modules" type="Control" parent="Main/Content/Sidebar" unique_id=2077860174]
-self_modulate = Color(1, 1, 1, 0)
+[node name="ScrollContainer" type="ScrollContainer" parent="Main/Content/Sidebar" unique_id=1958680145]
+custom_minimum_size = Vector2(250, 0)
 layout_mode = 2
 size_flags_vertical = 3
 
-[node name="AddModuleHint" type="RichTextLabel" parent="Main/Content/Sidebar/Modules" unique_id=1922651127]
-layout_mode = 1
-anchors_preset = 15
-anchor_right = 1.0
-anchor_bottom = 1.0
-grow_horizontal = 2
-grow_vertical = 2
-theme_override_styles/normal = SubResource("StyleBoxEmpty_d0lf3")
-bbcode_enabled = true
-text = "Add a module by entering the name below and clicking [img]res://addons/SpacetimeDB/ui/icons/Add.svg[/img]"
-scroll_active = false
-horizontal_alignment = 1
-vertical_alignment = 1
-
-[node name="ModulesList" type="ScrollContainer" parent="Main/Content/Sidebar/Modules" unique_id=158256308]
-layout_mode = 1
-anchors_preset = 15
-anchor_right = 1.0
-anchor_bottom = 1.0
-grow_horizontal = 2
-grow_vertical = 2
-size_flags_vertical = 3
-
-[node name="VBox" type="VBoxContainer" parent="Main/Content/Sidebar/Modules/ModulesList" unique_id=1083011433]
+[node name="VBoxContainer" type="VBoxContainer" parent="Main/Content/Sidebar/ScrollContainer" unique_id=288646920]
+custom_minimum_size = Vector2(250, 0)
 layout_mode = 2
 size_flags_horizontal = 3
 size_flags_vertical = 3
 
-[node name="PanelContainer2" type="PanelContainer" parent="Main/Content/Sidebar" unique_id=470251646]
+[node name="ModulesLabel" type="Label" parent="Main/Content/Sidebar/ScrollContainer/VBoxContainer" unique_id=1554960587]
+layout_mode = 2
+text = "Modules"
+horizontal_alignment = 1
+
+[node name="AddModuleHint" type="RichTextLabel" parent="Main/Content/Sidebar/ScrollContainer/VBoxContainer" unique_id=1922651127]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_vertical = 3
+theme_override_styles/normal = SubResource("StyleBoxEmpty_d0lf3")
+bbcode_enabled = true
+text = "Add a module by entering the name below and clicking [img]res://addons/SpacetimeDB/ui/icons/Add.svg[/img]"
+fit_content = true
+scroll_active = false
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="ModulesContainer" type="VBoxContainer" parent="Main/Content/Sidebar/ScrollContainer/VBoxContainer" unique_id=1083011433]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+
+[node name="ModulesLabel2" type="Label" parent="Main/Content/Sidebar/ScrollContainer/VBoxContainer" unique_id=1852514859]
+layout_mode = 2
+text = "Add New Module"
+horizontal_alignment = 1
+
+[node name="PanelContainer2" type="PanelContainer" parent="Main/Content/Sidebar/ScrollContainer/VBoxContainer" unique_id=470251646]
 custom_minimum_size = Vector2(245, 0)
 layout_mode = 2
 size_flags_horizontal = 3
 theme_override_styles/panel = SubResource("StyleBoxFlat_ej8d4")
 
-[node name="VBoxContainer" type="VBoxContainer" parent="Main/Content/Sidebar/PanelContainer2" unique_id=731307918]
+[node name="VBoxContainer" type="VBoxContainer" parent="Main/Content/Sidebar/ScrollContainer/VBoxContainer/PanelContainer2" unique_id=731307918]
 layout_mode = 2
 
-[node name="NewModule" type="HBoxContainer" parent="Main/Content/Sidebar/PanelContainer2/VBoxContainer" unique_id=133310361]
+[node name="NewModule" type="HBoxContainer" parent="Main/Content/Sidebar/ScrollContainer/VBoxContainer/PanelContainer2/VBoxContainer" unique_id=133310361]
 self_modulate = Color(1, 1, 1, 0)
 custom_minimum_size = Vector2(0, 35)
 layout_mode = 2
 theme_override_constants/separation = 5
 
-[node name="VBoxContainer" type="VBoxContainer" parent="Main/Content/Sidebar/PanelContainer2/VBoxContainer/NewModule" unique_id=157228287]
+[node name="VBoxContainer" type="VBoxContainer" parent="Main/Content/Sidebar/ScrollContainer/VBoxContainer/PanelContainer2/VBoxContainer/NewModule" unique_id=157228287]
 layout_mode = 2
 size_flags_horizontal = 3
 
-[node name="ModuleNameInput" type="LineEdit" parent="Main/Content/Sidebar/PanelContainer2/VBoxContainer/NewModule/VBoxContainer" unique_id=352108602]
+[node name="ModuleNameInput" type="LineEdit" parent="Main/Content/Sidebar/ScrollContainer/VBoxContainer/PanelContainer2/VBoxContainer/NewModule/VBoxContainer" unique_id=352108602]
+unique_name_in_owner = true
 layout_mode = 2
 size_flags_horizontal = 3
 placeholder_text = "Enter module name"
 
-[node name="ModuleAliasInput" type="LineEdit" parent="Main/Content/Sidebar/PanelContainer2/VBoxContainer/NewModule/VBoxContainer" unique_id=191976263]
+[node name="ModuleAliasInput" type="LineEdit" parent="Main/Content/Sidebar/ScrollContainer/VBoxContainer/PanelContainer2/VBoxContainer/NewModule/VBoxContainer" unique_id=191976263]
+unique_name_in_owner = true
 layout_mode = 2
 size_flags_horizontal = 3
 placeholder_text = "Enter Alias name"
 
-[node name="AddButton" type="Button" parent="Main/Content/Sidebar/PanelContainer2/VBoxContainer/NewModule" unique_id=1405223987]
+[node name="AddButton" type="Button" parent="Main/Content/Sidebar/ScrollContainer/VBoxContainer/PanelContainer2/VBoxContainer/NewModule" unique_id=1405223987]
 custom_minimum_size = Vector2(26, 27)
 layout_mode = 2
 size_flags_horizontal = 8
@@ -250,17 +254,20 @@ theme_override_styles/focus = SubResource("StyleBoxEmpty_k511v")
 icon = ExtResource("2_3cpcg")
 icon_alignment = 1
 
-[node name="ReducerCheckbox" type="CheckBox" parent="Main/Content/Sidebar/PanelContainer2/VBoxContainer" unique_id=1426498162]
+[node name="ReducerCheckbox" type="CheckBox" parent="Main/Content/Sidebar/ScrollContainer/VBoxContainer/PanelContainer2/VBoxContainer" unique_id=1426498162]
+unique_name_in_owner = true
 layout_mode = 2
 button_pressed = true
 text = "Hide scheduled reducer"
 
-[node name="TablesCheckbox" type="CheckBox" parent="Main/Content/Sidebar/PanelContainer2/VBoxContainer" unique_id=1656566781]
+[node name="TablesCheckbox" type="CheckBox" parent="Main/Content/Sidebar/ScrollContainer/VBoxContainer/PanelContainer2/VBoxContainer" unique_id=1656566781]
+unique_name_in_owner = true
 layout_mode = 2
 button_pressed = true
-text = "Hide private Tables"
+text = "Hide private tables"
 
 [node name="GenerateButton" type="Button" parent="Main/Content/Sidebar" unique_id=1719959949]
+unique_name_in_owner = true
 custom_minimum_size = Vector2(0, 31)
 layout_mode = 2
 disabled = true
@@ -307,6 +314,7 @@ text = "Server URI:"
 vertical_alignment = 1
 
 [node name="UriInput" type="LineEdit" parent="Main/BottomBar/ServerUri" unique_id=134731222]
+unique_name_in_owner = true
 layout_mode = 2
 size_flags_horizontal = 3
 text = "http://127.0.0.1:3000"
@@ -315,3 +323,9 @@ placeholder_text = "Enter the server URI"
 [node name="CheckUri" type="Button" parent="Main/BottomBar" unique_id=741931029]
 layout_mode = 2
 text = "Check URI"
+
+[connection signal="pressed" from="Main/Content/Sidebar/ScrollContainer/VBoxContainer/PanelContainer2/VBoxContainer/NewModule/AddButton" to="." method="_on_new_module"]
+[connection signal="pressed" from="Main/Content/Sidebar/GenerateButton" to="." method="_on_generate_code"]
+[connection signal="pressed" from="Main/BottomBar/LogsControls/ClearLogsButton" to="." method="_on_clear_logs"]
+[connection signal="pressed" from="Main/BottomBar/LogsControls/CopyLogsButton" to="." method="_on_copy_selected_logs"]
+[connection signal="pressed" from="Main/BottomBar/CheckUri" to="." method="_on_check_uri"]

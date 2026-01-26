@@ -15,33 +15,19 @@ var _new_module_name_input: LineEdit
 var _new_module_alias_input: LineEdit
 var _new_module_reducer_checkbox: CheckBox
 var _new_module_table_checkbox: CheckBox
-var _new_module_button: Button
-var _check_uri_button: Button
 var _generate_button: Button
-var _clear_logs_button: Button
-var _copy_logs_button: Button
 var _plugin_config: SpacetimeDBPluginConfig
 
 func _enter_tree() -> void:
-	_uri_input = $"Main/BottomBar/ServerUri/UriInput"
-	_modules_container = $"Main/Content/Sidebar/Modules/ModulesList/VBox"
-	_logs_label = $"Main/Content/Logs"
-	_add_module_hint_label = $"Main/Content/Sidebar/Modules/AddModuleHint"
-	_new_module_name_input = $Main/Content/Sidebar/PanelContainer2/VBoxContainer/NewModule/VBoxContainer/ModuleNameInput
-	_new_module_alias_input = $Main/Content/Sidebar/PanelContainer2/VBoxContainer/NewModule/VBoxContainer/ModuleAliasInput
-	_new_module_reducer_checkbox = $Main/Content/Sidebar/PanelContainer2/VBoxContainer/ReducerCheckbox
-	_new_module_table_checkbox = $Main/Content/Sidebar/PanelContainer2/VBoxContainer/TablesCheckbox
-	_new_module_button = $Main/Content/Sidebar/PanelContainer2/VBoxContainer/NewModule/AddButton
-	_check_uri_button = $"Main/BottomBar/CheckUri"
-	_generate_button = $"Main/Content/Sidebar/GenerateButton"
-	_clear_logs_button = $"Main/BottomBar/LogsControls/ClearLogsButton"
-	_copy_logs_button = $"Main/BottomBar/LogsControls/CopyLogsButton"
-
-	_check_uri_button.pressed.connect(_on_check_uri)
-	_generate_button.pressed.connect(_on_generate_code)
-	_new_module_button.pressed.connect(_on_new_module)
-	_clear_logs_button.pressed.connect(_on_clear_logs)
-	_copy_logs_button.pressed.connect(_on_copy_selected_logs)
+	_uri_input = %UriInput
+	_modules_container = %ModulesContainer
+	_logs_label = %Logs
+	_add_module_hint_label = %AddModuleHint
+	_new_module_name_input = %ModuleNameInput
+	_new_module_alias_input = %ModuleAliasInput
+	_new_module_reducer_checkbox = %ReducerCheckbox
+	_new_module_table_checkbox = %TablesCheckbox
+	_generate_button = %GenerateButton
 
 func _input(event: InputEvent) -> void:
 	if not visible:
@@ -146,11 +132,7 @@ func destroy() -> void:
 	_add_module_hint_label = null
 	_new_module_name_input = null
 	_new_module_alias_input = null
-	_new_module_button = null
-	_check_uri_button = null
 	_generate_button = null
-	_clear_logs_button = null
-	_copy_logs_button = null
 
 func _on_check_uri() -> void:
 	_plugin_config.uri = _uri_input.text
