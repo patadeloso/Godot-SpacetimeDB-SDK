@@ -50,15 +50,15 @@ func _enter_tree():
 	var author: String = config_file.get_value("plugin", "author", "??")
 
 	print_log("SpacetimeDB SDK v%s (c) 2025-present %s & Contributors" % [version, author])
-	print_log("""new module:
+	print_log("""New modules:
 [ul]
-name: required
-alias: optional
-hide scheduled reducer: hides the scheduled reducer from the client
-hide private tables: hides private tables from the client
+Name: Required
+Alias: Optional
+Hide scheduled reducer: Hides the scheduled reducer from the client.
+Hide private tables: Hides private tables from the client.
 [/ul]
 
-after generating the files. please restart godot.
+After generating schema files, please restart Godot.
 """)
 	load_codegen_data()
 
@@ -66,9 +66,8 @@ after generating the files. please restart godot.
 func load_codegen_data() -> void:
 	if ResourceLoader.exists(SAVE_PATH, "SpacetimeDBPluginConfig"):
 		plugin_config = ResourceLoader.load(SAVE_PATH)
-		print_log("Loading codegen data from %s" % [SAVE_PATH])
-	else:
-		print_log("failed to load codegen data from %s" % [SAVE_PATH])
+		print_log("Loaded module configs from %s" % [SAVE_PATH])
+	if plugin_config == null or plugin_config.module_configs.is_empty():
 		plugin_config = SpacetimeDBPluginConfig.new()
 	ui._plugin_config = plugin_config
 	ui.update_module_ui()
@@ -78,7 +77,7 @@ func save_codegen_data() -> void:
 		DirAccess.make_dir_absolute(BINDINGS_PATH)
 		get_editor_interface().get_resource_filesystem().scan()
 	if not plugin_config:
-		ui.add_err("somehow the plugin_config variable is empty")
+		ui.add_err("Somehow the plugin_config variable is empty")
 		plugin_config = SpacetimeDBPluginConfig.new()
 		ui._plugin_config = plugin_config
 		ui.update_module_ui()
@@ -152,7 +151,7 @@ func _on_generate_schema():
 	if not ProjectSettings.has_setting(setting_name):
 		add_autoload_singleton(AUTOLOAD_NAME, AUTOLOAD_PATH)
 	while get_editor_interface().get_resource_filesystem().is_scanning():
-		print_log("waiting for auto scan to finish")
+		print_log("Waiting for auto scan to finish")
 		continue
 	get_editor_interface().get_resource_filesystem().scan()
 	print_log("Code generation complete!")
