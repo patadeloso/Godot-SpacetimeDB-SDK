@@ -57,9 +57,7 @@ func set_uri(uri: String) -> void:
 	_uri_input.text = uri
 
 func update_module_ui():
-	add_log("updating ui")
 	for child in _modules_container.get_children():
-		add_log("remove module ui child")
 		_modules_container.remove_child(child)
 		child.free()
 
@@ -78,14 +76,32 @@ func update_module_ui():
 		var remove_button: Button = new_module.get_node("VBoxContainer/HBoxContainer/RemoveButton") as Button
 		remove_button.button_down.connect(func():
 			_plugin_config.module_configs.erase(module_config.alias)
-			_modules_container.remove_child(new_module)
-			new_module.queue_free()
-			if _modules_container.get_child_count() == 0:
-				_add_module_hint_label.show()
-				_generate_button.disabled = true
-		)
+			plugin_config_changed.emit()
+			update_module_ui()
+			)
 		new_module.show()
-		add_log("added module ui %s" % module_config.name)
+		reducer_config_box.toggled.connect(func(on:bool):
+			module_config.hide_scheduled_reducers = on
+			plugin_config_changed.emit()
+			)
+		table_config_box.toggled.connect(func(on:bool):
+			module_config.hide_private_tables = on
+			plugin_config_changed.emit()
+			)
+		name_input.text_changed.connect(func(text:String):
+			module_config.name = text
+			plugin_config_changed.emit()
+			)
+		alias_input.text_changed.connect(func(text:String):
+			_plugin_config.module_configs.erase(module_config.alias)
+			module_config.alias = text
+			_plugin_config.module_configs.set(module_config.alias, module_config)
+			plugin_config_changed.emit()
+			)
+	if _modules_container.get_child_count() == 0:
+		_add_module_hint_label.show()
+		_generate_button.disabled = true
+	else:
 		_add_module_hint_label.hide()
 		_generate_button.disabled = false
 
